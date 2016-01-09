@@ -47,16 +47,18 @@ class Nota extends Service {
         $friend = $this->utils->getPerson($find[0]->email);
         $person = $this->utils->getPerson($request->email);
 
+        $db->deepQuery("INSERT INTO _note (from_user, to_user, text) VALUES ('{$request->email}','{$friend->email}','$nota');");
+        
+        $notes = $db->deepQuery("SELECT *, (SELECT username FROM person WHERE person.email = _note.from_user) as from_username FROM _note WHERE (from_user = '{$person->email}' AND to_user = '{$friend->email}') OR (to_user = '{$person->email}' AND from_user = '{$friend->email}') ORDER BY send_date DESC;");
+
         $response = new Response();
         $response->setResponseEmail($friend->email);
         $response->setResponseSubject("Nota de {$person->username}");
-        $response->createFromTemplate("basic.tpl", array('username' => $person->username, 'nota' => $nota));
+        $response->createFromTemplate("basic.tpl", array('username' => $person->username, 'notes' => $notes));
 
         $response2 = new Response();
         $response2->setResponseSubject("Le enviamos la nota a tu amigo");
-        $response2->createFromTemplate("notify.tpl", array('username' => $un, 'nota' => $nota));
-
-        $db->deepQuery("INSERT INTO _note (from_user, to_user, text) VALUES ('{$request->email}','{$friend->email}','$nota');");
+        $response2->createFromTemplate("basic.tpl", array('username' => $un, 'notes' => $notes));
 
         return array($response, $response2);
     }
