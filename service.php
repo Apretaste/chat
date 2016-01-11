@@ -2,8 +2,6 @@
 
 class Nota extends Service {
 
-	static $results = array();
-
 	/**
 	 * Function executed when the service is called
 	 *
@@ -97,7 +95,6 @@ class Nota extends Service {
 		$notes = $db->deepQuery($sqlnotes);
 
 		$response = new Response();
-		$response->setResponseEmail($friend->email);
 		$response->setResponseSubject("Notas entre {$friend->username} y tu");
 		$response->createFromTemplate("basic.tpl", array('username' => $friend->username, 'notes' => $notes));
 
