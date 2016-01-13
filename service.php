@@ -1,6 +1,7 @@
 <?php
 
-class Nota extends Service {
+class Nota extends Service
+{
 
 	/**
 	 * Function executed when the service is called
@@ -8,98 +9,130 @@ class Nota extends Service {
 	 * @param Request
 	 * @return Response
 	 * */
-	public function _main(Request $request) {
+	public function _main(Request $request)
+	{
 
 		$argument = trim($request->query);
+		$person = $this->utils->getPerson($request->email);
 
+		// Extracting username and text
 		$parts = explode(' ', $argument);
 
 		$un = false;
-		$nota = false;
+		$nt = false;
 
-		if (isset($parts[0]))
+		if (isset($parts[0]) && !empty($parts[0])) {
 			$un = $parts[0];
+		}
 
 		if (isset($parts[1])) {
-			$nota = trim(substr($argument, strlen($un)));
-			if ($nota == '')
-				$nota = false;
+			$nt = trim(substr($argument, strlen($un)));
+			if ($nt == '')
+				$nt = false;
 		}
 
+		if ($un !== false)
+			if ($un[0] == '@')
+				$un = substr($un, 1);
+
+		// Connecting to database
 		$db = new Connection();
 
-		$friend = false;
-		$person = $this->utils->getPerson($request->email);
-
-		if ($un !== false && !empty($un)) {
-			$find = $db->deepQuery("SELECT email FROM person WHERE username = '$un';");
-
-			if (!isset($find[0])) {
-				$response = new Response();
-				$response->setResponseSubject("No se pudo enviar la nota pues el usuario $un no existe");
-				$response->createFromText("El usuario <b>$un</b> no existe en Apretaste. Para enviar la nota escriba en el asunto la palabra NOTA seguida del nombre de usuario de su amigo y luego el mensaje a enviar. Por ejemplo: <b>NOTA amigo1 Hola amigo</b>.");
-				return $response;
-			}
-
-			$friend = $this->utils->getPerson($find[0]->email);
-			$sqlnotes = "SELECT *, (SELECT username FROM person WHERE person.email = _note.from_user) as from_username FROM _note WHERE (from_user = '{$person->email}' AND to_user = '{$friend->email}') OR (to_user = '{$person->email}' AND from_user = '{$friend->email}') ORDER BY send_date DESC;";
-		}
+		// If subject's query is empty ...
+		if ($un === false) {
 
 
-		if (empty($un) || $un === false) {
+			// Searching contacts of the current user
 			$contacts = $db->deepQuery("SELECT (select username FROM person WHERE person.email = subq.username) as username,  
-                                    subq.username as email FROM (SELECT from_user as username FROM _note WHERE to_user = '{$person->email}'
-                                  UNION SELECT to_user as username FROM _note WHERE from_user = '{$person->email}') as subq WHERE username <> '' AND username IS NOT NULL GROUP BY username");
+                                            subq.username as email 
+                                        FROM (SELECT from_user as username FROM _note WHERE to_user = '{$person->email}'
+                                               UNION SELECT to_user as username FROM _note WHERE from_user = '{$person->email}') as subq 
+                                        WHERE username <> '' AND username IS NOT NULL GROUP BY username");
 
-			if (isset($contacts[0])) {
-				$response = new Response();
-				$response->setResponseSubject("Deseas enviar una nota?");
-
+			// Preparing contacts list
+			if (is_array($contacts))
 				foreach ($contacts as $k => $contact) {
-					$sqlnotes = "SELECT *, (SELECT username FROM person WHERE person.email = _note.from_user) as from_username FROM _note WHERE (from_user = '{$person->email}' AND to_user = '{$contact->email}') OR (to_user = '{$person->email}' AND from_user = '{$contact->email}') ORDER BY send_date DESC";
-					$last_note = $db->deepQuery("SELECT from_username, text FROM ($sqlnotes) as subq2 LIMIT 1 OFFSET 0;");
+					$last_note = $this->getConversation($person->email, $contact->email, 1);
 					$contacts[$k]->last_note = array(
-                        'from' => $last_note[0]->from_username,
-                        'note' => $last_note[0]->text
-                    );
+						'from' => $last_note[0]->from_username,
+						'note' => $last_note[0]->text,
+						'date' => $last_note[0]->date);
 				}
 
-				$response->createFromTemplate("nouser.tpl", array("contacts" => $contacts));
-				return $response;
-			} else {
-				$response = new Response();
-				$response->setResponseSubject("Deseas enviar una nota?");
-				$response->createFromTemplate("nouser.tpl", array("contacts" => false));
-				return $response;
-			}
+			// Return the response
+			$response = new Response();
+			$response->setResponseSubject("Deseas enviar una nota?");
+			$response->createFromTemplate("nouser.tpl", array("contacts" => $contacts));
+			return $response;
 		}
 
+		// Searching the user $un in the database
+		$friend = false;
+		$find = $db->deepQuery("SELECT email FROM person WHERE username = '$un';");
 
-		if ($nota !== false) {
-			$db->deepQuery("INSERT INTO _note (from_user, to_user, text) VALUES ('{$request->email}','{$friend->email}','$nota');");
+		// The user $un not exists
+		if (!isset($find[0])) {
+			$response = new Response();
+			$response->setResponseSubject("No se pudo enviar la nota pues el usuario @$un no existe");
+			$response->createFromTemplate("user_not_exists.tpl", array("username" => $un));
+			return $response;
+		}
 
-			$notes = $db->deepQuery($sqlnotes);
+		$friend = $this->utils->getPerson($find[0]->email);
 
+		// Sending the note
+		if ($nt !== false) {
+
+			// Store note in database
+			$db->deepQuery("INSERT INTO _note (from_user, to_user, text) VALUES ('{$request->email}','{$friend->email}','$nt');");
+
+			// Retrieve notes between users
+			$notes = $this->getConversation($person->email, $friend->email);
+
+			// Response for friend
 			$response = new Response();
 			$response->setResponseEmail($friend->email);
-			$response->setResponseSubject("Nota de {$person->username}");
+			$response->setResponseSubject("@{$person->username} te envio una nota");
 			$response->createFromTemplate("basic.tpl", array('username' => $person->username, 'notes' => $notes));
 
+			// Response for user
 			$response2 = new Response();
-			$response2->setResponseSubject("Le enviamos la nota a tu amigo");
+			$response2->setResponseSubject("Le enviamos la nota a @$un");
 			$response2->createFromTemplate("basic.tpl", array('username' => $un, 'notes' => $notes));
 
 			return array($response, $response2);
 		}
 
-		$notes = $db->deepQuery($sqlnotes);
-
+		// Empty note, sending conversation...
+		$notes = $this->getConversation($person->email, $friend->email);
 		$response = new Response();
 		$response->setResponseSubject("Notas entre {$friend->username} y tu");
 		$response->createFromTemplate("basic.tpl", array('username' => $friend->username, 'notes' => $notes));
-
 		return $response;
-
 	}
 
+	/**
+	 * Return a list of notes between $email1 & $email2 
+     * 
+     * @param string $email1
+     * @param string $email2
+     * @return array
+	 */
+	private function getConversation($email1, $email2, $limit = 20)
+	{
+		// SQL for retrieve conversation between users
+		$sql = "SELECT *, 
+                         date_format(send_date,'%d/%m/%y %h:%i%p') as date, 
+                        (SELECT username FROM person WHERE person.email = _note.from_user) as from_username 
+                    FROM _note 
+                    WHERE (from_user = '{$email1}' AND to_user = '{$email2}') 
+                       OR (to_user = '{$email1}' AND from_user = '{$email2}') 
+                    ORDER BY send_date DESC
+                    LIMIT $limit;";
+
+		$db = new Connection();
+		$find = $db->deepQuery($sql);
+
+		return $find;
+	}
 }
