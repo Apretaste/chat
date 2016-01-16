@@ -2,7 +2,7 @@
 	<serviceName>nota</serviceName>
 	<serviceDescription><![CDATA[Env&iacute;a una nota a otro usuario de Apretaste, y proporciona un espacio para socializar]]></serviceDescription>
 	<creatorEmail>salvi.pascual@gmail.com</creatorEmail>
-	<serviceCategory>comunicaciones</serviceCategory>
+	<serviceCategory>social</serviceCategory>
 	<serviceUsage>
 		<![CDATA[
 			Escriba un email a {APRETASTE_EMAIL} y en el asunto ponga la palabra NOTA seguida del nombre de usuario de su amigo, seguido por la nota a enviar, que debe tener un m&aacute;ximo de 130 caracteres
