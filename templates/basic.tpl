@@ -12,6 +12,12 @@
 
 {space30}
 
+{*decide where to say escribir o responder*}
+{assign var="caption" value="Escribir"}
+{if {$username} eq $notes[0]->from_username}
+	{assign var="caption" value="Responder"}
+{/if}
+
 <center>
-	{button href="NOTA @{$username} Reemplace este texto por su nota" caption="Responder" body="" color="green" size="large"}
+	{button href="NOTA @{$username} Reemplace este texto por su nota" caption="{$caption}" body="" color="green" size="large"}
 </center>
