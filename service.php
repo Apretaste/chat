@@ -105,12 +105,10 @@ class Nota extends Service
 			$response->setResponseSubject("Nueva nota de @{$person->username}");
 			$response->createFromTemplate("basic.tpl", array('username' => $person->username, 'notes' => $notes));
 
-			// Response for user
-			$response2 = new Response();
-			$response2->setResponseSubject("Enviamos su nota a @$un");
-			$response2->createFromTemplate("basic.tpl", array('username' => $un, 'notes' => $notes));
-
-			return array($response, $response2);
+			// Generate a notification
+			$this->utils->addNotification($request->email, 'nota', "Enviamos su nota a @$un", 'NOTA');
+			
+			return $response;
 		}
 
 		// Empty note, sending conversation...
@@ -144,6 +142,5 @@ class Nota extends Service
 		$find = $db->deepQuery($sql);
 
 		return $find;
-	}
->>>>>>> 8ed5afc3759e9257603492b5a63eaf8a34440c62
+	} 
 }
