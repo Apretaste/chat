@@ -84,7 +84,6 @@ class Nota extends Service
 		// Sending the note
 		if ($nt !== false)
 		{
-			
 			if ($nt == 'Reemplace este texto por su nota') {
                 $response = new Response();
                 $response->setResponseSubject(
