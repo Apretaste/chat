@@ -118,6 +118,35 @@ class Nota extends Service
 	}
 
 	/**
+	 * Get latest chats after certain date/time
+	 * Pass the time as YYYY-MM-DDTHH:MM:SS
+	 *
+	 * @api
+	 * @author salvipascual
+	 * @param Request
+	 * @return Response
+	 * */
+	public function _get(Request $request)
+	{
+		$connection = new Connection();
+		$response = new Response();
+
+		// get the friend email
+		$argument = explode(" ", $request->query);
+		$friendUsername = str_replace("@", "", $argument[0]);
+		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername';");
+		if (empty($find)) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+		$friendEmail = $find[0]->email;
+
+		// get the date/time passed as mysql notation
+		$filterDateTime = isset($argument[1]) ? date("Y-m-d H:i:s", strtotime($argument[1])) : false;
+
+		// get the array of notes
+		$notes = $this->getConversation($request->email, $friendEmail, $filterDateTime, 100);
+		return $response->createFromJSON(json_encode($notes));
+	}
+
+	/**
 	 * Create a new chat without sending any emails, useful for the API
 	 *
 	 * @api
@@ -178,13 +207,13 @@ class Nota extends Service
 				FROM _note A LEFT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '$email1' AND to_user = '$email2'
-				AND DATE(A.send_date) > DATE('$date')
+				AND A.send_date > '$date'
 				UNION
 				SELECT B.username, A.text, A.send_date as sent
 				FROM _note A LEFT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '$email2' AND to_user = '$email1'
-				AND DATE(A.send_date) > DATE('$date')) C
+				AND A.send_date > '$date') C
 			ORDER BY sent DESC
 			LIMIT $limit");
 	}
