@@ -1,15 +1,15 @@
-{if $contacts}
+{if $notes}
 	<h1>Charlas pendientes</h1>
 	<table width="100%" cellpadding="3">
-		{foreach item=item from=$contacts}
-		    <tr>
-		    	<td>{link href="PERFIL @{$item->username}" caption="@{$item->username}"}</td>
-				<td><small>{$item->last_note['date']}</small></td>
-		    	<td align="right">
-		    		{button href="NOTA @{$item->username} Reemplace este texto por su nota" body="" caption="Enviar nota" size="small"}
-		    		{button href="NOTA @{$item->username}" caption="Conversaci&oacute;n" size="small" color="grey"}
-		    	</td>
-		    </tr>
+		{foreach item=item from=$notes}
+			<tr>
+				<td>{link href="PERFIL @{$item->username}" caption="@{$item->username}"}</td>
+				<td><small>{$item->sent|date_format}</small></td>
+				<td align="right">
+					{button href="NOTA @{$item->username} Reemplace este texto por su nota" body="" caption="Enviar nota" size="small"}
+					{button href="NOTA @{$item->username}" caption="Conversaci&oacute;n" size="small" color="grey"}
+				</td>
+			</tr>
 		{/foreach}
 	</table>
 {else}
