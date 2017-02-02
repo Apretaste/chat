@@ -131,18 +131,18 @@ class Nota extends Service
 		$connection = new Connection();
 		$response = new Response();
 
-		// get the friend email
+		// get the username and ID of the query
 		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername';");
+		$lastID = isset($argument[1]) ? $argument[1] : 0;
+
+		// get the friend email
+		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername'");
 		if (empty($find)) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
 		$friendEmail = $find[0]->email;
 
-		// get the date/time passed as mysql notation
-		$filterDateTime = isset($argument[1]) ? date("Y-m-d H:i:s", strtotime($argument[1])) : false;
-
 		// get the array of notes
-		$notes = $this->getConversation($request->email, $friendEmail, $filterDateTime, 100);
+		$notes = $this->getConversation($request->email, $friendEmail, $lastID, 20);
 		return $response->createFromJSON(json_encode($notes));
 	}
 
@@ -190,30 +190,27 @@ class Nota extends Service
 	 * @author salvipascual
 	 * @param String $email1
 	 * @param String $email2
-	 * @param String $date, on the form YYYY-MM-DD
+	 * @param String $lastID, get all from this ID
 	 * @param string $limit, integer number of max rows
 	 * @return array
 	 */
-	private function getConversation($email1, $email2, $date=false, $limit=20)
+	private function getConversation($email1, $email2, $lastID=0, $limit=20)
 	{
-		// get a default date a year ago
-		if(empty($date)) $date = date('Y-m-d', strtotime('-1 year'));
-
 		// retrieve conversation between users
 		$connection = new Connection();
 		return $connection->deepQuery("
 			SELECT * FROM (
-				SELECT B.username, A.text, A.send_date as sent
+				SELECT A.id, B.username, A.text, A.send_date as sent
 				FROM _note A LEFT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '$email1' AND to_user = '$email2'
-				AND A.send_date > '$date'
+				AND A.id > '$lastID'
 				UNION
-				SELECT B.username, A.text, A.send_date as sent
+				SELECT A.id, B.username, A.text, A.send_date as sent
 				FROM _note A LEFT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '$email2' AND to_user = '$email1'
-				AND A.send_date > '$date') C
+				AND A.id > '$lastID') C
 			ORDER BY sent DESC
 			LIMIT $limit");
 	}
