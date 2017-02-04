@@ -56,13 +56,9 @@ class Nota extends Service
 			// get the conversation between you and your friend
 			$notes = $this->getConversation($request->email, $friendEmail);
 
-			// decide where to say escribir o responder
-			$btnCaption = ($friendUsername == $notes[0]->username) ? "Escribir" : "Responder";
-
 			// prepare the datails for the view
 			$responseContent = array(
 				"friendUsername" => $friendUsername,
-				"btnCaption" => $btnCaption,
 				"notes" => $notes
 			);
 
@@ -87,9 +83,8 @@ class Nota extends Service
 		}
 
 		//
-		// POST A NOTE WHEN SUBJECT=NOTA MY NOTE HERE
+		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
 		//
-
 		// store note in database
 		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
@@ -98,14 +93,13 @@ class Nota extends Service
 
 		// create a notification for you and your friend
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-		$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$friendUsername", "NOTA @$friendUsername");
+
+		$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$yourUsername", "NOTA @$friendUsername");
 		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
 
 		// prepare the datails for the view
-		$btnCaption = ($friendUsername == $notes[0]->username) ? "Responder" : "Escribir";
 		$responseContent = array(
-			"friendUsername" => $friendUsername,
-			"btnCaption" => $btnCaption,
+			"friendUsername" => $yourUsername,
 			"notes" => $notes
 		);
 
@@ -142,8 +136,19 @@ class Nota extends Service
 		$friendEmail = $find[0]->email;
 
 		// get the array of notes
-		$notes = $this->getConversation($request->email, $friendEmail, $lastID, 20);
-		return $response->createFromJSON(json_encode($notes));
+		$notes = $this->getConversation($request->email, $friendEmail, $lastID);
+
+		// get the new last ID and remove ID for each note
+		$newLastID = 0;
+		foreach ($notes as $nota)
+		{
+			if($nota->id > $newLastID) $newLastID = $nota->id;
+			unset($nota->id);
+		}
+
+		// return json
+		$json = '{"code":"ok","last_id":"'.$newLastID.'","chats":'.json_encode($notes).'}';
+		return $response->createFromJSON($json);
 	}
 
 	/**
@@ -202,13 +207,13 @@ class Nota extends Service
 			SELECT * FROM (
 				SELECT A.id, B.username, A.text, A.send_date as sent
 				FROM _note A LEFT JOIN person B
-				ON A.to_user = B.email
+				ON A.from_user = B.email
 				WHERE from_user = '$email1' AND to_user = '$email2'
 				AND A.id > '$lastID'
 				UNION
 				SELECT A.id, B.username, A.text, A.send_date as sent
 				FROM _note A LEFT JOIN person B
-				ON A.to_user = B.email
+				ON A.from_user = B.email
 				WHERE from_user = '$email2' AND to_user = '$email1'
 				AND A.id > '$lastID') C
 			ORDER BY sent DESC
