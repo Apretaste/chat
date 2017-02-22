@@ -97,6 +97,11 @@ class Nota extends Service
 		$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$yourUsername", "NOTA @$friendUsername");
 		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
 
+		// send push notification for users with Piropazo app
+		$pushNotification = new PushNotification();
+		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+		if($appid) $pushNotification->sendPush($friendEmail, "@$yourUsername le ha escrito", $note);
+
 		// prepare the datails for the view
 		$responseContent = array(
 			"friendUsername" => $yourUsername,
@@ -131,9 +136,8 @@ class Nota extends Service
 		$lastID = isset($argument[1]) ? $argument[1] : 0;
 
 		// get the friend email
-		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername'");
-		if (empty($find)) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
-		$friendEmail = $find[0]->email;
+		$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+		if ( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
 
 		// get the array of notes
 		$notes = $this->getConversation($request->email, $friendEmail, $lastID);
@@ -184,10 +188,44 @@ class Nota extends Service
 		$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$friendUsername", "NOTA @$friendUsername");
 		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
 
+		// send push notification for users with Piropazo app
+		$pushNotification = new PushNotification();
+		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+		if($appid) $pushNotification->sendPush($friendEmail, "@$yourUsername le ha escrito", $note);
+
 		// return response
 		return $response->createFromJSON('{"code":"OK"}');
 	}
 
+	/**
+	 * Return the count of all unread notes. Useful for the API
+	 *
+	 * @api
+	 * @author salvipascual
+	 * @param Request
+	 * @return Response
+	 */
+	public function _unread(Request $request)
+	{
+		// get count of unread notes
+		$connection = new Connection();
+		$notes = $connection->deepQuery("
+			SELECT B.username, MAX(send_date) as sent, COUNT(B.username) as counter
+			FROM _note A LEFT JOIN person B
+			ON A.from_user = B.email
+			WHERE to_user = '{$request->email}'
+			AND read_date IS NULL
+			GROUP BY B.username");
+
+		// get the total counter
+		$total = 0;
+		foreach ($notes as $note) $total += $note->counter;
+
+		// respond back to the API
+		$response = new Response();
+		$jsonResponse = array("code" => "ok", "total"=>$total, "items" => $notes);
+		return $response->createFromJSON(json_encode($jsonResponse));
+	}
 
 	/**
 	 * Return a list of notes between $email1 & $email2
@@ -199,24 +237,40 @@ class Nota extends Service
 	 * @param string $limit, integer number of max rows
 	 * @return array
 	 */
-	private function getConversation($email1, $email2, $lastID=0, $limit=20)
+	private function getConversation($yourEmail, $friendEmail, $lastID=0, $limit=20)
 	{
+		// if a last ID is passed, do not cut the result based on the limit
+		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
+
 		// retrieve conversation between users
 		$connection = new Connection();
-		return $connection->deepQuery("
+		$notes = $connection->deepQuery("
 			SELECT * FROM (
-				SELECT A.id, B.username, A.text, A.send_date as sent
+				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
 				FROM _note A LEFT JOIN person B
 				ON A.from_user = B.email
-				WHERE from_user = '$email1' AND to_user = '$email2'
+				WHERE from_user = '$yourEmail' AND to_user = '$friendEmail'
 				AND A.id > '$lastID'
 				UNION
-				SELECT A.id, B.username, A.text, A.send_date as sent
+				SELECT A.id, B.username, A.text, A.send_date as sent, CURRENT_TIMESTAMP as `read`
 				FROM _note A LEFT JOIN person B
 				ON A.from_user = B.email
-				WHERE from_user = '$email2' AND to_user = '$email1'
+				WHERE from_user = '$friendEmail' AND to_user = '$yourEmail'
 				AND A.id > '$lastID') C
-			ORDER BY sent DESC
-			LIMIT $limit");
+			ORDER BY sent DESC $setLimit");
+
+		// mark the other person notes as unread
+		if($notes)
+		{
+			$lastNoteID = end($notes)->id;
+			$connection->deepQuery("
+				UPDATE _note
+				SET read_date = CURRENT_TIMESTAMP
+				WHERE read_date is NULL
+				AND from_user = '$friendEmail'
+				AND id >= $lastNoteID");
+		}
+
+		return $notes;
 	}
 }
