@@ -85,22 +85,31 @@ class Nota extends Service
 		//
 		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
 		//
-		// store note in database
+
+		// store note in the database
 		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
+
+		// prepare notification
+		$pushNotification = new PushNotification();
+		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+
+		// send push notification for users with the App
+		if($appid)
+		{
+			$personFrom = $this->utils->getPerson($request->email);
+			$personTo = $this->utils->getPerson($friendEmail);
+			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
+		}
+		// post an internal notification for the user
+		else
+		{
+			$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$yourUsername", "NOTA @$friendUsername");
+			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
+		}
 
 		// get the conversation between you and your friend
 		$notes = $this->getConversation($request->email, $friendEmail);
-
-		// create a notification for you and your friend
-		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-
-		$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$yourUsername", "NOTA @$friendUsername");
-		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
-
-		// send push notification for users with Piropazo app
-		$pushNotification = new PushNotification();
-		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
-		if($appid) $pushNotification->sendPush($friendEmail, "@$yourUsername le ha escrito", $note);
 
 		// prepare the datails for the view
 		$responseContent = array(
@@ -190,8 +199,9 @@ class Nota extends Service
 		// send push notification for users with the App
 		if($appid)
 		{
-			$person = $this->utils->getPerson($request->email);
-			$pushNotification->piropazoChatPush($appid, $person, $note);
+			$personFrom = $this->utils->getPerson($request->email);
+			$personTo = $this->utils->getPerson($friendEmail);
+			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
 		}
 		// post an internal notification for the user
 		else
@@ -200,11 +210,6 @@ class Nota extends Service
 			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
 			$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$friendUsername", "NOTA @$friendUsername");
 		}
-
-		// send push notification for users with Piropazo app
-		$pushNotification = new PushNotification();
-		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
-		if($appid) $pushNotification->piropazoChatPush($appid, $person, $note);
 
 		// return response
 		return $response->createFromJSON('{"code":"OK"}');
