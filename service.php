@@ -150,12 +150,12 @@ class Nota extends Service
 
 			// get the friend email
 			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-			if (empty($friendEmail)) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+			if (empty($friendEmail)) return $response->createFromText("El nombre de usuario @$friendUsername no parece existir. Verifica que sea correcto e intenta nuevamente.", "ERROR", "Wrong username");
 
 			// get the text for the note
 			unset($argument[0]);
 			$note = implode(" ", $argument);
-			if(empty($note)) return $response->createFromJSON('{"code":"ERROR", "message":"No text to save"}');
+			if(empty($note)) return $response->createFromText("No has pasado un texto, no podemos enviar una nota en blanco. El asunto debe ser: NOTA @username TEXTO A ENVIAR", "ERROR", "No text to save");
 		}
 
 		// store the note in the database
@@ -172,8 +172,7 @@ class Nota extends Service
 			$personFrom = $this->utils->getPerson($request->email);
 			$personTo = $this->utils->getPerson($friendEmail);
 			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
-
-			return $response->createFromJSON('{"code":"OK"}');
+			return $response;
 		}
 		// send emails for users within the email platform
 		else
