@@ -8,7 +8,7 @@ class Nota extends Service
 	 * @author salvipascual
 	 * @param Request
 	 * @return Response
-	 * */
+	 */
 	public function _main(Request $request)
 	{
 		// Connecting to database
@@ -17,7 +17,7 @@ class Nota extends Service
 		//
 		// SHOW THE LIST OF OPEN CHATS WHEN SUBJECT=NOTA
 		//
-		if ( ! $request->query)
+		if (empty($request->query))
 		{
 			// Searching contacts of the current user
 			$notes = $connection->deepQuery("
@@ -42,7 +42,7 @@ class Nota extends Service
 		if (empty($find))
 		{
 			$response = new Response();
-			$response->setResponseSubject("El usuario @$username no existe");
+			$response->setResponseSubject("El usuario @$friendUsername no existe");
 			$response->createFromTemplate("user_not_exists.tpl", array("username"=>$friendUsername));
 			return $response;
 		}
@@ -53,20 +53,7 @@ class Nota extends Service
 		//
 		if(count($argument) == 1)
 		{
-			// get the conversation between you and your friend
-			$notes = $this->getConversation($request->email, $friendEmail);
-
-			// prepare the datails for the view
-			$responseContent = array(
-				"friendUsername" => $friendUsername,
-				"notes" => $notes
-			);
-
-			// sending conversation to the view
-			$response = new Response();
-			$response->setResponseSubject("Su charla con @$friendUsername");
-			$response->createFromTemplate("chats.tpl", $responseContent);
-			return $response;
+			return $this->_get($request, $friendEmail);
 		}
 
 		// get text of the the note to post
@@ -86,55 +73,18 @@ class Nota extends Service
 		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
 		//
 
-		// store note in the database
-		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
-
-		// prepare notification
-		$pushNotification = new PushNotification();
-		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
-		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-
-		// send push notification for users with the App
-		if($appid)
-		{
-			$personFrom = $this->utils->getPerson($request->email);
-			$personTo = $this->utils->getPerson($friendEmail);
-			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
-		}
-		// post an internal notification for the user
-		else
-		{
-			$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$yourUsername", "NOTA @$friendUsername");
-			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
-		}
-
-		// get the conversation between you and your friend
-		$notes = $this->getConversation($request->email, $friendEmail);
-
-		// prepare the datails for the view
-		$responseContent = array(
-			"friendUsername" => $yourUsername,
-			"notes" => $notes
-		);
-
-		// Send the response email to your friend
-		$response = new Response();
-		$response->setResponseEmail($friendEmail);
-		$response->setResponseSubject("Nueva nota de @$yourUsername");
-		$response->createFromTemplate("chats.tpl", $responseContent);
-		return $response;
+		return $this->_post($request, $friendUsername, $friendEmail, $note);
 	}
 
 	/**
-	 * Get latest chats after certain date/time
-	 * Pass the time as YYYY-MM-DDTHH:MM:SS
+	 * Get latest chats after certain NOTE_ID
 	 *
 	 * @api
 	 * @author salvipascual
 	 * @param Request
 	 * @return Response
 	 * */
-	public function _get(Request $request)
+	public function _get(Request $request, $friendEmail=false)
 	{
 		$connection = new Connection();
 		$response = new Response();
@@ -144,9 +94,12 @@ class Nota extends Service
 		$friendUsername = str_replace("@", "", $argument[0]);
 		$lastID = isset($argument[1]) ? $argument[1] : 0;
 
-		// get the friend email
-		$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-		if ( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+		// get the friend email if not passed
+		if(empty($friendEmail))
+		{
+			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+			if ( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+		}
 
 		// get the array of notes
 		$notes = $this->getConversation($request->email, $friendEmail, $lastID);
@@ -159,9 +112,21 @@ class Nota extends Service
 			unset($nota->id);
 		}
 
-		// return json
-		$json = '{"code":"ok","last_id":"'.$newLastID.'","chats":'.json_encode($notes).'}';
-		return $response->createFromJSON($json);
+		// get your username
+		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+
+		// prepare the details for the view
+		$responseContent = array(
+			"code" => "ok",
+			"last_id" => $newLastID,
+			"friendUsername" => $friendUsername,
+			"chats" => $notes
+		);
+
+		// Send the response email to your friend
+		$response->setResponseSubject("Nueva nota de @$yourUsername");
+		$response->createFromTemplate("chats.tpl", $responseContent);
+		return $response;
 	}
 
 	/**
@@ -172,24 +137,29 @@ class Nota extends Service
 	 * @param Request
 	 * @return Response
 	 * */
-	public function _post(Request $request)
+	public function _post(Request $request, $friendUsername=false, $friendEmail=false, $note=false)
 	{
-		$connection = new Connection();
 		$response = new Response();
 
-		// get the friend username and email
-		$argument = explode(" ", $request->query);
-		$friendUsername = str_replace("@", "", $argument[0]);
-		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername';");
-		if (empty($find)) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
-		$friendEmail = $find[0]->email;
+		// load params if not passed
+		if(empty($friendUsername) || empty($friendEmail) || empty($note))
+		{
+			// get the friend username
+			$argument = explode(" ", $request->query);
+			$friendUsername = str_replace("@", "", $argument[0]);
 
-		// get the text for the note
-		unset($argument[0]);
-		$note = implode(" ", $argument);
-		if(empty($note)) return $response->createFromJSON('{"code":"ERROR", "message":"No text to save"}');
+			// get the friend email
+			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+			if (empty($friendEmail)) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+
+			// get the text for the note
+			unset($argument[0]);
+			$note = implode(" ", $argument);
+			if(empty($note)) return $response->createFromJSON('{"code":"ERROR", "message":"No text to save"}');
+		}
 
 		// store the note in the database
+		$connection = new Connection();
 		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
 		// prepare notification
@@ -202,17 +172,30 @@ class Nota extends Service
 			$personFrom = $this->utils->getPerson($request->email);
 			$personTo = $this->utils->getPerson($friendEmail);
 			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
+
+			return $response->createFromJSON('{"code":"OK"}');
 		}
-		// post an internal notification for the user
+		// send emails for users within the email platform
 		else
 		{
-			$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
-			$this->utils->addNotification($request->email, "nota", "Enviamos su nota a @$friendUsername", "NOTA @$friendUsername");
-		}
+			// get the conversation between you and your friend
+			$notes = $this->getConversation($request->email, $friendEmail);
 
-		// return response
-		return $response->createFromJSON('{"code":"OK"}');
+			// get your username
+			$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+
+			// prepare the details for the view
+			$responseContent = array("friendUsername" => $yourUsername, "chats" => $notes);
+
+			// add notification for your friend
+			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
+
+			// Send the response email to your friend
+			$response->setResponseEmail($friendEmail);
+			$response->setResponseSubject("Nueva nota de @$yourUsername");
+			$response->createFromTemplate("chats.tpl", $responseContent);
+			return $response;
+		}
 	}
 
 	/**
