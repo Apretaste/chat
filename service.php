@@ -109,7 +109,6 @@ class Nota extends Service
 		foreach ($notes as $nota)
 		{
 			if($nota->id > $newLastID) $newLastID = $nota->id;
-			unset($nota->id);
 		}
 
 		// get your username
