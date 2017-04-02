@@ -3,144 +3,273 @@
 class Nota extends Service
 {
 	/**
-	 * Get the list of conversations
+	 * Get the list of conversations, or post a note
 	 *
+	 * @author salvipascual
 	 * @param Request
 	 * @return Response
-	 * */
+	 */
 	public function _main(Request $request)
 	{
-		$argument = trim($request->query);
-		$person = $this->utils->getPerson($request->email);
-
-		// Extracting username and text
-		$parts = explode(' ', $argument);
-
-		$un = false;
-		$nt = false;
-
-		if (isset($parts[0]) && !empty($parts[0]))
-		{
-			$un = $parts[0];
-		}
-
-		if (isset($parts[1]))
-		{
-			$nt = trim(substr($argument, strlen($un)));
-			if ($nt == '')
-				$nt = false;
-		}
-
-		if ($un !== false)
-			if ($un[0] == '@')
-				$un = substr($un, 1);
-
 		// Connecting to database
-		$db = new Connection();
+		$connection = new Connection();
 
-		// If subject's query is empty ...
-		if ($un === false)
+		//
+		// SHOW THE LIST OF OPEN CHATS WHEN SUBJECT=NOTA
+		//
+		if (empty($request->query))
 		{
 			// Searching contacts of the current user
-			$contacts = $db->deepQuery("SELECT (select username FROM person WHERE person.email = subq.username) as username,
-										      subq.username as email 
-										FROM (SELECT from_user as username FROM _note WHERE to_user = '{$person->email}'
-										UNION SELECT to_user as username FROM _note WHERE from_user = '{$person->email}') as subq 
-										WHERE username <> '' AND username IS NOT NULL GROUP BY username");
-
-			// Preparing contacts list
-			if (is_array($contacts))
-				foreach ($contacts as $k => $contact)
-				{
-					$last_note = $this->getConversation($person->email, $contact->email, 1);
-					$contacts[$k]->last_note = array(
-						'from' => $last_note[0]->from_username,
-						'note' => $last_note[0]->text,
-						'date' => $last_note[0]->date);
-                    $contacts[$k]->profile = $this->utils->getPerson($contact->email);
-				}
+			$notes = $connection->deepQuery("
+				SELECT B.username, MAX(send_date) as sent
+				FROM _note A RIGHT JOIN person B
+				ON A.to_user = B.email
+				WHERE from_user = '{$request->email}'
+				GROUP BY to_user
+				ORDER BY send_date DESC");
 
 			// Return the response
 			$response = new Response();
-			$response->setResponseSubject("Deseas enviar una nota?");
-			$response->createFromTemplate("nouser.tpl", array("contacts" => $contacts));
+			$response->setResponseSubject("Lista de chats abiertos");
+			$response->createFromTemplate("open.tpl", array("notes" => $notes));
 			return $response;
 		}
 
-		// Searching the user $un in the database
-		$friend = false;
-		$find = $db->deepQuery("SELECT email FROM person WHERE username = '$un';");
-
-		// The user $un not exists
-		if (!isset($find[0]))
+		// check that the username of the note is valid
+		$argument = explode(" ", $request->query);
+		$friendUsername = str_replace("@", "", $argument[0]);
+		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername';");
+		if (empty($find))
 		{
 			$response = new Response();
-			$response->setResponseSubject("El usuario @$un no existe");
-			$response->createFromTemplate("user_not_exists.tpl", array("username" => $un));
+			$response->setResponseSubject("El usuario @$friendUsername no existe");
+			$response->createFromTemplate("user_not_exists.tpl", array("username"=>$friendUsername));
 			return $response;
 		}
+		$friendEmail = $find[0]->email;
 
-		$friend = $this->utils->getPerson($find[0]->email);
-
-		// Sending the note
-		if ($nt !== false)
+		//
+		// GET A LIST OF THE CHATS WHEN SUBJECT=NOTA @USERNAME
+		//
+		if(count($argument) == 1)
 		{
-			if ($nt == 'Reemplace este texto por su nota') {
-                $response = new Response();
-                $response->setResponseSubject(
-                        "No reemplazaste el texto por tu nota");
-                $response->createFromTemplate("howto.tpl", array());
-                return $response;
-            }
-			
-			// Store note in database
-			$db->deepQuery("INSERT INTO _note (from_user, to_user, text) VALUES ('{$request->email}','{$friend->email}','$nt');");
+			return $this->_get($request, $friendEmail);
+		}
 
-			// Retrieve notes between users
-			$notes = $this->getConversation($person->email, $friend->email);
+		// get text of the the note to post
+		unset($argument[0]);
+		$note = implode(" ", $argument);
 
-			// Response for friend
+		// if you are trying to post using the example text, send the help document
+		if ($note == 'Reemplace este texto por su nota')
+		{
 			$response = new Response();
-			$response->setResponseEmail($friend->email);
-			$response->setResponseSubject("Nueva nota de @{$person->username}");
-			$response->createFromTemplate("basic.tpl", array('username' => $person->username, 'notes' => $notes));
-
-			// Generate a notification
-			$this->utils->addNotification($request->email, 'nota', "Enviamos su nota a @$un", 'NOTA');
-			
+			$response->setResponseSubject("No reemplazaste el texto por tu nota");
+			$response->createFromTemplate("howto.tpl", array());
 			return $response;
 		}
 
-		// Empty note, sending conversation...
-		$notes = $this->getConversation($person->email, $friend->email);
+		//
+		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
+		//
+
+		return $this->_post($request, $friendUsername, $friendEmail, $note);
+	}
+
+	/**
+	 * Get latest chats after certain NOTE_ID
+	 *
+	 * @api
+	 * @author salvipascual
+	 * @param Request
+	 * @return Response
+	 * */
+	public function _get(Request $request, $friendEmail=false)
+	{
+		$connection = new Connection();
 		$response = new Response();
-		$response->setResponseSubject("Su charla con @{$friend->username}");
-		$response->createFromTemplate("basic.tpl", array('username' => $friend->username, 'notes' => $notes));
+
+		// get the username and ID of the query
+		$argument = explode(" ", $request->query);
+		$friendUsername = str_replace("@", "", $argument[0]);
+		$lastID = isset($argument[1]) ? $argument[1] : 0;
+
+		// get the friend email if not passed
+		if(empty($friendEmail))
+		{
+			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+			if ( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+		}
+
+		// get the array of notes
+		$notes = $this->getConversation($request->email, $friendEmail, $lastID);
+
+		// get the new last ID and remove ID for each note
+		$newLastID = 0;
+		foreach ($notes as $nota)
+		{
+			if($nota->id > $newLastID) $newLastID = $nota->id;
+		}
+
+		// get your username
+		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+
+		// prepare the details for the view
+		$responseContent = array(
+			"code" => "ok",
+			"last_id" => $newLastID,
+			"friendUsername" => $friendUsername,
+			"chats" => $notes
+		);
+
+		// Send the response email to your friend
+		$response->setResponseSubject("Nueva nota de @$yourUsername");
+		$response->createFromTemplate("chats.tpl", $responseContent);
 		return $response;
 	}
 
 	/**
-	 * Return a list of notes between $email1 & $email2 
-	 * 
-	 * @param string $email1
-	 * @param string $email2
+	 * Create a new chat without sending any emails, useful for the API
+	 *
+	 * @api
+	 * @author salvipascual
+	 * @param Request
+	 * @return Response
+	 * */
+	public function _post(Request $request, $friendUsername=false, $friendEmail=false, $note=false)
+	{
+		$response = new Response();
+
+		// load params if not passed
+		if(empty($friendUsername) || empty($friendEmail) || empty($note))
+		{
+			// get the friend username
+			$argument = explode(" ", $request->query);
+			$friendUsername = str_replace("@", "", $argument[0]);
+
+			// get the friend email
+			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+			if (empty($friendEmail)) return $response->createFromText("El nombre de usuario @$friendUsername no parece existir. Verifica que sea correcto e intenta nuevamente.", "ERROR", "Wrong username");
+
+			// get the text for the note
+			unset($argument[0]);
+			$note = implode(" ", $argument);
+			if(empty($note)) return $response->createFromText("No has pasado un texto, no podemos enviar una nota en blanco. El asunto debe ser: NOTA @username TEXTO A ENVIAR", "ERROR", "No text to save");
+		}
+
+		// store the note in the database
+		$connection = new Connection();
+		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
+
+		// prepare notification
+		$pushNotification = new PushNotification();
+		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+
+		// send push notification for users with the App
+		if($appid)
+		{
+			$personFrom = $this->utils->getPerson($request->email);
+			$personTo = $this->utils->getPerson($friendEmail);
+			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
+			return $response;
+		}
+		// send emails for users within the email platform
+		else
+		{
+			// get the conversation between you and your friend
+			$notes = $this->getConversation($request->email, $friendEmail);
+
+			// get your username
+			$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+
+			// prepare the details for the view
+			$responseContent = array("friendUsername" => $yourUsername, "chats" => $notes);
+
+			// add notification for your friend
+			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
+
+			// Send the response email to your friend
+			$response->setResponseEmail($friendEmail);
+			$response->setResponseSubject("Nueva nota de @$yourUsername");
+			$response->createFromTemplate("chats.tpl", $responseContent);
+			return $response;
+		}
+	}
+
+	/**
+	 * Return the count of all unread notes. Useful for the API
+	 *
+	 * @api
+	 * @author salvipascual
+	 * @param Request
+	 * @return Response
+	 */
+	public function _unread(Request $request)
+	{
+		// get count of unread notes
+		$connection = new Connection();
+		$notes = $connection->deepQuery("
+			SELECT B.username, MAX(send_date) as sent, COUNT(B.username) as counter
+			FROM _note A LEFT JOIN person B
+			ON A.from_user = B.email
+			WHERE to_user = '{$request->email}'
+			AND read_date IS NULL
+			GROUP BY B.username");
+
+		// get the total counter
+		$total = 0;
+		foreach ($notes as $note) $total += $note->counter;
+
+		// respond back to the API
+		$response = new Response();
+		$jsonResponse = array("code" => "ok", "total"=>$total, "items" => $notes);
+		return $response->createFromJSON(json_encode($jsonResponse));
+	}
+
+	/**
+	 * Return a list of notes between $email1 & $email2
+	 *
+	 * @author salvipascual
+	 * @param String $email1
+	 * @param String $email2
+	 * @param String $lastID, get all from this ID
+	 * @param string $limit, integer number of max rows
 	 * @return array
 	 */
-	private function getConversation($email1, $email2, $limit = 20)
+	private function getConversation($yourEmail, $friendEmail, $lastID=0, $limit=20)
 	{
-		// SQL for retrieve conversation between users
-		$sql = "SELECT *, 
-				date_format(send_date,'%d/%m/%y %h:%i%p') as date, 
-				(SELECT username FROM person WHERE person.email = _note.from_user) as from_username 
-				FROM _note 
-				WHERE (from_user = '{$email1}' AND to_user = '{$email2}') 
-				OR (to_user = '{$email1}' AND from_user = '{$email2}') 
-				ORDER BY send_date DESC
-				LIMIT $limit;";
+		// if a last ID is passed, do not cut the result based on the limit
+		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
 
-		$db = new Connection();
-		$find = $db->deepQuery($sql);
+		// retrieve conversation between users
+		$connection = new Connection();
+		$notes = $connection->deepQuery("
+			SELECT * FROM (
+				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
+				FROM _note A LEFT JOIN person B
+				ON A.from_user = B.email
+				WHERE from_user = '$yourEmail' AND to_user = '$friendEmail'
+				AND A.id > '$lastID'
+				UNION
+				SELECT A.id, B.username, A.text, A.send_date as sent, CURRENT_TIMESTAMP as `read`
+				FROM _note A LEFT JOIN person B
+				ON A.from_user = B.email
+				WHERE from_user = '$friendEmail' AND to_user = '$yourEmail'
+				AND A.id > '$lastID') C
+			ORDER BY sent DESC $setLimit");
 
-		return $find;
-	} 
+		// mark the other person notes as unread
+		if($notes)
+		{
+			$lastNoteID = end($notes)->id;
+			$connection->deepQuery("
+				UPDATE _note
+				SET read_date = CURRENT_TIMESTAMP
+				WHERE read_date is NULL
+				AND from_user = '$friendEmail'
+				AND id >= $lastNoteID");
+		}
+
+		return $notes;
+	}
 }
