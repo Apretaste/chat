@@ -42,8 +42,8 @@ class Nota extends Service
 		if ($un === false)
 		{
 			// Searching contacts of the current user
-			$contacts = $db->deepQuery("SELECT (select username FROM person WHERE person.email = subq.username) as username,  
-										subq.username as email 
+			$contacts = $db->deepQuery("SELECT (select username FROM person WHERE person.email = subq.username) as username,
+										      subq.username as email 
 										FROM (SELECT from_user as username FROM _note WHERE to_user = '{$person->email}'
 										UNION SELECT to_user as username FROM _note WHERE from_user = '{$person->email}') as subq 
 										WHERE username <> '' AND username IS NOT NULL GROUP BY username");
@@ -57,6 +57,7 @@ class Nota extends Service
 						'from' => $last_note[0]->from_username,
 						'note' => $last_note[0]->text,
 						'date' => $last_note[0]->date);
+                    $contacts[$k]->profile = $this->utils->getPerson($contact->email);
 				}
 
 			// Return the response
