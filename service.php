@@ -28,6 +28,16 @@ class Nota extends Service
 				GROUP BY to_user
 				ORDER BY send_date DESC");
 
+			foreach($notes as $k => $note)
+            {
+                $notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+                $last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+                $notes[$k]->last_note = array(
+                    'from' => $last_note[0]->username,
+                    'note' => $last_note[0]->text,
+                    'date' => $last_note[0]->sent);
+            }
+
 			// Return the response
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
