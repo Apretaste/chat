@@ -25,6 +25,7 @@ class Nota extends Service
 				FROM _note A RIGHT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '{$request->email}'
+				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.to_user AND type = 'blocked' AND confirmed = 1)
 				GROUP BY to_user
 				ORDER BY send_date DESC");
 
