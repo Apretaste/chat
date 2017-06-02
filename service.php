@@ -226,11 +226,17 @@ class Nota extends Service
 			WHERE to_user = '{$request->email}'
 			AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
 			AND read_date IS NULL
-			GROUP BY B.username");
+			GROUP BY B.username
+			ORDER BY sent DESC;");
 
 		// get the total counter
 		$total = 0;
-		foreach ($notes as $note) $total += $note->counter;
+		foreach ($notes as $k => $note)
+        {
+            $total += $note->counter;
+            $notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+            $notes[$k]->last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+        }
 
 		// respond back to the API
 		$response = new Response();
