@@ -19,16 +19,24 @@ class Nota extends Service
 		//
 		if (empty($request->query))
 		{
-			// Searching contacts of the current user
-			$notes = $connection->deepQuery("
-				SELECT B.username, MAX(send_date) as sent
+		    $union = "(SELECT B.username, MAX(send_date) as sent
 				FROM _note A RIGHT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '{$request->email}'
-				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.to_user AND type = 'blocked' AND confirmed = 1)
-				GROUP BY to_user
-				ORDER BY send_date DESC");
+                AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.to_user AND type = 'blocked' AND confirmed = 1)
+				GROUP BY to_user)
+				UNION
+                (SELECT B.username, MAX(send_date) as sent
+				FROM _note A RIGHT JOIN person B
+				ON A.from_user = B.email
+				WHERE to_user = '{$request->email}'
+                AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
+				GROUP BY from_user)";
 
+			// Searching contacts of the current user
+			$sql = "SELECT username, MAX(sent) as sent FROM ($union) U GROUP BY username ORDER BY sent DESC;";
+
+            $notes = $connection->deepQuery($sql);
 			foreach($notes as $k => $note)
             {
                 $notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
