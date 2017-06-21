@@ -1,5 +1,10 @@
 <service>
 	<serviceName>nota</serviceName>
+	<serviceAliases>
+		<alias>chat</alias>
+		<alias>notas</alias>
+		<alias>chats</alias>
+	</serviceAliases>
 	<serviceDescription><![CDATA[Env&iacute;a una nota privada a otro usuario de Apretaste, y proporciona un espacio para mantener conversaciones]]></serviceDescription>
 	<creatorEmail>salvi@apretaste.com</creatorEmail>
 	<serviceCategory>social</serviceCategory>
