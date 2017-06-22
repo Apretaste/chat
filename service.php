@@ -19,33 +19,33 @@ class Nota extends Service
 		//
 		if (empty($request->query))
 		{
-		    $union = "(SELECT B.username, MAX(send_date) as sent
+			$union = "(SELECT B.username, MAX(send_date) as sent
 				FROM _note A RIGHT JOIN person B
 				ON A.to_user = B.email
 				WHERE from_user = '{$request->email}'
-                AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.to_user AND type = 'blocked' AND confirmed = 1)
+				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.to_user AND type = 'blocked' AND confirmed = 1)
 				GROUP BY to_user)
 				UNION
-                (SELECT B.username, MAX(send_date) as sent
+				(SELECT B.username, MAX(send_date) as sent
 				FROM _note A RIGHT JOIN person B
 				ON A.from_user = B.email
 				WHERE to_user = '{$request->email}'
-                AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
+				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
 				GROUP BY from_user)";
 
 			// Searching contacts of the current user
 			$sql = "SELECT username, MAX(sent) as sent FROM ($union) U GROUP BY username ORDER BY sent DESC;";
 
-            $notes = $connection->deepQuery($sql);
+			$notes = $connection->deepQuery($sql);
 			foreach($notes as $k => $note)
-            {
-                $notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-                $last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
-                $notes[$k]->last_note = array(
-                    'from' => $last_note[0]->username,
-                    'note' => $last_note[0]->text,
-                    'date' => $last_note[0]->sent);
-            }
+			{
+				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+				$last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+				$notes[$k]->last_note = array(
+					'from' => $last_note[0]->username,
+					'note' => $last_note[0]->text,
+					'date' => $last_note[0]->sent);
+			}
 
 			// Return the response
 			$response = new Response();
@@ -91,7 +91,6 @@ class Nota extends Service
 		//
 		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
 		//
-
 		return $this->_post($request, $friendUsername, $friendEmail, $note);
 	}
 
@@ -180,11 +179,9 @@ class Nota extends Service
 		$connection = new Connection();
 		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
-		// prepare notification
+		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
 		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
-
-		// send push notification for users with the App
 		if($appid)
 		{
 			$personFrom = $this->utils->getPerson($request->email);
@@ -192,27 +189,27 @@ class Nota extends Service
 			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
 			return $response;
 		}
-		// send emails for users within the email platform
-		else
+
+		// send web notification for users of Pizarra
+		$appid = $pushNotification->getAppId($friendEmail, "pizarra");
+		if($appid)
 		{
-			// get the conversation between you and your friend
-			$notes = $this->getConversation($request->email, $friendEmail);
-
-			// get your username
 			$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-
-			// prepare the details for the view
-			$responseContent = array("friendUsername" => $yourUsername, "chats" => $notes);
-
-			// add notification for your friend
-			$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
-
-			// Send the response email to your friend
-			$response->setResponseEmail($friendEmail);
-			$response->setResponseSubject("Nueva nota de @$yourUsername");
-			$response->createFromTemplate("chats.tpl", $responseContent);
+			$pushNotification->pizarraChatReceived($appid, $yourUsername, $note);
 			return $response;
 		}
+
+		// send emails for users within the email platform
+		$notes = $this->getConversation($request->email, $friendEmail);
+		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+		$responseContent = array("friendUsername" => $yourUsername, "chats" => $notes);
+		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
+
+		// Send the response email to your friend
+		$response->setResponseEmail($friendEmail);
+		$response->setResponseSubject("Nueva nota de @$yourUsername");
+		$response->createFromTemplate("chats.tpl", $responseContent);
+		return $response;
 	}
 
 	/**
@@ -240,11 +237,11 @@ class Nota extends Service
 		// get the total counter
 		$total = 0;
 		foreach ($notes as $k => $note)
-        {
-            $total += $note->counter;
-            $notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-            $notes[$k]->last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
-        }
+		{
+			$total += $note->counter;
+			$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+			$notes[$k]->last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+		}
 
 		// respond back to the API
 		$response = new Response();
