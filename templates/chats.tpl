@@ -13,5 +13,5 @@
 {space30}
 
 <center>
-	{button href="NOTA @{$friendUsername} Reemplace este texto por su nota" caption="Responder" body="" color="green" size="large"}
+	{button href="NOTA @{$friendUsername}" caption="Responder" size="large" body="Escriba en el asunto el texto a enviar a continuacion del @username" desc="Escriba el texto a enviar" popup="true" wait="false"}
 </center>

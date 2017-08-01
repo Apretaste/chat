@@ -36,7 +36,7 @@ class Nota extends Service
 			// Searching contacts of the current user
 			$sql = "SELECT username, MAX(sent) as sent FROM ($union) U GROUP BY username ORDER BY sent DESC;";
 
-			$notes = $connection->deepQuery($sql);
+			$notes = $connection->query($sql);
 			foreach($notes as $k => $note)
 			{
 				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
@@ -57,7 +57,7 @@ class Nota extends Service
 		// check that the username of the note is valid
 		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$find = $connection->deepQuery("SELECT email FROM person WHERE username = '$friendUsername';");
+		$find = $connection->query("SELECT email FROM person WHERE username = '$friendUsername';");
 		if (empty($find))
 		{
 			$response = new Response();
@@ -177,7 +177,7 @@ class Nota extends Service
 
 		// store the note in the database
 		$connection = new Connection();
-		$connection->deepQuery("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
+		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
 		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
@@ -224,7 +224,7 @@ class Nota extends Service
 	{
 		// get count of unread notes
 		$connection = new Connection();
-		$notes = $connection->deepQuery("
+		$notes = $connection->query("
 			SELECT B.username, MAX(send_date) as sent, COUNT(B.username) as counter
 			FROM _note A LEFT JOIN person B
 			ON A.from_user = B.email
@@ -266,7 +266,7 @@ class Nota extends Service
 
 		// retrieve conversation between users
 		$connection = new Connection();
-		$notes = $connection->deepQuery("
+		$notes = $connection->query("
 			SELECT * FROM (
 				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
 				FROM _note A LEFT JOIN person B
@@ -285,7 +285,7 @@ class Nota extends Service
 		if($notes)
 		{
 			$lastNoteID = end($notes)->id;
-			$connection->deepQuery("
+			$connection->query("
 				UPDATE _note
 				SET read_date = CURRENT_TIMESTAMP
 				WHERE read_date is NULL
