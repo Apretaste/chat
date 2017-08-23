@@ -1,6 +1,6 @@
 <?php
 
-class Nota extends Service
+class Chat extends Service
 {
 	/**
 	 * Get the list of conversations, or post a note
@@ -41,6 +41,7 @@ class Nota extends Service
 			{
 				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
 				$last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+				if(empty($last_note)) continue;
 				$notes[$k]->last_note = array(
 					'from' => $last_note[0]->username,
 					'note' => $last_note[0]->text,
@@ -84,7 +85,7 @@ class Nota extends Service
 		{
 			$response = new Response();
 			$response->setResponseSubject("No reemplazaste el texto por tu nota");
-			$response->createFromTemplate("howto.tpl", array());
+			$response->createFromText("Para enviar una nota escriba la palabra CHAT seguida del nombre de usuario del destinatario y luego el texto de la nota a enviar, todo en el asunto del correo. Por ejemplo: CHAT @pepe1 Hola pepe");
 			return $response;
 		}
 

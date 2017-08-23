@@ -1,7 +1,7 @@
 <service>
-	<serviceName>nota</serviceName>
+	<serviceName>chat</serviceName>
 	<serviceAliases>
-		<alias>chat</alias>
+		<alias>nota</alias>
 		<alias>notas</alias>
 		<alias>chats</alias>
 	</serviceAliases>
