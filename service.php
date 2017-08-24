@@ -178,6 +178,7 @@ class Chat extends Service
 
 		// store the note in the database
 		$connection = new Connection();
+		$note = $connection->escape($note);
 		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
 		// send push notification for users of Piropazo
