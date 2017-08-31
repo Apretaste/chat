@@ -19,6 +19,7 @@ class Chat extends Service
 		//
 		if (empty($request->query))
 		{
+			// Searching contacts of the current user
 			$union = "(SELECT B.username, MAX(send_date) as sent
 				FROM _note A RIGHT JOIN person B
 				ON A.to_user = B.email
@@ -32,11 +33,9 @@ class Chat extends Service
 				WHERE to_user = '{$request->email}'
 				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
 				GROUP BY from_user)";
+			$notes = $connection->query("SELECT username, MAX(sent) AS sent FROM ($union) U GROUP BY username ORDER BY sent DESC");
 
-			// Searching contacts of the current user
-			$sql = "SELECT username, MAX(sent) as sent FROM ($union) U GROUP BY username ORDER BY sent DESC;";
-
-			$notes = $connection->query($sql);
+			// add profiles to the list of notes
 			foreach($notes as $k => $note)
 			{
 				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
@@ -48,7 +47,16 @@ class Chat extends Service
 					'date' => $last_note[0]->sent);
 			}
 
-			// Return the response
+			// show home page
+			if(empty($notes))
+			{
+				$response = new Response();
+				$response->setResponseSubject("Lista de chats abiertos");
+				$response->createFromTemplate("home.tpl", array());
+				return $response;
+			}
+
+			// show list of notes
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
 			$response->createFromTemplate("open.tpl", array("notes" => $notes));
