@@ -189,6 +189,10 @@ class Chat extends Service
 		$note = $connection->escape($note);
 		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
+		// send notification for the app
+		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
+		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
+
 		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
 		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
@@ -204,21 +208,14 @@ class Chat extends Service
 		$appid = $pushNotification->getAppId($friendEmail, "pizarra");
 		if($appid)
 		{
-			$yourUsername = $this->utils->getUsernameFromEmail($request->email);
 			$pushNotification->pizarraChatReceived($appid, $yourUsername, $note);
 			return $response;
 		}
 
-		// send emails for users within the email platform
+		// create the response
 		$notes = $this->getConversation($request->email, $friendEmail);
-		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-		$responseContent = array("friendUsername" => $yourUsername, "chats" => $notes);
-		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
-
-		// Send the response email to your friend
-		$response->setResponseEmail($friendEmail);
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
-		$response->createFromTemplate("chats.tpl", $responseContent);
+		$response->createFromTemplate("chats.tpl", array("friendUsername"=>$friendUsername, "chats"=>$notes));
 		return $response;
 	}
 
