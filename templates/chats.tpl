@@ -14,4 +14,9 @@
 
 <center>
 	{button href="CHAT @{$friendUsername}" caption="Responder" size="large" desc="Escriba el texto a enviar" popup="true" wait="false"}
+	{if $online == true}
+	{button href="CHAT OCULTARSE" caption="Ocultarse" color="red" wait="false"}
+	{else}
+	{button href="CHAT MOSTRARSE" caption="Mostrarse" wait="false"}
+	{/if}
 </center>

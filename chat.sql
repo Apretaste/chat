@@ -5,3 +5,5 @@ CREATE TABLE _note(
     text varchar(255),
     send_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE person ADD COLUMN online tinyint(1) default 0;

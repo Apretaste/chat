@@ -4,4 +4,9 @@
 
 <center>
 	{button href="CHAT amigo1 Hola amigo" desc="Escriba el @username seguido de la nota. Por ejemplo: @pepe Hola socio" caption="Enviar nota"}
+	{if $online == true}
+	{button href="CHAT OCULTARSE" caption="Ocultarse" color="red" wait="false"}
+	{else}
+	{button href="CHAT MOSTRARSE" caption="Mostrarse" wait="false"}
+	{/if}
 </center>
