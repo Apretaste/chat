@@ -41,7 +41,9 @@ class Chat extends Service
 	 * Get the list of conversations, or post a note
 	 *
 	 * @author salvipascual
+	 *
 	 * @param Request
+	 *
 	 * @return Response
 	 */
 	public function _main(Request $request)
@@ -49,7 +51,7 @@ class Chat extends Service
 		//
 		// SHOW THE LIST OF OPEN CHATS WHEN SUBJECT=NOTA
 		//
-		if (empty($request->query))
+		if(empty($request->query))
 		{
 			// Searching contacts of the current user
 			$union = "(SELECT B.username, MAX(send_date) as sent
@@ -70,13 +72,14 @@ class Chat extends Service
 			// add profiles to the list of notes
 			foreach($notes as $k => $note)
 			{
-				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-				$last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+				$notes[ $k ]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+				$last_note            = $this->getConversation($request->email, $notes[ $k ]->profile->email, 1);
 				if(empty($last_note)) continue;
-				$notes[$k]->last_note = array(
+				$notes[ $k ]->last_note = [
 					'from' => $last_note[0]->username,
 					'note' => $last_note[0]->text,
-					'date' => $last_note[0]->sent);
+					'date' => $last_note[0]->sent
+				];
 			}
 
 			// show home page
@@ -84,26 +87,32 @@ class Chat extends Service
 			{
 				$response = new Response();
 				$response->setResponseSubject("Lista de chats abiertos");
-				$response->createFromTemplate("home.tpl", array("online" => $this->isOnline($request)));
+				$response->createFromTemplate("home.tpl", ["online" => $this->isOnline($request)]);
+
 				return $response;
 			}
 
 			// show list of notes
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
-			$response->createFromTemplate("open.tpl", array("notes" => $notes, "online" => $this->isOnline($request)));
+			$response->createFromTemplate("open.tpl", ["notes" => $notes, "online" => $this->isOnline($request)]);
+
 			return $response;
 		}
 
 		// check that the username of the note is valid
-		$argument = explode(" ", $request->query);
+		$argument       = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$find = $this->q("SELECT email FROM person WHERE username = '$friendUsername';");
-		if (empty($find))
+		$find           = $this->q("SELECT email FROM person WHERE username = '$friendUsername';");
+		if(empty($find))
 		{
 			$response = new Response();
 			$response->setResponseSubject("El usuario @$friendUsername no existe");
-			$response->createFromTemplate("user_not_exists.tpl", array("username"=>$friendUsername, "online" => $this->isOnline($request)));
+			$response->createFromTemplate("user_not_exists.tpl", [
+				"username" => $friendUsername,
+				"online" => $this->isOnline($request)
+			]);
+
 			return $response;
 		}
 		$friendEmail = $find[0]->email;
@@ -121,11 +130,12 @@ class Chat extends Service
 		$note = implode(" ", $argument);
 
 		// if you are trying to post using the example text, send the help document
-		if ($note == 'Reemplace este texto por su nota')
+		if($note == 'Reemplace este texto por su nota')
 		{
 			$response = new Response();
 			$response->setResponseSubject("No reemplazaste el texto por tu nota");
 			$response->createFromText("Para enviar una nota escriba la palabra CHAT seguida del nombre de usuario del destinatario y luego el texto de la nota a enviar, todo en el asunto del correo. Por ejemplo: CHAT @pepe1 Hola pepe");
+
 			return $response;
 		}
 
@@ -140,23 +150,25 @@ class Chat extends Service
 	 *
 	 * @api
 	 * @author salvipascual
+	 *
 	 * @param Request
+	 *
 	 * @return Response
 	 * */
-	public function _get(Request $request, $friendEmail=false)
+	public function _get(Request $request, $friendEmail = false)
 	{
 		$response = new Response();
 
 		// get the username and ID of the query
-		$argument = explode(" ", $request->query);
+		$argument       = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$lastID = isset($argument[1]) ? $argument[1] : 0;
+		$lastID         = isset($argument[1]) ? $argument[1] : 0;
 
 		// get the friend email if not passed
 		if(empty($friendEmail))
 		{
 			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-			if ( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+			if( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
 		}
 
 		// get the array of notes
@@ -164,7 +176,7 @@ class Chat extends Service
 
 		// get the new last ID and remove ID for each note
 		$newLastID = 0;
-		foreach ($notes as $nota)
+		foreach($notes as $nota)
 		{
 			if($nota->id > $newLastID) $newLastID = $nota->id;
 		}
@@ -173,17 +185,18 @@ class Chat extends Service
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
 
 		// prepare the details for the view
-		$responseContent = array(
+		$responseContent = [
 			"code" => "ok",
 			"last_id" => $newLastID,
 			"friendUsername" => $friendUsername,
 			"chats" => $notes,
 			"online" => $this->isOnline($request)
-		);
+		];
 
 		// Send the response email to your friend
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
 		$response->createFromTemplate("chats.tpl", $responseContent);
+
 		return $response;
 	}
 
@@ -192,10 +205,12 @@ class Chat extends Service
 	 *
 	 * @api
 	 * @author salvipascual
+	 *
 	 * @param Request
+	 *
 	 * @return Response
 	 * */
-	public function _post(Request $request, $friendUsername=false, $friendEmail=false, $note=false)
+	public function _post(Request $request, $friendUsername = false, $friendEmail = false, $note = false)
 	{
 		$response = new Response();
 
@@ -203,12 +218,12 @@ class Chat extends Service
 		if(empty($friendUsername) || empty($friendEmail) || empty($note))
 		{
 			// get the friend username
-			$argument = explode(" ", $request->query);
+			$argument       = explode(" ", $request->query);
 			$friendUsername = str_replace("@", "", $argument[0]);
 
 			// get the friend email
 			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-			if (empty($friendEmail)) return $response->createFromText("El nombre de usuario @$friendUsername no parece existir. Verifica que sea correcto e intenta nuevamente.", "ERROR", "Wrong username");
+			if(empty($friendEmail)) return $response->createFromText("El nombre de usuario @$friendUsername no parece existir. Verifica que sea correcto e intenta nuevamente.", "ERROR", "Wrong username");
 
 			// get the text for the note
 			unset($argument[0]);
@@ -226,12 +241,13 @@ class Chat extends Service
 
 		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
-		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+		$appid            = $pushNotification->getAppId($friendEmail, "piropazo");
 		if($appid)
 		{
 			$personFrom = $this->utils->getPerson($request->email);
-			$personTo = $this->utils->getPerson($friendEmail);
+			$personTo   = $this->utils->getPerson($friendEmail);
 			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
+
 			return $response;
 		}
 
@@ -240,13 +256,15 @@ class Chat extends Service
 		if($appid)
 		{
 			$pushNotification->pizarraChatReceived($appid, $yourUsername, $note);
+
 			return $response;
 		}
 
 		// create the response
 		$notes = $this->getConversation($request->email, $friendEmail);
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
-		$response->createFromTemplate("chats.tpl", array("friendUsername"=>$friendUsername, "chats"=>$notes));
+		$response->createFromTemplate("chats.tpl", ["friendUsername" => $friendUsername, "chats" => $notes]);
+
 		return $response;
 	}
 
@@ -255,7 +273,9 @@ class Chat extends Service
 	 *
 	 * @api
 	 * @author salvipascual
+	 *
 	 * @param Request
+	 *
 	 * @return Response
 	 */
 	public function _unread(Request $request)
@@ -273,16 +293,17 @@ class Chat extends Service
 
 		// get the total counter
 		$total = 0;
-		foreach ($notes as $k => $note)
+		foreach($notes as $k => $note)
 		{
-			$total += $note->counter;
-			$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-			$notes[$k]->last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+			$total                  += $note->counter;
+			$notes[ $k ]->profile   = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+			$notes[ $k ]->last_note = $this->getConversation($request->email, $notes[ $k ]->profile->email, 1);
 		}
 
 		// respond back to the API
-		$response = new Response();
-		$jsonResponse = array("code" => "ok", "total"=>$total, "items" => $notes);
+		$response     = new Response();
+		$jsonResponse = ["code" => "ok", "total" => $total, "items" => $notes];
+
 		return $response->createFromJSON(json_encode($jsonResponse));
 	}
 
@@ -290,13 +311,15 @@ class Chat extends Service
 	 * Return a list of notes between $email1 & $email2
 	 *
 	 * @author salvipascual
+	 *
 	 * @param String $email1
 	 * @param String $email2
-	 * @param String $lastID, get all from this ID
-	 * @param string $limit, integer number of max rows
+	 * @param String $lastID , get all from this ID
+	 * @param string $limit  , integer number of max rows
+	 *
 	 * @return array
 	 */
-	private function getConversation($yourEmail, $friendEmail, $lastID=0, $limit=20)
+	private function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
 	{
 		// if a last ID is passed, do not cut the result based on the limit
 		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
@@ -334,6 +357,7 @@ class Chat extends Service
 
 	/**
 	 * Sub-service OCULTARSE
+	 *
 	 * @param \Request $request
 	 *
 	 * @return \Response
@@ -341,6 +365,7 @@ class Chat extends Service
 	public function _ocultarse(Request $request)
 	{
 		$this->q("UPDATE person SET online = 0 WHERE email = '{$request->email}';");
+
 		return new Response();
 	}
 
@@ -354,6 +379,7 @@ class Chat extends Service
 	public function _mostrarse(Request $request)
 	{
 		$this->q("UPDATE person SET online = 1 WHERE email = '{$request->email}';");
+
 		return new Response();
 	}
 
@@ -366,12 +392,49 @@ class Chat extends Service
 	 */
 	public function _online(Request $request)
 	{
-		$r = $this->q("SELECT username FROM person WHERE active = 1 AND online =1 AND email <> '{$request->email}' LIMIT 50;");
+		$r = $this->q("SELECT username, email, province, gender 
+		FROM person 
+		WHERE active = 1 
+			AND online = 1 
+			AND email <> '{$request->email}' 
+			AND province is not null 
+			AND province <> '' 
+			AND timestampdiff(MINUTE, last_access, now()) <= 10
+		ORDER BY last_access DESC
+		LIMIT 0,50;");
+
+		$users = [];
+
+		$codes = [
+			'LA_HABANA' => 'LH',
+			'GUANTANAMO' => 'GU',
+			'SANTIAGO_DE_CUBA' => 'SC',
+			'GRANMA' => 'GR',
+			'HOLGUIN' => 'HL',
+			'LAS_TUNAS' => 'LT',
+			'CAMAGUEY' => 'CM',
+			'CIEGO_DE_AVILA' => 'CV',
+			'SANCTI_SPIRITUS' => 'SS',
+			'VILLA_CLARA' => 'VC',
+			'CIENFUEGOS' => 'CF',
+			'MATANZAS' => 'MT',
+			'ISLA_DE_LA_JUVENTUD' => 'IJ',
+			'ARTEMISA' => 'AR',
+			'MAYABEQUE' => 'MA',
+			'PINAR_DEL_RIO' => 'PR'
+		];
+
+		foreach($r as $item)
+		{
+			$person                = $item;
+			$person->province_code = isset($codes[ $item->province ]) ? $codes[ $item->province ] : '';
+			$users[]               = $person;
+		}
 
 		$response = new Response();
 		$response->setResponseSubject("Usuarios conectados al chat");
 		$response->createFromTemplate("online.tpl", [
-			'users' => $r
+			'users' => $users
 		]);
 
 		return $response;
@@ -387,7 +450,8 @@ class Chat extends Service
 	private function isOnline($request)
 	{
 		$r = $this->q("SELECT online FROM person WHERE email = '{$request->email}';");
-		if (isset($r[0]) && $r[0]->online == '1') return true;
+		if(isset($r[0]) && $r[0]->online == '1') return true;
+
 		return false;
 	}
 }
