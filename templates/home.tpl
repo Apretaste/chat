@@ -6,6 +6,7 @@
 
 <center>
 	{button href="CHAT" desc="Escriba el @username de su amigo|Escriba el texto a enviar" caption="Primera Nota" popup="true" wait="false"}
+	{button href="CHAT ONLINE" caption="Conectados" color="blue" wait="false"}
 	{if $online == true}
 	{button href="CHAT OCULTARSE" caption="Ocultarse" color="red" wait="false"}
 	{else}
