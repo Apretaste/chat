@@ -6,7 +6,7 @@
 <table cellspacing="0" cellpadding="10" border="0" width="100%">
 	{foreach item=item from=$users}
 	<tr>
-		<td>{link caption="{$item->username}" href="PERFIL @{$item->username}"}</td>
+		<td>{link caption="@{$item->username}" href="PERFIL @{$item->username}"}</td>
 		<td>{$item->province_code}</td>
 		<td>
 			{if $item->gender eq "M"}<font color="#4863A0">M</font>{/if}
