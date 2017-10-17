@@ -2,7 +2,6 @@
 
 class Chat extends Service
 {
-
 	private $connection = null;
 
 	/**
@@ -13,11 +12,7 @@ class Chat extends Service
 	 */
 	private function connection()
 	{
-		if(is_null($this->connection))
-		{
-			$this->connection = new Connection();
-		}
-
+		if(is_null($this->connection)) $this->connection = new Connection();
 		return $this->connection;
 	}
 
@@ -101,9 +96,9 @@ class Chat extends Service
 		}
 
 		// check that the username of the note is valid
-		$argument       = explode(" ", $request->query);
+		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$find           = $this->q("SELECT email FROM person WHERE username = '$friendUsername';");
+		$find = $this->q("SELECT email FROM person WHERE username = '$friendUsername';");
 		if(empty($find))
 		{
 			$response = new Response();
@@ -160,9 +155,9 @@ class Chat extends Service
 		$response = new Response();
 
 		// get the username and ID of the query
-		$argument       = explode(" ", $request->query);
+		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$lastID         = isset($argument[1]) ? $argument[1] : 0;
+		$lastID = isset($argument[1]) ? $argument[1] : 0;
 
 		// get the friend email if not passed
 		if(empty($friendEmail))
@@ -365,7 +360,6 @@ class Chat extends Service
 	public function _ocultarse(Request $request)
 	{
 		$this->q("UPDATE person SET online = 0 WHERE email = '{$request->email}';");
-
 		return new Response();
 	}
 
@@ -379,7 +373,6 @@ class Chat extends Service
 	public function _mostrarse(Request $request)
 	{
 		$this->q("UPDATE person SET online = 1 WHERE email = '{$request->email}';");
-
 		return new Response();
 	}
 
@@ -392,19 +385,18 @@ class Chat extends Service
 	 */
 	public function _online(Request $request)
 	{
-		$r = $this->q("SELECT username, email, province, gender 
-		FROM person 
-		WHERE active = 1 
-			AND online = 1 
-			AND email <> '{$request->email}' 
-			AND province is not null 
-			AND province <> '' 
+		$r = $this->q("SELECT username, email, province, gender
+		FROM person
+		WHERE active = 1
+			AND online = 1
+			AND email <> '{$request->email}'
+			AND province is not null
+			AND province <> ''
 			AND timestampdiff(MINUTE, last_access, now()) <= 10
 		ORDER BY last_access DESC
 		LIMIT 0,50;");
 
 		$users = [];
-
 		$codes = [
 			'LA_HABANA' => 'LH',
 			'GUANTANAMO' => 'GU',
@@ -426,17 +418,14 @@ class Chat extends Service
 
 		foreach($r as $item)
 		{
-			$person                = $item;
+			$person = $item;
 			$person->province_code = isset($codes[ $item->province ]) ? $codes[ $item->province ] : '';
-			$users[]               = $person;
+			$users[] = $person;
 		}
 
 		$response = new Response();
 		$response->setResponseSubject("Usuarios conectados al chat");
-		$response->createFromTemplate("online.tpl", [
-			'users' => $users
-		]);
-
+		$response->createFromTemplate("online.tpl", ['users' => $users]);
 		return $response;
 	}
 

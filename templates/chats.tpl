@@ -14,14 +14,8 @@
 	</table>
 {/if}
 
-<p>Si est&aacute; "disponible" otros usuarios le encontrar&aacute;n para chatear. Si est&aacute; "oculto" su nombre no aparecer&aacute; en la lista de chat.</p>
 {space15}
 
 <center>
 	{button href="CHAT @{$friendUsername}" caption="Escribir" size="medium" desc="Escriba el texto a enviar" popup="true" wait="false"}
-	{if $online == true}
-	{button href="CHAT OCULTARSE" caption="Ocultarse" color="red" wait="false" size="medium"}
-	{else}
-	{button href="CHAT MOSTRARSE" caption="Mostrarse" wait="false" size="medium"}
-	{/if}
 </center>

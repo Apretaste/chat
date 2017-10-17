@@ -14,15 +14,20 @@
 </table>
 
 {space15}
-<p>Si est&aacute; "disponible" otros usuarios le encontrar&aacute;n para chatear. Si est&aacute; "oculto" su nombre no aparecer&aacute; en la lista de chat.</p>
+
+<table bgcolor="#F2F2F2" width="100%">
+	<tr>
+		<td><small>Si est&aacute; "disponible" otros usuarios le ver&aacute;n. Si est&aacute; "oculto", no aparecer&aacute;.</small></td>
+		<td align="right">
+			{if $online}{button href="CHAT OCULTARSE" caption="Ocultarse" color="grey" wait="false" size="small"}
+			{else}{button href="CHAT MOSTRARSE" caption="Mostrarse" wait="false" size="small"}{/if}
+		</td>
+	</tr>
+</table>
+
 {space15}
 
 <center>
 	{button href="CHAT" desc="Escriba el @username de su amigo|Escriba el texto a enviar" caption="+ Nueva Nota" popup="true" wait="false"}
 	{button href="CHAT ONLINE" caption="Conectados" color="blue" wait="false"}
-	{if $online == true}
-	{button href="CHAT OCULTARSE" caption="Ocultarse" color="red" wait="false" size="medium"}
-	{else}
-	{button href="CHAT MOSTRARSE" caption="Mostrarse" wait="false" size="medium"}
-	{/if}
 </center>
