@@ -29,5 +29,5 @@
 
 <center>
 	{button href="CHAT" desc="Escriba el @username de su amigo|Escriba el texto a enviar" caption="+ Nueva Nota" popup="true" wait="false"}
-	{button href="CHAT ONLINE" caption="Conectados" color="blue" wait="false"}
+	{button href="CHAT ONLINE" caption="Conectados" color="blue"}
 </center>
