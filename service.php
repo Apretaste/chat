@@ -2,47 +2,17 @@
 
 class Chat extends Service
 {
-	private $connection = null;
-
-	/**
-	 * Singleton connection to db
-	 *
-	 * @author kuma
-	 * @return Connection
-	 */
-	private function connection()
-	{
-		if(is_null($this->connection)) $this->connection = new Connection();
-		return $this->connection;
-	}
-
-	/**
-	 * Query assistant
-	 *
-	 * @author kuma
-	 * @example
-	 *      $this->q("SELECT * FROM TABLE"); // (more readable / SQL is autodescriptive)
-	 *
-	 * @param string $sql
-	 *
-	 * @return array
-	 */
-	private function q($sql)
-	{
-		return $this->connection()->deepQuery($sql);
-	}
-
 	/**
 	 * Get the list of conversations, or post a note
 	 *
 	 * @author salvipascual
-	 *
 	 * @param Request
-	 *
 	 * @return Response
 	 */
 	public function _main(Request $request)
 	{
+		$connection = new Connection();
+
 		//
 		// SHOW THE LIST OF OPEN CHATS WHEN SUBJECT=NOTA
 		//
@@ -62,7 +32,7 @@ class Chat extends Service
 				WHERE to_user = '{$request->email}'
 				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
 				GROUP BY from_user)";
-			$notes = $this->q("SELECT username, MAX(sent) AS sent FROM ($union) U GROUP BY username ORDER BY sent DESC");
+			$notes = $connection->query("SELECT username, MAX(sent) AS sent FROM ($union) U GROUP BY username ORDER BY sent DESC");
 
 			// add profiles to the list of notes
 			foreach($notes as $k => $note)
@@ -83,7 +53,6 @@ class Chat extends Service
 				$response = new Response();
 				$response->setResponseSubject("Lista de chats abiertos");
 				$response->createFromTemplate("home.tpl", ["online" => $this->isOnline($request)]);
-
 				return $response;
 			}
 
@@ -91,14 +60,13 @@ class Chat extends Service
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
 			$response->createFromTemplate("open.tpl", ["notes" => $notes, "online" => $this->isOnline($request)]);
-
 			return $response;
 		}
 
 		// check that the username of the note is valid
 		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$find = $this->q("SELECT email FROM person WHERE username = '$friendUsername';");
+		$find = $connection->query("SELECT email FROM person WHERE username = '$friendUsername';");
 		if(empty($find))
 		{
 			$response = new Response();
@@ -130,7 +98,6 @@ class Chat extends Service
 			$response = new Response();
 			$response->setResponseSubject("No reemplazaste el texto por tu nota");
 			$response->createFromText("Para enviar una nota escriba la palabra CHAT seguida del nombre de usuario del destinatario y luego el texto de la nota a enviar, todo en el asunto del correo. Por ejemplo: CHAT @pepe1 Hola pepe");
-
 			return $response;
 		}
 
@@ -145,11 +112,9 @@ class Chat extends Service
 	 *
 	 * @api
 	 * @author salvipascual
-	 *
 	 * @param Request
-	 *
 	 * @return Response
-	 * */
+	 */
 	public function _get(Request $request, $friendEmail = false)
 	{
 		$response = new Response();
@@ -191,7 +156,6 @@ class Chat extends Service
 		// Send the response email to your friend
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
 		$response->createFromTemplate("chats.tpl", $responseContent);
-
 		return $response;
 	}
 
@@ -200,11 +164,9 @@ class Chat extends Service
 	 *
 	 * @api
 	 * @author salvipascual
-	 *
 	 * @param Request
-	 *
 	 * @return Response
-	 * */
+	 */
 	public function _post(Request $request, $friendUsername = false, $friendEmail = false, $note = false)
 	{
 		$response = new Response();
@@ -213,7 +175,7 @@ class Chat extends Service
 		if(empty($friendUsername) || empty($friendEmail) || empty($note))
 		{
 			// get the friend username
-			$argument       = explode(" ", $request->query);
+			$argument = explode(" ", $request->query);
 			$friendUsername = str_replace("@", "", $argument[0]);
 
 			// get the friend email
@@ -227,8 +189,9 @@ class Chat extends Service
 		}
 
 		// store the note in the database
-		$note = $this->connection->escape($note);
-		$this->q("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
+		$connection = new Connection();
+		$note = $connection->escape($note);
+		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
 
 		// send notification for the app
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
@@ -236,22 +199,18 @@ class Chat extends Service
 
 		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
-		$appid            = $pushNotification->getAppId($friendEmail, "piropazo");
-		if($appid)
-		{
+		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+		if($appid) {
 			$personFrom = $this->utils->getPerson($request->email);
-			$personTo   = $this->utils->getPerson($friendEmail);
+			$personTo = $this->utils->getPerson($friendEmail);
 			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
-
 			return $response;
 		}
 
 		// send web notification for users of Pizarra
 		$appid = $pushNotification->getAppId($friendEmail, "pizarra");
-		if($appid)
-		{
+		if($appid) {
 			$pushNotification->pizarraChatReceived($appid, $yourUsername, $note);
-
 			return $response;
 		}
 
@@ -259,7 +218,6 @@ class Chat extends Service
 		$notes = $this->getConversation($request->email, $friendEmail);
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
 		$response->createFromTemplate("chats.tpl", ["friendUsername" => $friendUsername, "chats" => $notes]);
-
 		return $response;
 	}
 
@@ -268,15 +226,14 @@ class Chat extends Service
 	 *
 	 * @api
 	 * @author salvipascual
-	 *
 	 * @param Request
-	 *
 	 * @return Response
 	 */
 	public function _unread(Request $request)
 	{
 		// get count of unread notes
-		$notes = $this->q("
+		$connection = new Connection();
+		$notes = $connection->query("
 			SELECT B.username, MAX(send_date) as sent, COUNT(B.username) as counter
 			FROM _note A LEFT JOIN person B
 			ON A.from_user = B.email
@@ -288,17 +245,15 @@ class Chat extends Service
 
 		// get the total counter
 		$total = 0;
-		foreach($notes as $k => $note)
-		{
-			$total                  += $note->counter;
-			$notes[ $k ]->profile   = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+		foreach($notes as $k => $note) {
+			$total += $note->counter;
+			$notes[ $k ]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
 			$notes[ $k ]->last_note = $this->getConversation($request->email, $notes[ $k ]->profile->email, 1);
 		}
 
 		// respond back to the API
-		$response     = new Response();
+		$response = new Response();
 		$jsonResponse = ["code" => "ok", "total" => $total, "items" => $notes];
-
 		return $response->createFromJSON(json_encode($jsonResponse));
 	}
 
@@ -306,12 +261,10 @@ class Chat extends Service
 	 * Return a list of notes between $email1 & $email2
 	 *
 	 * @author salvipascual
-	 *
 	 * @param String $email1
 	 * @param String $email2
 	 * @param String $lastID , get all from this ID
 	 * @param string $limit  , integer number of max rows
-	 *
 	 * @return array
 	 */
 	private function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
@@ -320,7 +273,8 @@ class Chat extends Service
 		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
 
 		// retrieve conversation between users
-		$notes = $this->q("
+		$connection = new Connection();
+		$notes = $connection->query("
 			SELECT * FROM (
 				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
 				FROM _note A LEFT JOIN person B
@@ -336,10 +290,9 @@ class Chat extends Service
 			ORDER BY sent DESC $setLimit");
 
 		// mark the other person notes as unread
-		if($notes)
-		{
+		if($notes) {
 			$lastNoteID = end($notes)->id;
-			$this->q("
+			$connection->query("
 				UPDATE _note
 				SET read_date = CURRENT_TIMESTAMP
 				WHERE read_date is NULL
@@ -354,12 +307,12 @@ class Chat extends Service
 	 * Sub-service OCULTARSE
 	 *
 	 * @param \Request $request
-	 *
 	 * @return \Response
 	 */
 	public function _ocultarse(Request $request)
 	{
-		$this->q("UPDATE person SET online = 0 WHERE email = '{$request->email}';");
+		$connection = new Connection();
+		$connection->query("UPDATE person SET online = 0 WHERE email = '{$request->email}';");
 		return new Response();
 	}
 
@@ -367,12 +320,12 @@ class Chat extends Service
 	 * Sub-service MOSTRARSE
 	 *
 	 * @param \Request $request
-	 *
 	 * @return \Response
 	 */
 	public function _mostrarse(Request $request)
 	{
-		$this->q("UPDATE person SET online = 1 WHERE email = '{$request->email}';");
+		$connection = new Connection();
+		$connection->query("UPDATE person SET online = 1 WHERE email = '{$request->email}';");
 		return new Response();
 	}
 
@@ -380,21 +333,22 @@ class Chat extends Service
 	 * Sub-service ONLINE
 	 *
 	 * @param \Request $request
-	 *
 	 * @return \Response
 	 */
 	public function _online(Request $request)
 	{
-		$r = $this->q("SELECT username, email, province, gender
-		FROM person
-		WHERE active = 1
-			AND online = 1
-			AND email <> '{$request->email}'
-			AND province is not null
-			AND province <> ''
-			AND timestampdiff(MINUTE, last_access, now()) <= 10
-		ORDER BY last_access DESC
-		LIMIT 0,50;");
+		$connection = new Connection();
+		$r = $connection->query("
+			SELECT username, email, province, gender
+			FROM person
+			WHERE active = 1
+				AND online = 1
+				AND email <> '{$request->email}'
+				AND province is not null
+				AND province <> ''
+				AND timestampdiff(MINUTE, last_access, now()) <= 10
+			ORDER BY last_access DESC
+			LIMIT 0,50;");
 
 		$users = [];
 		$codes = [
@@ -433,14 +387,12 @@ class Chat extends Service
 	 * Return TRUE if a user is online
 	 *
 	 * @param $request
-	 *
 	 * @return bool
 	 */
 	private function isOnline($request)
 	{
-		$r = $this->q("SELECT online FROM person WHERE email = '{$request->email}';");
-		if(isset($r[0]) && $r[0]->online == '1') return true;
-
-		return false;
+		$connection = new Connection();
+		$r = $connection->query("SELECT online FROM person WHERE email = '{$request->email}';");
+		return isset($r[0]) && $r[0]->online == '1';
 	}
 }
