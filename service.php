@@ -191,7 +191,8 @@ class Chat extends Service
 		// store the note in the database
 		$connection = new Connection();
 		$note = $connection->escape($note);
-		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note');");
+		$note = substr($note, 0, 499);
+		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note')");
 
 		// send notification for the app
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
