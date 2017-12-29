@@ -196,7 +196,7 @@ class Chat extends Service
 
 		// send notification for the app
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-		$this->utils->addNotification($friendEmail, "nota", "@$yourUsername le ha enviado una nota", "NOTA @$yourUsername");
+		$this->utils->addNotification($friendEmail, "chat", "@$yourUsername le ha enviado una nota", "CHAT @$yourUsername");
 
 		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
