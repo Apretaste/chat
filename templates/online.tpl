@@ -12,7 +12,7 @@
 			{if $item->gender eq "M"}<font color="#4863A0">M</font>{/if}
 			{if $item->gender eq "F"}<font color=#F778A1>F</font>{/if}
 		</td>
-		<td align="right">{button href="CHAT @{$item->username}" desc="Escriba el texto a enviar" caption="chatear" popup="true" wait="false" size="small"}</td>
+		<td align="right">{button href="CHAT @{$item->username}" desc="a:Escriba el texto a enviar*" caption="chatear" popup="true" wait="false" size="small"}</td>
 	</tr>
 	{/foreach}
 </table>

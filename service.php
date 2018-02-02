@@ -37,10 +37,10 @@ class Chat extends Service
 			// add profiles to the list of notes
 			foreach($notes as $k => $note)
 			{
-				$notes[ $k ]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-				$last_note            = $this->getConversation($request->email, $notes[ $k ]->profile->email, 1);
+				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+				$last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
 				if(empty($last_note)) continue;
-				$notes[ $k ]->last_note = [
+				$notes[$k]->last_note = [
 					'from' => $last_note[0]->username,
 					'note' => $last_note[0]->text,
 					'date' => $last_note[0]->sent
@@ -248,60 +248,14 @@ class Chat extends Service
 		$total = 0;
 		foreach($notes as $k => $note) {
 			$total += $note->counter;
-			$notes[ $k ]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-			$notes[ $k ]->last_note = $this->getConversation($request->email, $notes[ $k ]->profile->email, 1);
+			$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
+			$notes[$k]->last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
 		}
 
 		// respond back to the API
 		$response = new Response();
 		$jsonResponse = ["code" => "ok", "total" => $total, "items" => $notes];
 		return $response->createFromJSON(json_encode($jsonResponse));
-	}
-
-	/**
-	 * Return a list of notes between $email1 & $email2
-	 *
-	 * @author salvipascual
-	 * @param String $email1
-	 * @param String $email2
-	 * @param String $lastID , get all from this ID
-	 * @param string $limit  , integer number of max rows
-	 * @return array
-	 */
-	private function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
-	{
-		// if a last ID is passed, do not cut the result based on the limit
-		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
-
-		// retrieve conversation between users
-		$connection = new Connection();
-		$notes = $connection->query("
-			SELECT * FROM (
-				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
-				FROM _note A LEFT JOIN person B
-				ON A.from_user = B.email
-				WHERE from_user = '$yourEmail' AND to_user = '$friendEmail'
-				AND A.id > '$lastID'
-				UNION
-				SELECT A.id, B.username, A.text, A.send_date as sent, CURRENT_TIMESTAMP as `read`
-				FROM _note A LEFT JOIN person B
-				ON A.from_user = B.email
-				WHERE from_user = '$friendEmail' AND to_user = '$yourEmail'
-				AND A.id > '$lastID') C
-			ORDER BY sent DESC $setLimit");
-
-		// mark the other person notes as unread
-		if($notes) {
-			$lastNoteID = end($notes)->id;
-			$connection->query("
-				UPDATE _note
-				SET read_date = CURRENT_TIMESTAMP
-				WHERE read_date is NULL
-				AND from_user = '$friendEmail'
-				AND id >= $lastNoteID");
-		}
-
-		return $notes;
 	}
 
 	/**
@@ -382,6 +336,52 @@ class Chat extends Service
 		$response->setResponseSubject("Usuarios conectados al chat");
 		$response->createFromTemplate("online.tpl", ['users' => $users]);
 		return $response;
+	}
+
+	/**
+	 * Return a list of notes between $email1 & $email2
+	 *
+	 * @author salvipascual
+	 * @param String $email1
+	 * @param String $email2
+	 * @param String $lastID , get all from this ID
+	 * @param string $limit  , integer number of max rows
+	 * @return array
+	 */
+	private function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
+	{
+		// if a last ID is passed, do not cut the result based on the limit
+		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
+
+		// retrieve conversation between users
+		$connection = new Connection();
+		$notes = $connection->query("
+			SELECT * FROM (
+				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
+				FROM _note A LEFT JOIN person B
+				ON A.from_user = B.email
+				WHERE from_user = '$yourEmail' AND to_user = '$friendEmail'
+				AND A.id > '$lastID'
+				UNION
+				SELECT A.id, B.username, A.text, A.send_date as sent, CURRENT_TIMESTAMP as `read`
+				FROM _note A LEFT JOIN person B
+				ON A.from_user = B.email
+				WHERE from_user = '$friendEmail' AND to_user = '$yourEmail'
+				AND A.id > '$lastID') C
+			ORDER BY sent DESC $setLimit");
+
+		// mark the other person notes as unread
+		if($notes) {
+			$lastNoteID = end($notes)->id;
+			$connection->query("
+				UPDATE _note
+				SET read_date = CURRENT_TIMESTAMP
+				WHERE read_date is NULL
+				AND from_user = '$friendEmail'
+				AND id >= $lastNoteID");
+		}
+
+		return $notes;
 	}
 
 	/**

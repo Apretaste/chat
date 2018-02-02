@@ -17,5 +17,5 @@
 {space15}
 
 <center>
-	{button href="CHAT @{$friendUsername}" caption="Escribir" size="medium" desc="Escriba el texto a enviar" popup="true" wait="false"}
+	{button href="CHAT @{$friendUsername}" caption="Escribir" size="medium" desc="a:Escriba el texto a enviar*" popup="true" wait="false"}
 </center>

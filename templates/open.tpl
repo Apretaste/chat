@@ -6,7 +6,7 @@
 			<td>{link href="PERFIL @{$item->username}" caption="@{$item->username}"}</td>
 			<td><small>{$item->sent|date_format}</small></td>
 			<td align="right">
-				{button href="CHAT @{$item->username}" caption="Enviar nota" size="small" desc="Escriba el texto a enviar" popup="true" wait="false"}
+				{button href="CHAT @{$item->username}" caption="Enviar nota" size="small" desc="a:Escriba el texto a enviar*" popup="true" wait="false"}
 				{button href="CHAT @{$item->username}" caption="Conversaci&oacute;n" size="small" color="grey"}
 			</td>
 		</tr>
@@ -28,6 +28,6 @@
 {space15}
 
 <center>
-	{button href="CHAT" desc="Escriba el @username de su amigo|Escriba el texto a enviar" caption="+ Nueva Nota" popup="true" wait="false"}
+	{button href="CHAT" desc="Escriba el @username de su amigo*|a:Escriba el texto a enviar*" caption="+ Nueva Nota" popup="true" wait="false"}
 	{button href="CHAT ONLINE" caption="Conectados" color="blue"}
 </center>
