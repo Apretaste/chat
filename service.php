@@ -348,7 +348,7 @@ class Chat extends Service
 	 * @param string $limit  , integer number of max rows
 	 * @return array
 	 */
-	private function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
+	public static function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
 	{
 		// if a last ID is passed, do not cut the result based on the limit
 		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
