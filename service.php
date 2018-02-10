@@ -119,9 +119,6 @@ class Chat extends Service
 			$chats[] = $chat;
 		}
 
-		// get your username
-		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-
 		// prepare the details for the view
 		$content = [
 			"code" => "ok",
@@ -132,7 +129,7 @@ class Chat extends Service
 
 		// send information to the view
 		$response = new Response();
-		$response->setResponseSubject("Nueva nota de @$yourUsername");
+		$response->setResponseSubject("Charla con @$friendUsername");
 		$response->createFromTemplate("chats.tpl", $content);
 		return $response;
 	}
