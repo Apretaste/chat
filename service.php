@@ -11,74 +11,43 @@ class Chat extends Service
 	 */
 	public function _main(Request $request)
 	{
-		$connection = new Connection();
-
 		//
 		// SHOW THE LIST OF OPEN CHATS WHEN SUBJECT=NOTA
 		//
 		if(empty($request->query))
 		{
-			// Searching contacts of the current user
-			$union = "(SELECT B.username, MAX(send_date) as sent
-				FROM _note A RIGHT JOIN person B
-				ON A.to_user = B.email
-				WHERE from_user = '{$request->email}'
-				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.to_user AND type = 'blocked' AND confirmed = 1)
-				GROUP BY to_user)
-				UNION
-				(SELECT B.username, MAX(send_date) as sent
-				FROM _note A RIGHT JOIN person B
-				ON A.from_user = B.email
-				WHERE to_user = '{$request->email}'
-				AND NOT EXISTS (SELECT id FROM relations WHERE user1 = '{$request->email}' AND user2 = A.from_user AND type = 'blocked' AND confirmed = 1)
-				GROUP BY from_user)";
-			$notes = $connection->query("SELECT username, MAX(sent) AS sent FROM ($union) U GROUP BY username ORDER BY sent DESC");
+			// get the list of people chating with you
+			$social = new Social();
+			$notes = $social->chatsOpen('salvi.pascual@gmail.com');
 
-			// add profiles to the list of notes
-			foreach($notes as $k => $note)
-			{
-				$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-				$last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
-				if(empty($last_note)) continue;
-				$notes[$k]->last_note = [
-					'from' => $last_note[0]->username,
-					'note' => $last_note[0]->text,
-					'date' => $last_note[0]->sent
-				];
-			}
-
-			// show home page
+			// show home page if no notes found
 			if(empty($notes))
 			{
 				$response = new Response();
 				$response->setResponseSubject("Lista de chats abiertos");
-				$response->createFromTemplate("home.tpl", ["online" => $this->isOnline($request)]);
+				$response->createFromTemplate("home.tpl", []);
 				return $response;
 			}
 
-			// show list of notes
+			// send data to the view
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
-			$response->createFromTemplate("open.tpl", ["notes" => $notes, "online" => $this->isOnline($request)]);
+			$response->createFromTemplate("open.tpl", ["notes" => $notes]);
 			return $response;
 		}
 
-		// check that the username of the note is valid
+		// get the username of the note
 		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$find = $connection->query("SELECT email FROM person WHERE username = '$friendUsername';");
-		if(empty($find))
-		{
+		$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+
+		// check if the username is valid
+		if(empty($friendEmail)) {
 			$response = new Response();
 			$response->setResponseSubject("El usuario @$friendUsername no existe");
-			$response->createFromTemplate("user_not_exists.tpl", [
-				"username" => $friendUsername,
-				"online" => $this->isOnline($request)
-			]);
-
+			$response->createFromText("El usuario @$friendUsername no existe en Apretaste, por favor compruebe que el @username es valido. Puede que halla cometido un error al escribirlo o que la persona halla cambiado su @username.");
 			return $response;
 		}
-		$friendEmail = $find[0]->email;
 
 		//
 		// GET A LIST OF THE CHATS WHEN SUBJECT=NOTA @USERNAME
@@ -115,47 +84,56 @@ class Chat extends Service
 	 * @param Request
 	 * @return Response
 	 */
-	public function _get(Request $request, $friendEmail = false)
+	public function _get(Request $request, $friendEmail=false)
 	{
-		$response = new Response();
-
 		// get the username and ID of the query
 		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
 		$lastID = isset($argument[1]) ? $argument[1] : 0;
 
 		// get the friend email if not passed
-		if(empty($friendEmail))
-		{
+		if(empty($friendEmail)) {
 			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-			if( ! $friendEmail) return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+			if( ! $friendEmail) {
+				$response = new Response();
+				return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
+			}
 		}
 
 		// get the array of notes
-		$notes = $this->getConversation($request->email, $friendEmail, $lastID);
+		$social = new Social();
+		$notes = $social->chatConversation($request->email, $friendEmail, $lastID);
 
 		// get the new last ID and remove ID for each note
 		$newLastID = 0;
-		foreach($notes as $nota)
-		{
-			if($nota->id > $newLastID) $newLastID = $nota->id;
+		$chats = [];
+		foreach($notes as $nota) {
+			if($nota->id > $newLastID) $newLastID = $nota->id; // for the piropazo app
+			$chat = new stdClass();
+			$chat->username = $nota->username;
+			$chat->gender = $nota->gender;
+			$chat->picture = $nota->picture_public;
+			$chat->text = $nota->text;
+			$chat->sent = $nota->sent;
+			$chat->read = $nota->read;
+			$chats[] = $chat;
 		}
 
 		// get your username
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
 
 		// prepare the details for the view
-		$responseContent = [
+		$content = [
 			"code" => "ok",
 			"last_id" => $newLastID,
 			"friendUsername" => $friendUsername,
-			"chats" => $notes,
-			"online" => $this->isOnline($request)
+			"chats" => $chats
 		];
 
-		// Send the response email to your friend
+		// send information to the view
+		$response = new Response();
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
-		$response->createFromTemplate("chats.tpl", $responseContent);
+		$response->createFromTemplate("chats.tpl", $content);
 		return $response;
 	}
 
@@ -216,7 +194,7 @@ class Chat extends Service
 		}
 
 		// create the response
-		$notes = $this->getConversation($request->email, $friendEmail);
+		$notes = Social::chatConversation($request->email, $friendEmail);
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
 		$response->createFromTemplate("chats.tpl", ["friendUsername" => $friendUsername, "chats" => $notes]);
 		return $response;
@@ -249,39 +227,13 @@ class Chat extends Service
 		foreach($notes as $k => $note) {
 			$total += $note->counter;
 			$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-			$notes[$k]->last_note = $this->getConversation($request->email, $notes[$k]->profile->email, 1);
+			$notes[$k]->last_note = Social::chatConversation($request->email, $notes[$k]->profile->email, 1);
 		}
 
 		// respond back to the API
 		$response = new Response();
 		$jsonResponse = ["code" => "ok", "total" => $total, "items" => $notes];
 		return $response->createFromJSON(json_encode($jsonResponse));
-	}
-
-	/**
-	 * Sub-service OCULTARSE
-	 *
-	 * @param \Request $request
-	 * @return \Response
-	 */
-	public function _ocultarse(Request $request)
-	{
-		$connection = new Connection();
-		$connection->query("UPDATE person SET online = 0 WHERE email = '{$request->email}';");
-		return new Response();
-	}
-
-	/**
-	 * Sub-service MOSTRARSE
-	 *
-	 * @param \Request $request
-	 * @return \Response
-	 */
-	public function _mostrarse(Request $request)
-	{
-		$connection = new Connection();
-		$connection->query("UPDATE person SET online = 1 WHERE email = '{$request->email}';");
-		return new Response();
 	}
 
 	/**
@@ -292,108 +244,39 @@ class Chat extends Service
 	 */
 	public function _online(Request $request)
 	{
+		// get online users
 		$connection = new Connection();
-		$r = $connection->query("
-			SELECT username, email, province, gender
+		$users = $connection->query("
+			SELECT *
 			FROM person
 			WHERE active = 1
-				AND online = 1
-				AND email <> '{$request->email}'
-				AND province is not null
-				AND province <> ''
-				AND timestampdiff(MINUTE, last_access, now()) <= 10
+			AND online = 1
+			AND blocked = 0
+			AND email <> '{$request->email}'
 			ORDER BY last_access DESC
-			LIMIT 0,50;");
+			LIMIT 25");
 
-		$users = [];
-		$codes = [
-			'LA_HABANA' => 'LH',
-			'GUANTANAMO' => 'GU',
-			'SANTIAGO_DE_CUBA' => 'SC',
-			'GRANMA' => 'GR',
-			'HOLGUIN' => 'HL',
-			'LAS_TUNAS' => 'LT',
-			'CAMAGUEY' => 'CM',
-			'CIEGO_DE_AVILA' => 'CV',
-			'SANCTI_SPIRITUS' => 'SS',
-			'VILLA_CLARA' => 'VC',
-			'CIENFUEGOS' => 'CF',
-			'MATANZAS' => 'MT',
-			'ISLA_DE_LA_JUVENTUD' => 'IJ',
-			'ARTEMISA' => 'AR',
-			'MAYABEQUE' => 'MA',
-			'PINAR_DEL_RIO' => 'PR'
-		];
-
-		foreach($r as $item)
-		{
-			$person = $item;
-			$person->province_code = isset($codes[ $item->province ]) ? $codes[ $item->province ] : '';
-			$users[] = $person;
+		// error if no users online
+		if(empty($users)) {
+			$response = new Response();
+			$response->setResponseSubject("No hay usuarios conectados");
+			$response->createFromText("No hay nadie conectado en este momento. Por favor vuelva a intentar mas tarde.");
+			return $response;
 		}
 
+		// format users
+		$online = [];
+		$social = new Social();
+		foreach($users as $u) {
+			$profile = $social->prepareUserProfile($u);
+			$profile->picture = $profile->picture ? $profile->picture_public : "/images/user.jpg";
+			$online[] = $profile;
+		}
+
+		// send info to the view
 		$response = new Response();
-		$response->setResponseSubject("Usuarios conectados al chat");
-		$response->createFromTemplate("online.tpl", ['users' => $users]);
+		$response->setResponseSubject("Usuarios conectados");
+		$response->createFromTemplate("online.tpl", ['users' => $online]);
 		return $response;
-	}
-
-	/**
-	 * Return a list of notes between $email1 & $email2
-	 *
-	 * @author salvipascual
-	 * @param String $email1
-	 * @param String $email2
-	 * @param String $lastID , get all from this ID
-	 * @param string $limit  , integer number of max rows
-	 * @return array
-	 */
-	public static function getConversation($yourEmail, $friendEmail, $lastID = 0, $limit = 20)
-	{
-		// if a last ID is passed, do not cut the result based on the limit
-		$setLimit = ($lastID > 0) ? "" : "LIMIT $limit";
-
-		// retrieve conversation between users
-		$connection = new Connection();
-		$notes = $connection->query("
-			SELECT * FROM (
-				SELECT A.id, B.username, A.text, A.send_date as sent, A.read_date as `read`
-				FROM _note A LEFT JOIN person B
-				ON A.from_user = B.email
-				WHERE from_user = '$yourEmail' AND to_user = '$friendEmail'
-				AND A.id > '$lastID'
-				UNION
-				SELECT A.id, B.username, A.text, A.send_date as sent, CURRENT_TIMESTAMP as `read`
-				FROM _note A LEFT JOIN person B
-				ON A.from_user = B.email
-				WHERE from_user = '$friendEmail' AND to_user = '$yourEmail'
-				AND A.id > '$lastID') C
-			ORDER BY sent DESC $setLimit");
-
-		// mark the other person notes as unread
-		if($notes) {
-			$lastNoteID = end($notes)->id;
-			$connection->query("
-				UPDATE _note
-				SET read_date = CURRENT_TIMESTAMP
-				WHERE read_date is NULL
-				AND from_user = '$friendEmail'
-				AND id >= $lastNoteID");
-		}
-
-		return $notes;
-	}
-
-	/**
-	 * Return TRUE if a user is online
-	 *
-	 * @param $request
-	 * @return bool
-	 */
-	private function isOnline($request)
-	{
-		$connection = new Connection();
-		$r = $connection->query("SELECT online FROM person WHERE email = '{$request->email}';");
-		return isset($r[0]) && $r[0]->online == '1';
 	}
 }
