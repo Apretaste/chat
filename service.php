@@ -18,11 +18,10 @@ class Chat extends Service
 		{
 			// get the list of people chating with you
 			$social = new Social();
-			$notes = $social->chatsOpen('salvi.pascual@gmail.com');
+			$notes = $social->chatConversation($request->email);
 
 			// show home page if no notes found
-			if(empty($notes))
-			{
+			if(empty($notes)) {
 				$response = new Response();
 				$response->setResponseSubject("Lista de chats abiertos");
 				$response->createFromTemplate("home.tpl", []);
@@ -60,15 +59,6 @@ class Chat extends Service
 		// get text of the the note to post
 		unset($argument[0]);
 		$note = implode(" ", $argument);
-
-		// if you are trying to post using the example text, send the help document
-		if($note == 'Reemplace este texto por su nota')
-		{
-			$response = new Response();
-			$response->setResponseSubject("No reemplazaste el texto por tu nota");
-			$response->createFromText("Para enviar una nota escriba la palabra CHAT seguida del nombre de usuario del destinatario y luego el texto de la nota a enviar, todo en el asunto del correo. Por ejemplo: CHAT @pepe1 Hola pepe");
-			return $response;
-		}
 
 		//
 		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
@@ -251,7 +241,7 @@ class Chat extends Service
 			AND blocked = 0
 			AND email <> '{$request->email}'
 			ORDER BY last_access DESC
-			LIMIT 25");
+			LIMIT 20");
 
 		// error if no users online
 		if(empty($users)) {

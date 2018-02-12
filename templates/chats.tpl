@@ -18,9 +18,10 @@
 			{/if}
 			<td>
 				<!--USERNAME AND DATE SENT-->
-				<span style="color:grey; font-size:10px;">
+				<span style="font-size:10px;">
 					{link href="PERFIL @{$item->username}" caption="@{$item->username}" style="color:{$color};"}
-					{$item->sent|date_format:"%e/%m/%Y %I:%M %p"}
+					<b>&middot;</b>
+					<span style="color:grey;">{$item->sent|date_format:"%e/%m/%Y %I:%M %p"}</span>
 				</span><br/>
 
 				<!--TEXT-->
