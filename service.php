@@ -18,7 +18,7 @@ class Chat extends Service
 		{
 			// get the list of people chating with you
 			$social = new Social();
-			$notes = $social->chatConversation($request->email);
+			$notes = $social->chatsOpen($request->email);
 
 			// show home page if no notes found
 			if(empty($notes)) {
@@ -181,7 +181,8 @@ class Chat extends Service
 		}
 
 		// create the response
-		$notes = Social::chatConversation($request->email, $friendEmail);
+		$social = new Social();
+		$notes = $social->chatConversation($request->email, $friendEmail);
 		$response->setResponseSubject("Nueva nota de @$yourUsername");
 		$response->createFromTemplate("chats.tpl", ["friendUsername" => $friendUsername, "chats" => $notes]);
 		return $response;
@@ -211,10 +212,11 @@ class Chat extends Service
 
 		// get the total counter
 		$total = 0;
+		$social = new Social();
 		foreach($notes as $k => $note) {
 			$total += $note->counter;
 			$notes[$k]->profile = $this->utils->getPerson($this->utils->getEmailFromUsername($note->username));
-			$notes[$k]->last_note = Social::chatConversation($request->email, $notes[$k]->profile->email, 1);
+			$notes[$k]->last_note = $social->chatConversation($request->email, $notes[$k]->profile->email, 1);
 		}
 
 		// respond back to the API
