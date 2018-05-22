@@ -125,6 +125,20 @@ class Chat extends Service
 	}
 
 	/**
+	 *
+	 *@author ricardo
+	 *@param Request
+	 *@return Response
+	 */
+	 public function _borrar(Request $request){
+		 $to_email=$this->utils->getEmailFromUsername($request->query);
+		 $social = new Social();
+		 $social->chatOcult($request->email,$to_email);
+		 $request->query=null;
+		 return $this->_main($request);
+	 }
+
+	/**
 	 * Create a new chat without sending any emails, useful for the API
 	 *
 	 * @api

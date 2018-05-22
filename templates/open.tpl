@@ -23,6 +23,7 @@
 			<td align="right">
 				{button href="CHAT @{$item->profile->username}" caption="Enviar nota" size="small" desc="a:Escriba el texto a enviar*" popup="true" wait="false"}
 				{button href="CHAT @{$item->profile->username}" caption="Charla" size="small" color="grey"}
+				{button href="CHAT BORRAR @{$item->profile->username}" caption="Eliminar" size="small" color="grey"}
 			</td>
 		</tr>
 		{if not $smarty.foreach.foo.last}
