@@ -9,7 +9,7 @@
 			<td><small>
 				<!--PICTURE-->
 				{if $APRETASTE_ENVIRONMENT eq "web"}
-					<img class="profile-small" style="border:2px solid {$color};" src="{$user->picture}" title="@{$user->username}" alt="@{$user->username}"/>
+					{img src="{$user->picture}" title="@{$user->username}" alt="@{$user->username}" class="profile-small" style="border:2px solid {$color};"}
 				{/if}
 
 				<!--USERNAME-->
@@ -18,7 +18,7 @@
 
 				<!--FLAG AND LOCATION-->
 				{if $APRETASTE_ENVIRONMENT eq "web" AND $user->country}
-					<img class="flag" src="/images/flags/{$user->country|lower}.png" alt="{$user->country}"/>
+					{img src="{$user->country|lower}.png" alt="{$user->country}" class="flag"}
 				{/if}
 				{$user->location}
 

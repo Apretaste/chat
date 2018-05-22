@@ -13,7 +13,7 @@
 			<!--PICTURE-->
 			{if $APRETASTE_ENVIRONMENT eq "web"}
 			<td width="1" valign="top">
-				<img class="profile-small" src="{$item->picture}" title="@{$item->username}" alt="@{$item->username}"/>
+				{img src="{$item->picture}" title="@{$item->username}" alt="@{$item->username}" class="profile-small"}
 			</td>
 			{/if}
 			<td>

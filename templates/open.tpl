@@ -10,7 +10,7 @@
 			<td><small>
 				<!--PICTURE-->
 				{if $APRETASTE_ENVIRONMENT eq "web"}
-					<img class="profile-small" style="border:2px solid {$color};" src="{$item->profile->picture_public}" title="@{$item->profile->username}" alt="@{$item->profile->username}"/>
+					{img src="{$item->profile->picture_internal}" title="@{$item->profile->username}" alt="@{$item->profile->username}" class="profile-small" style="border:2px solid {$color};"}
 				{/if}
 
 				<!--USERNAME-->

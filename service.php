@@ -28,10 +28,18 @@ class Chat extends Service
 				return $response;
 			}
 
+			// get images for the web
+			$images = [];
+			if($request->environment == "web") {
+				foreach ($notes as $note) {
+					$images[] = $note->profile->picture_internal;
+				}
+			}
+
 			// send data to the view
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
-			$response->createFromTemplate("open.tpl", ["notes" => $notes]);
+			$response->createFromTemplate("open.tpl", ["notes" => $notes], $images);
 			return $response;
 		}
 
@@ -102,7 +110,7 @@ class Chat extends Service
 			$chat = new stdClass();
 			$chat->username = $nota->username;
 			$chat->gender = $nota->gender;
-			$chat->picture = $nota->picture_public;
+			$chat->picture = $nota->picture_internal;
 			$chat->text = $nota->text;
 			$chat->sent = $nota->sent;
 			$chat->read = $nota->read;
@@ -117,10 +125,18 @@ class Chat extends Service
 			"chats" => $chats
 		];
 
+		// get images for the web
+		$images = [];
+		if($request->environment == "web") {
+			foreach ($chats as $chat) {
+				$images[] = $chat->picture;
+			}
+		}
+
 		// send information to the view
 		$response = new Response();
 		$response->setResponseSubject("Charla con @$friendUsername");
-		$response->createFromTemplate("chats.tpl", $content);
+		$response->createFromTemplate("chats.tpl", $content, $images);
 		return $response;
 	}
 
@@ -276,10 +292,23 @@ class Chat extends Service
 			$online[] = $profile;
 		}
 
+		// add path to root folder
+		$di = \Phalcon\DI\FactoryDefault::getDefault();
+		$wwwroot = $di->get('path')['root'];
+
+		// get images for the web
+		$images = [];
+		if($request->environment == "web") {
+			foreach ($online as $user) {
+				$images[] = $user->picture_internal;
+				if($user->country) $images[] = "$wwwroot/public/images/flags/".strtolower($user->country).".png";
+			}
+		}
+
 		// send info to the view
 		$response = new Response();
 		$response->setResponseSubject("Usuarios conectados");
-		$response->createFromTemplate("online.tpl", ['users' => $online]);
+		$response->createFromTemplate("online.tpl", ['users' => $online], $images);
 		return $response;
 	}
 }
