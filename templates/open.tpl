@@ -21,9 +21,10 @@
 				{$item->last_sent|date_format|capitalize}<br/>
 			</small></td>
 			<td align="right">
-				{button href="CHAT @{$item->profile->username}" caption="Enviar nota" size="small" desc="a:Escriba el texto a enviar*" popup="true" wait="false"}
+				{button href="CHAT @{$item->profile->username}" caption="Escribir" size="small" desc="a:Escriba el texto a enviar*" popup="true" wait="false"}
 				{button href="CHAT @{$item->profile->username}" caption="Charla" size="small" color="grey"}
-				{button href="CHAT BORRAR @{$item->profile->username}" caption="Eliminar" size="small" color="grey"}
+				{button href="CHAT BORRAR @{$item->profile->username}" caption="Eliminar" size="small" color="red"}
+				<!--{*button href="CHAT BORRAR @{$item->profile->username}" desc="c:¿Esta seguro de eliminar el chat con @{$item->profile->username}?\nPresione para confirmar*" popup="true" wait="false" caption="Eliminar" size="small" color="red"*}-->
 			</td>
 		</tr>
 		{if not $smarty.foreach.foo.last}
@@ -31,14 +32,11 @@
 		{/if}
 	{/foreach}
 </table>
-
 {space15}
-
 <center>
 	{button href="CHAT" desc="Escriba el @username de su amigo*|a:Escriba el texto a enviar*" caption="+ Nueva Nota" popup="true" wait="false"}
 	{button href="CHAT ONLINE" caption="Conectados" color="grey"}
 </center>
-
 <style type="text/css">
 	hr{
 		border: 0;

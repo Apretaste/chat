@@ -2,7 +2,15 @@
 
 {if not $chats}
 	<p>Usted no ha chateado con @{$friendUsername} anteriormente. Presione el bot&oacute;n a continuaci&oacute;n para enviarle una primera nota.</p>
+	<center>
+	{button href="CHAT @{$friendUsername}" caption="Escribir" desc="a:Escriba el texto a enviar*" size="small" popup="true" wait="false"}
+	{button href="CHAT" caption="Mis chats" size="small" color="grey"}
+</center>
 {else}
+	<center>
+		{button href="CHAT @{$friendUsername}" caption="Escribir" desc="a:Escriba el texto a enviar*" size="small" popup="true" wait="false"}
+		{button href="CHAT" caption="Mis chats" size="small" color="grey"}
+	</center>
 	<table width="100%" cellspacing="0" cellpadding="5" border=0>
 	{foreach item=item from=$chats}
 		{assign var="color" value="black"}
@@ -33,13 +41,6 @@
 	{/foreach}
 	</table>
 {/if}
-
-{space15}
-
-<center>
-	{button href="CHAT @{$friendUsername}" caption="Escribir" desc="a:Escriba el texto a enviar*" popup="true" wait="false"}
-	{button href="CHAT" caption="Mis chats" color="grey"}
-</center>
 
 {if $APRETASTE_ENVIRONMENT eq "web"}
 <style type="text/css">
