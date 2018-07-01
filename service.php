@@ -35,7 +35,6 @@ class Chat extends Service
 					$images[] = $note->profile->picture_internal;
 				}
 			}
-
 			// send data to the view
 			$response = new Response();
 			$response->setResponseSubject("Lista de chats abiertos");
@@ -114,6 +113,7 @@ class Chat extends Service
 			$chat->text = $nota->text;
 			$chat->sent = $nota->sent;
 			$chat->read = $nota->read;
+			$chat->readed = $nota->readed;
 			$chats[] = $chat;
 		}
 

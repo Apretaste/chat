@@ -34,7 +34,7 @@
 
 				<!--TEXT-->
 				<span style="color:{if $friendUsername == $item->username}#000000{else}#000066{/if};">
-					{$item->text}
+					{$item->text}{if $item->readed}&#10004;{/if}
 				</span>
 			</td>
 		</tr>
