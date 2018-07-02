@@ -104,6 +104,7 @@ class Chat extends Service
 		// get the new last ID and remove ID for each note
 		$newLastID = 0;
 		$chats = [];
+		$online=$this->utils->getPerson($friendEmail)->online;
 		foreach($notes as $nota) {
 			if($nota->id > $newLastID) $newLastID = $nota->id; // for the piropazo app
 			$chat = new stdClass();
@@ -112,7 +113,7 @@ class Chat extends Service
 			$chat->picture = $nota->picture_internal;
 			$chat->text = $nota->text;
 			$chat->sent = $nota->sent;
-			$chat->read = $nota->read;
+			$chat->read = date('d/m/Y G:i',strtotime($nota->read));
 			$chat->readed = $nota->readed;
 			$chats[] = $chat;
 		}
@@ -122,6 +123,7 @@ class Chat extends Service
 			"code" => "ok",
 			"last_id" => $newLastID,
 			"friendUsername" => $friendUsername,
+			"online" => $online,
 			"chats" => $chats
 		];
 

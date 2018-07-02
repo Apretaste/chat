@@ -1,4 +1,5 @@
 <h1>Charla con @{$friendUsername}</h1>
+{if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{/if}{/if}
 
 {if not $chats}
 	<p>Usted no ha chateado con @{$friendUsername} anteriormente. Presione el bot&oacute;n a continuaci&oacute;n para enviarle una primera nota.</p>
@@ -34,7 +35,7 @@
 
 				<!--TEXT-->
 				<span style="color:{if $friendUsername == $item->username}#000000{else}#000066{/if};">
-					{$item->text}{if $item->readed}&#10004;{/if}
+					{$item->text}{if $item->readed}<i onclick="alert('Leido el: {$item->read}')">&#10004;</i>{/if}
 				</span>
 			</td>
 		</tr>
@@ -42,12 +43,20 @@
 	</table>
 {/if}
 
-{if $APRETASTE_ENVIRONMENT eq "web"}
 <style type="text/css">
+{if $APRETASTE_ENVIRONMENT eq "web"}
 	.profile-small{
 		width:28px;
 		height:28px;
 		border-radius:100px;
 	}
-</style>
 {/if}
+	.online{
+	background-color:#74C365;
+	font-size:7px;
+	padding:2px;
+	border-radius:3px;
+	color:white;
+	font-weight:bold;
+	}
+</style>
