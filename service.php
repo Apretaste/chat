@@ -185,6 +185,13 @@ class Chat extends Service
 			if(empty($note)) return $response->createFromText("No has pasado un texto, no podemos enviar una nota en blanco. El asunto debe ser: NOTA @username TEXTO A ENVIAR", "ERROR", "No text to save");
 		}
 
+		$blocks=$this->isBlocked($request->email,$friendEmail);
+		if ($blocks->blocked>0 || $blocks->blockedByMe>0) {
+			$response->subject="Lo sentimos";
+			$response->createFromText("Lo sentimos, usted no puede escribirle a @$friendUsername ya que ha sido bloqueado por esa persona, o usted lo ha bloqueado");
+			return $response;
+		}
+
 		// store the note in the database
 		$connection = new Connection();
 		$note = $connection->escape($note);
@@ -312,5 +319,31 @@ class Chat extends Service
 		$response->setResponseSubject("Usuarios conectados");
 		$response->createFromTemplate("online.tpl", ['users' => $online], $images);
 		return $response;
+	}
+
+	/**
+	 * Get if the user is blocked or has been blocked by
+	 * @author ricardo@apretaste.com
+	 * @param String $user1
+	 * @param String $user2
+	 * @return Object
+	 */
+	private function isBlocked(String $user1, String $user2){
+		$res=new stdClass();
+		$res->blocked = false;
+		$res->blockedByMe = false;
+
+		$r = Connection::query("SELECT *
+		FROM ((SELECT COUNT(user1) AS blockedByMe FROM relations
+				WHERE user1 = '$user1' AND user2 = '$user2'
+				AND `type` = 'blocked' AND confirmed=1) AS A,
+				(SELECT COUNT(user1) AS blocked FROM relations
+				WHERE user1 = '$user2' AND user2 = '$user1'
+				AND `type` = 'blocked' AND confirmed=1) AS B)");
+
+		$res->blocked=($r[0]->blocked>0)?true:false;
+		$res->blockedByMe=($r[0]->blockedByMe>0)?true:false;
+
+		return $res;
 	}
 }
