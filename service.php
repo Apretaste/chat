@@ -104,7 +104,7 @@ class Chat extends Service
 		// get the new last ID and remove ID for each note
 		$newLastID = 0;
 		$chats = [];
-		$online=$this->utils->getPerson($friendEmail)->online;
+		$friend=$this->utils->getPerson($friendEmail);
 		foreach($notes as $nota) {
 			if($nota->id > $newLastID) $newLastID = $nota->id; // for the piropazo app
 			$chat = new stdClass();
@@ -123,7 +123,8 @@ class Chat extends Service
 			"code" => "ok",
 			"last_id" => $newLastID,
 			"friendUsername" => $friendUsername,
-			"online" => $online,
+			"online" => $friend->online,
+			'last' => date('d/m/Y G:i',strtotime($friend->last_access)),
 			"chats" => $chats
 		];
 
@@ -218,12 +219,20 @@ class Chat extends Service
 			$pushNotification->pizarraChatReceived($appid, $yourUsername, $note);
 			return $response;
 		}
-
+		$friend=$this->utils->getPerson($friendEmail);
 		// create the response
 		$social = new Social();
 		$notes = $social->chatConversation($request->email, $friendEmail);
-		$response->setResponseSubject("Nueva nota de @$yourUsername");
-		$response->createFromTemplate("chats.tpl", ["friendUsername" => $friendUsername, "chats" => $notes]);
+
+		$content = [
+			"friendUsername" => $friendUsername,
+			"online" => $friend->online,
+			'last' => date('d/m/Y G:i',strtotime($friend->last_access)),
+			"chats" => $notes
+		];
+
+		$response->setResponseSubject("Charla con @$friendUsername");
+		$response->createFromTemplate("chats.tpl", $content);
 		return $response;
 	}
 
