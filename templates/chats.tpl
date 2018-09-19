@@ -1,4 +1,23 @@
-<h1>Charla con @{$friendUsername}</h1>
+<style type="text/css">
+h1{
+	display: inline-block;
+	margin-bottom: 2em;
+}
+#messages tr{
+	margin-top: 20px!important;
+}
+.mensaje-propio{
+	background: rgba(80,198,127,.2);
+	width: 30px;
+	padding:2%!important;
+}
+.img-perfil{
+	width: 20%;
+	border-radius: 50%;
+}
+
+</style>
+<h1>Charla con @{$friendUsername}</h1>{img src="{$picture}" title="@{$friendUsername}" alt="@{$friendUsername}" class="img-perfil"}
 {if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{else}Ultima vez: {$last}{/if}{/if}
 {space5}
 {if not $chats}
@@ -13,18 +32,18 @@
 		{button href="CHAT" caption="Mis chats" size="small" color="grey"}
 	</center>
 	{space5}
-	<table width="100%" cellspacing="0" cellpadding="5" border=0>
+	<table width="100%" cellspacing="0" cellpadding="5" border=0 id="messages">
 	{foreach item=item from=$chats}
 		{assign var="color" value="black"}
 		{if $item->gender eq "M"}{assign var="color" value="#4863A0"}{/if}
 		{if $item->gender eq "F"}{assign var="color" value="#F778A1"}{/if}
 
-		<tr {if $friendUsername == $item->username}bgcolor="#F2F2F2"{/if}>
+		<tr {if $friendUsername !== $item->username}class="mensaje-propio" align="right"{/if}>
 			<!--PICTURE-->
 			{if $APRETASTE_ENVIRONMENT eq "web"}
-			<td width="1" valign="top">
+			<!--<td width="1" valign="top">
 				{img src="{$item->picture}" title="@{$item->username}" alt="@{$item->username}" class="profile-small"}
-			</td>
+			</td>-->
 			{/if}
 			<td>
 				<!--USERNAME AND DATE SENT-->

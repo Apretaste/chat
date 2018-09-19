@@ -105,6 +105,7 @@ class Chat extends Service
 		$newLastID = 0;
 		$chats = [];
 		$friend=$this->utils->getPerson($friendEmail);
+
 		foreach($notes as $nota) {
 			if($nota->id > $newLastID) $newLastID = $nota->id; // for the piropazo app
 			$chat = new stdClass();
@@ -123,6 +124,7 @@ class Chat extends Service
 			"code" => "ok",
 			"last_id" => $newLastID,
 			"friendUsername" => $friendUsername,
+			"picture"=>$friend->picture_internal,
 			"online" => $friend->online,
 			'last' => date('d/m/Y G:i',strtotime($friend->last_access)),
 			"chats" => $chats
