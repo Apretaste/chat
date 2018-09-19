@@ -7,7 +7,7 @@ h1{
 	margin-top: 20px!important;
 }
 .mensaje-propio{
-	background: rgba(80,198,127,.2);
+	background: rgba(140,198,127,.2);
 	width: 30px;
 	padding:2%!important;
 }
