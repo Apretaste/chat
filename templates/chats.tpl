@@ -12,8 +12,8 @@ h1{
 	padding:2%!important;
 }
 .img-perfil{
-	width: 20%;
-	border-radius: 50%;
+	width: 75px;
+	border-radius: 75px;
 }
 
 </style>
