@@ -17,9 +17,7 @@ class Chat extends Service
 		if(empty($request->query))
 		{
 			// get the list of people chating with you
-			$social = new Social();
-			$notes = $social->chatsOpen($request->email);
-
+			$notes = $this->social->chatsOpen($request->userId);
 			// show home page if no notes found
 			if(empty($notes)) {
 				$response = new Response();
@@ -45,10 +43,10 @@ class Chat extends Service
 		// get the username of the note
 		$argument = explode(" ", $request->query);
 		$friendUsername = str_replace("@", "", $argument[0]);
-		$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
+		$friendId = $this->utils->getIdFromUsername($friendUsername);
 
 		// check if the username is valid
-		if(empty($friendEmail)) {
+		if(empty($friendId)) {
 			$response = new Response();
 			$response->setResponseSubject("El usuario @$friendUsername no existe");
 			$response->createFromText("El usuario @$friendUsername no existe en Apretaste, por favor compruebe que el @username es valido. Puede que halla cometido un error al escribirlo o que la persona halla cambiado su @username.");
@@ -60,7 +58,7 @@ class Chat extends Service
 		//
 		if(count($argument) == 1)
 		{
-			return $this->_get($request, $friendEmail);
+			return $this->_get($request, $friendId);
 		}
 
 		// get text of the the note to post
@@ -70,7 +68,7 @@ class Chat extends Service
 		//
 		// POST A NOTE WHEN SUBJECT=NOTA @username MY NOTE HERE
 		//
-		return $this->_post($request, $friendUsername, $friendEmail, $note);
+		return $this->_post($request, $friendUsername, $friendId, $note);
 	}
 
 	/**
@@ -81,7 +79,7 @@ class Chat extends Service
 	 * @param Request
 	 * @return Response
 	 */
-	public function _get(Request $request, $friendEmail=false)
+	public function _get(Request $request, $friendId=false)
 	{
 		// get the username and ID of the query
 		$argument = explode(" ", $request->query);
@@ -89,23 +87,22 @@ class Chat extends Service
 		$lastID = isset($argument[1]) ? $argument[1] : 0;
 
 		// get the friend email if not passed
-		if(empty($friendEmail)) {
-			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-			if( ! $friendEmail) {
+		if(empty($friendId)) {
+			$friendId = $this->utils->getIdFromUsername($friendUsername);
+			if( ! $friendId) {
 				$response = new Response();
 				return $response->createFromJSON('{"code":"ERROR", "message":"Wrong username"}');
 			}
 		}
 
 		// get the array of notes
-		$social = new Social();
-		$notes = $social->chatConversation($request->email, $friendEmail, $lastID);
+		$notes = $this->social->chatConversation($request->userId, $friendId, $lastID);
 
 		// get the new last ID and remove ID for each note
 		$newLastID = 0;
 		$chats = [];
-		$friend=$this->utils->getPerson($friendEmail);
 
+		$friend=$this->utils->getPerson($friendId);
 		foreach($notes as $nota) {
 			if($nota->id > $newLastID) $newLastID = $nota->id; // for the piropazo app
 			$chat = new stdClass();
@@ -167,20 +164,20 @@ class Chat extends Service
 	 * @param Request
 	 * @return Response
 	 */
-	public function _post(Request $request, $friendUsername = false, $friendEmail = false, $note = false)
+	public function _post(Request $request, $friendUsername = false, $friendId = false, $note = false)
 	{
 		$response = new Response();
 
 		// load params if not passed
-		if(empty($friendUsername) || empty($friendEmail) || empty($note))
+		if(empty($friendUsername) || empty($friendId) || empty($note))
 		{
 			// get the friend username
 			$argument = explode(" ", $request->query);
 			$friendUsername = str_replace("@", "", $argument[0]);
 
 			// get the friend email
-			$friendEmail = $this->utils->getEmailFromUsername($friendUsername);
-			if(empty($friendEmail)) return $response->createFromText("El nombre de usuario @$friendUsername no parece existir. Verifica que sea correcto e intenta nuevamente.", "ERROR", "Wrong username");
+			$friendId = $this->utils->getEmailFromUsername($friendUsername);
+			if(empty($friendId)) return $response->createFromText("El nombre de usuario @$friendUsername no parece existir. Verifica que sea correcto e intenta nuevamente.", "ERROR", "Wrong username");
 
 			// get the text for the note
 			unset($argument[0]);
@@ -188,7 +185,7 @@ class Chat extends Service
 			if(empty($note)) return $response->createFromText("No has pasado un texto, no podemos enviar una nota en blanco. El asunto debe ser: NOTA @username TEXTO A ENVIAR", "ERROR", "No text to save");
 		}
 
-		$blocks=$this->isBlocked($request->email,$friendEmail);
+		$blocks=$this->isBlocked($request->email,$friendId);
 		if ($blocks->blocked>0 || $blocks->blockedByMe>0) {
 			$response->subject="Lo sentimos";
 			$response->createFromText("Lo sentimos, usted no puede escribirle a @$friendUsername ya que ha sido bloqueado por esa persona, o usted lo ha bloqueado");
@@ -196,35 +193,34 @@ class Chat extends Service
 		}
 
 		// store the note in the database
-		$connection = new Connection();
-		$note = $connection->escape($note);
+		$note = Connection::escape($note);
 		$note = substr($note, 0, 499);
-		$connection->query("INSERT INTO _note (from_user, to_user, `text`) VALUES ('{$request->email}','$friendEmail','$note')");
+		Connection::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ($request->userId,$friendId,'$note')");
 
 		// send notification for the app
 		$yourUsername = $this->utils->getUsernameFromEmail($request->email);
-		$this->utils->addNotification($friendEmail, "chat", "@$yourUsername le ha enviado una nota", "CHAT @$yourUsername");
+		$this->utils->addNotification($friendId, "chat", "@$yourUsername le ha enviado una nota", "CHAT @$yourUsername");
 
 		// send push notification for users of Piropazo
 		$pushNotification = new PushNotification();
-		$appid = $pushNotification->getAppId($friendEmail, "piropazo");
+		$appid = $pushNotification->getAppId($friendId, "piropazo");
 		if($appid) {
-			$personFrom = $this->utils->getPerson($request->email);
-			$personTo = $this->utils->getPerson($friendEmail);
+			$personFrom = $this->utils->getPerson($request->userId);
+			$personTo = $this->utils->getPerson($friendId);
 			$pushNotification->piropazoChatPush($appid, $personFrom, $personTo, $note);
 			return $response;
 		}
 
 		// send web notification for users of Pizarra
-		$appid = $pushNotification->getAppId($friendEmail, "pizarra");
+		$appid = $pushNotification->getAppId($friendId, "pizarra");
 		if($appid) {
 			$pushNotification->pizarraChatReceived($appid, $yourUsername, $note);
 			return $response;
 		}
-		$friend=$this->utils->getPerson($friendEmail);
+		$friend=$this->utils->getPerson($friendId);
 		// create the response
 		$social = new Social();
-		$notes = $social->chatConversation($request->email, $friendEmail);
+		$notes = $social->chatConversation($request->userId, $friendId);
 
 		$content = [
 			"friendUsername" => $friendUsername,
