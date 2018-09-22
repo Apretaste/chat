@@ -13,17 +13,18 @@ h1{
 }
 .img-perfil{
 	width: 50px;
+	height: 50px;
 	border-radius: 75px;
 }
 
 </style>
 
-<table>
+<table width="100%">
 	<tr>
 		<td>{link href="PERFIL @{$friendUsername}" caption="{img src="{$picture}" title="@{$friendUsername}" alt="@{$friendUsername}" class="img-perfil"}"}</td>
 		<td><table>
-			<tr><td><b>&nbsp;&middot;&nbsp;@{$friendUsername}</b></td></tr>
-			<tr><td>&nbsp;&middot;&nbsp;{if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{else}Ultima vez: {$last}{/if}{/if}</td></tr>
+			<tr><td><b>&middot;&nbsp;@{$friendUsername}</b></td></tr>
+			<tr><td>&middot;&nbsp;{if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{else}Ultima vez: {$last}{/if}{/if}</td></tr>
 		</table></td>
 	</tr>
 </table>

@@ -1,5 +1,9 @@
 <h1>Chats abiertos</h1>
-
+<center>
+	{button href="CHAT" desc="Escriba el @username de su amigo*|a:Escriba el texto a enviar*" caption="+ Nueva Nota" popup="true" size="small"} 
+	{button href="CHAT ONLINE" caption="Conectados" color="grey" size="small"}
+</center>
+{space5}
 <table width="100%" cellpadding="3">
 	{foreach item=item from=$notes name=foo} 
 		{assign var="color" value="black"} 
@@ -49,17 +53,15 @@
 	</tr>
 	{/if} {/foreach}
 </table>
-{space15}
-<center>
-	{button href="CHAT" desc="Escriba el @username de su amigo*|a:Escriba el texto a enviar*" caption="+ Nueva Nota" popup="true" wait="false"} 
-	{button href="CHAT ONLINE" caption="Conectados" color="grey"}
-</center>
 <style type="text/css">
 	hr{
 		border: 0;
 		height: 0;
 		border-top: 1px solid rgba(0, 0, 0, 0.1);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+	}
+	h1{
+		margin: 5px;
 	}
 	.online{
 		background-color:#74C365;

@@ -129,11 +129,7 @@ class Chat extends Service
 
 		// get images for the web
 		$images = [];
-		if($request->environment == "web") {
-			foreach ($chats as $chat) {
-				$images[] = $chat->picture;
-			}
-		}
+		$images[] = $friend->picture_internal;
 
 		// send information to the view
 		$response = new Response();
