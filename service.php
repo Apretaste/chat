@@ -226,6 +226,7 @@ class Chat extends Service
 			"friendUsername" => $friendUsername,
 			"online" => $friend->online,
 			'last' => date('d/m/Y G:i',strtotime($friend->last_access)),
+			"picture"=>$friend->picture_internal,
 			"chats" => $notes
 		];
 

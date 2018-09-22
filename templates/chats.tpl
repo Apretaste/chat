@@ -1,7 +1,7 @@
 <style type="text/css">
 h1{
 	display: inline-block;
-	margin-bottom: 2em;
+	margin: 5px 0;
 }
 #messages tr{
 	margin-top: 20px!important;
@@ -12,13 +12,21 @@ h1{
 	padding:2%!important;
 }
 .img-perfil{
-	width: 75px;
+	width: 50px;
 	border-radius: 75px;
 }
 
 </style>
-<h1>Charla con @{$friendUsername}</h1>{img src="{$picture}" title="@{$friendUsername}" alt="@{$friendUsername}" class="img-perfil"}
-{if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{else}Ultima vez: {$last}{/if}{/if}
+
+<table>
+	<tr>
+		<td>{link href="PERFIL @{$friendUsername}" caption="{img src="{$picture}" title="@{$friendUsername}" alt="@{$friendUsername}" class="img-perfil"}"}</td>
+		<td><table>
+			<tr><td><b>&nbsp;&middot;&nbsp;@{$friendUsername}</b></td></tr>
+			<tr><td>&nbsp;&middot;&nbsp;{if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{else}Ultima vez: {$last}{/if}{/if}</td></tr>
+		</table></td>
+	</tr>
+</table>
 {space5}
 {if not $chats}
 	<p>Usted no ha chateado con @{$friendUsername} anteriormente. Presione el bot&oacute;n a continuaci&oacute;n para enviarle una primera nota.</p>
@@ -40,11 +48,11 @@ h1{
 
 		<tr {if $friendUsername !== $item->username}class="mensaje-propio" align="right"{/if}>
 			<!--PICTURE-->
-			{if $APRETASTE_ENVIRONMENT eq "web"}
+			{*if $APRETASTE_ENVIRONMENT eq "web"}
 			<!--<td width="1" valign="top">
 				{img src="{$item->picture}" title="@{$item->username}" alt="@{$item->username}" class="profile-small"}
 			</td>-->
-			{/if}
+			{/if*}
 			<td>
 				<!--USERNAME AND DATE SENT-->
 				<span style="font-size:10px;">
