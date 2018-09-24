@@ -23,6 +23,7 @@
 				<td>
 					<!--USERNAME-->
 					{link href="PERFIL @{$item->profile->username}" caption="@{$item->profile->username}" style="color:{$color};"}
+					{if {$item->cantidad[0]->cantidad!=0}}<sup>{$item->cantidad[0]->cantidad}</sup>{/if}
 					{if {$item->profile->online}}&nbsp;<span class="online">ONLINE</span>{/if}
 				</td>
 				<td align="right">
@@ -53,7 +54,16 @@
 	</tr>
 	{/if} {/foreach}
 </table>
-<style type="text/css">
+<style type="text/css">}
+
+	sup{
+		background: red;
+		color: white;
+		display: inline-block;
+		width: 13px;
+		height: 13px;
+		border-radius: 50%;
+	}
 	hr{
 		border: 0;
 		height: 0;
@@ -84,6 +94,15 @@
 		vertical-align: middle;
 		width: 20px;
 		margin-right: 3px;
+	}
+	sup{
+		background: red;
+		color: white;
+		display: inline-block;
+		width: 13px;
+		height: 13px;
+		border-radius: 50%;
+		text-align: center;
 	}
 {/if}
 </style>
