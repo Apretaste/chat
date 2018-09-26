@@ -145,9 +145,9 @@ class Chat extends Service
 	 *@return Response
 	 */
 	 public function _borrar(Request $request){
-		 $to_email=$this->utils->getEmailFromUsername($request->query);
+		 $toId=$this->utils->getIdFromUsername($request->query);
 		 $social = new Social();
-		 $social->chatOcult($request->email,$to_email);
+		 $social->chatOcult($request->userId,$toId);
 		 $request->query=null;
 		 return $this->_main($request);
 	 }

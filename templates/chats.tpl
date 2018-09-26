@@ -8,7 +8,6 @@ h1{
 }
 .mensaje-propio{
 	background: rgba(140,198,127,.2);
-	width: 30px;
 	padding:2%!important;
 }
 .img-perfil{
@@ -21,8 +20,8 @@ h1{
 
 <table width="100%">
 	<tr>
-		<td>{link href="PERFIL @{$friendUsername}" caption="{img src="{$picture}" title="@{$friendUsername}" alt="@{$friendUsername}" class="img-perfil"}"}</td>
-		<td><table>
+		<td width="60px">{link href="PERFIL @{$friendUsername}" caption="{img src="{$picture}" title="@{$friendUsername}" alt="@{$friendUsername}" class="img-perfil"}"}</td>
+		<td><table width="100%">
 			<tr><td><b>&middot;&nbsp;@{$friendUsername}</b></td></tr>
 			<tr><td>&middot;&nbsp;{if isset($online)}{if $online}&nbsp;<span class="online">ONLINE</span>{else}Ultima vez: {$last}{/if}{/if}</td></tr>
 		</table></td>
@@ -48,12 +47,6 @@ h1{
 		{if $item->gender eq "F"}{assign var="color" value="#F778A1"}{/if}
 
 		<tr {if $friendUsername !== $item->username}class="mensaje-propio" align="right"{/if}>
-			<!--PICTURE-->
-			{*if $APRETASTE_ENVIRONMENT eq "web"}
-			<!--<td width="1" valign="top">
-				{img src="{$item->picture}" title="@{$item->username}" alt="@{$item->username}" class="profile-small"}
-			</td>-->
-			{/if*}
 			<td>
 				<!--USERNAME AND DATE SENT-->
 				<span style="font-size:10px;">
@@ -63,7 +56,7 @@ h1{
 				</span><br/>
 
 				<!--TEXT-->
-				<span style="color:{if $friendUsername == $item->username}#000000{else}#000066{/if};">
+				<span style="color:{if $friendUsername == $item->username}#000000{else}#000066{/if}; word-break: break-word;">
 					{$item->text}{if $item->readed}<i onclick="alert('Leido el: {$item->read}')">&#10004;</i>{/if}
 				</span>
 			</td>
