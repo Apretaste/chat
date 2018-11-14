@@ -23,7 +23,6 @@
 				<td>
 					<!--USERNAME-->
 					{link href="PERFIL @{$item->profile->username}" caption="@{$item->profile->username}" style="color:{$color};"}
-					{if {$item->cantidad[0]->cantidad!=0}}<sup>{$item->cantidad[0]->cantidad}</sup>{/if}
 					{if {$item->profile->online}}&nbsp;<span class="online">ONLINE</span>{/if}
 				</td>
 				<td align="right">
