@@ -1,0 +1,49 @@
+<h2 class="center-align">Chats</h2>
+
+<ul class="collection">
+	<%chats.forEach(function(chat){%>
+		<%var color = ""%>
+		<li class="collection-item avatar noselect openchat" id="<%=chat.id%>" username="<%=chat.username%>">
+
+		<%if(chat.gender=="F") var color = "purple"; else if(chat.gender=="M") var color = "blue";%>
+
+		<i class="circle <%=color%> lighten-2"><%=chat.username[0].toUpperCase()%></i>
+
+		<span>
+			<!-- SERVICE AND DATE -->
+			<b>@<%=chat.username%></b>
+			<%if(chat.online=="1"){%>
+				<i class="material-icons green-text" style="font-size:10px;">brightness_1</i>
+			<%}%>
+				<p class="right"><%=chat.last_sent%></p>
+			<br/>
+
+			<!-- TEXT -->
+			<%=chat.last_note%>
+			<%if(chat.last_note_read){%>&#10004;<%}%>
+		</span>
+		</li>
+	<%})%>
+</ul>
+
+<div class="modal bottom-sheet" id="optionsModal">
+	<ul class="collection">
+		<li class="collection-item" onclick="viewProfile()"><div>Perfil<a class="secondary-content"><i class="material-icons">person</i></a></div></li>
+		<li class="collection-item" onclick="writeModalOpen()"><div>Escribir<a class="secondary-content"><i class="material-icons">message</i></a></div></li>
+		<li class="collection-item" onclick="deleteModalOpen()"><div>Borrar<a class="secondary-content"><i class="material-icons">delete</i></a></div></li>
+	</ul>
+</div>
+
+<div id="writeMessageModal" class="modal bottom-sheet">
+	<div class="modal-content">
+		<div class="input-field">
+          <textarea id="message" class="materialize-textarea" oninput="messageLengthValidate()"></textarea>
+		  <label for="message">Escriba su mensaje</label>
+		  <span class="helper-text">Restante: 500</span>
+    	</div>
+	</div>	
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
+		<a onclick="sendMessage()" class="modal-close waves-effect waves-green btn-flat">Enviar</a>
+	</div>
+</div>

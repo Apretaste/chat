@@ -1,0 +1,8 @@
+{
+    "name":"chat",
+    "version":"1",
+    "description":"Envia una nota privada a otro usuario de Apretaste y proporciona un espacio para conversar con sus amigos dentro y fuera de Cuba",
+    "category":"social",
+    "creator":"salvi@apretaste.org",
+    "listed": true
+}
