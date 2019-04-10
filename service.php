@@ -22,11 +22,12 @@ class Service
 			}
 
 			$messages = Social::chatConversation($request->person->id, $user->id);
-
+			
 			$chats = [];
 
 			foreach ($messages as $message) {
 				$chat = new stdClass();
+				$chat->id = $message->note_id;
 				$chat->username = $message->username;
 				$chat->text = $message->text;
 				$chat->sent = date_format((new DateTime($message->sent)), 'd/m/Y - h:i a');
@@ -38,6 +39,7 @@ class Service
 			$content =  [
 				"messages" => $chats,
 				"username" => $user->username,
+				"myusername" => $request->person->username,
 				"id" => $user->id,
 				"online" => $user->online,
 				'last' => date('d/m/Y G:i', strtotime($user->last_access))
@@ -82,13 +84,14 @@ class Service
 		$blocks = Social::isBlocked($request->person->id ,$userTo->id);
 		if ($blocks->blocked>0 || $blocks->blockedByMe>0){
 			Utils::addNotification(
-				$userTo->id, 
+				$request->person->id, 
 				"Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.", 
 				"{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}",
 				'error'
 			);
+			return;
 		}
-
+		
 		// store the note in the database
 		$message = Connection::escape($message, 499);
 		Connection::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$request->person->id},{$userTo->id},'$message')");
