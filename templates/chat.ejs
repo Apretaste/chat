@@ -1,7 +1,7 @@
 <div class="row">
 	<h3 class="valign-wrapper">
 		<i class="material-icons black-text" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i>
-		Chat con @<%=username%>
+		Chat con&nbsp;<a onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%=id%>'}})">@<%=username%></a>
 	</h3>
 	<%if(online=="1"){%>
 		<i class="material-icons green-text" style="font-size:10px;">brightness_1</i>

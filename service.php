@@ -70,6 +70,27 @@ class Service
 	 }
 
 	/**
+	 * Search an user by username
+	 * 
+	 * @author ricardo@apretaste.org
+	 * @param Request $request
+	 * @param Response $response
+	 */
+
+	public function _buscar(Request $request, Response $response)
+	{
+		$username = $request->input->data->username;
+		$user = Utils::getPerson($username);
+		if(!$user){
+			$response->setTemplate('notFound.ejs');
+			return;
+		}
+
+		$request->input->data->userId = $user->id;
+		$this->_main($request, $response);
+	}
+
+	/**
 	 * Create a new chat without sending any emails, useful for the API
 	 *
 	 * @author salvipascual

@@ -28,6 +28,26 @@
 	<%})%>
 </ul>
 
+<div class="fixed-action-btn">
+	<a href="#searchModal" class="btn-floating btn-large waves-effect waves-light modal-trigger">
+		<i class="large material-icons">search</i>
+	</a>
+</div>
+
+<div id="searchModal" class="modal bottom-sheet">
+	<div class="modal-content">
+		<div class="input-field">
+          <textarea id="usernameToSearch" class="materialize-textarea"></textarea>
+		  <label for="usernameToSearch">Buscar</label>
+		  <span class="helper-text">Escriba un nombre de usuario</span>
+    	</div>
+	</div>	
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
+		<a onclick="searchProfile()" class="modal-close waves-effect waves-green btn-flat">Buscar</a>
+	</div>
+</div>
+
 <div class="modal bottom-sheet" id="optionsModal">
 	<ul class="collection">
 		<li class="collection-item" onclick="viewProfile()"><div>Perfil<a class="secondary-content"><i class="material-icons">person</i></a></div></li>

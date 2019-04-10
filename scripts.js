@@ -63,7 +63,7 @@ function resendModalOpen() {
 }
 
 function resendMessage(){
-    var username = $('#usernameToResend').val();
+    var username = $('#usernameToResend').val().trim();
     var message = $('#'+activeMessage+' msg').html()
     if(username.length > 2){
         apretaste.send({
@@ -71,6 +71,18 @@ function resendMessage(){
             'data':{'id': username, 'message': message},
             'redirect': false,
             'callback': {'name':'resendMessageCallback','data':username}
+        })
+    }
+    else showToast("Ingrese un username valido")
+    
+}
+
+function searchProfile(){
+    var username = $('#usernameToSearch').val().trim();
+    if(username.length > 2){
+        apretaste.send({
+            'command':'CHAT BUSCAR',
+            'data':{'username': username}
         })
     }
     else showToast("Ingrese un username valido")
@@ -123,7 +135,7 @@ function sendMessage() {
         apretaste.send({
             'command': "CHAT ESCRIBIR",
             'data': { 'id': activeChat, 'message': message },
-            'redirect': true,
+            'redirect': false,
             'callback': { 'name': 'sendMessageCallback', 'data': message }
         });
     }
