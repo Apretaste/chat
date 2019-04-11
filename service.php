@@ -52,7 +52,7 @@ class Service
 		// get the list of people chating with you
 		$chats = Social::chatsOpen($request->person->id);
 
-		$response->setTemplate("main.ejs", ["chats" => $chats]);
+		$response->setTemplate("main.ejs", ["chats" => $chats, "myusername" => $request->person->username]);
 	}
 
 	/**

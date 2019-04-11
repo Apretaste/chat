@@ -20,8 +20,12 @@
 
 			<!-- TEXT -->
 			<msg>
-				<%=chat.last_note%>
-				<%if(chat.last_note_read){%>&#10004;<%}%>
+				<%if(chat.read_date != null && chat.username != myusername){%>
+					<b><%=chat.last_note%></b>
+				<%}else{%>
+					<%=chat.last_note%>
+					<%if(chat.last_note_read){%>&#10004;<%}%>
+				<%}%>
 			</msg>
 		</span>
 		</li>
