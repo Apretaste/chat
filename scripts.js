@@ -7,9 +7,9 @@ var timer;
 
 $(() => {
     if (typeof messages != "undefined") {
-		resizeChat();
+		/*resizeChat();
 		$(window).resize(() => resizeChat());
-		$('.chat').scrollTop($('.bubble:last-of-type').offset().top);
+		$('.chat').scrollTop($('.bubble:last-of-type').offset().top);*/
         $('#message').focus();
         activeChat = id;
         activeUsername = username;
