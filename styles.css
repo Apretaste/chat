@@ -1,6 +1,10 @@
 .chat {
-    overflow:hidden;
-    margin: 20px 0;
+	overflow:auto;
+	margin: 10px 0;
+}
+
+html {
+	overflow-x: hidden;
 }
 
 .row{

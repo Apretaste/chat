@@ -2,6 +2,12 @@
 
 class Service
 {
+	private $provinces = [
+		'PINAR_DEL_RIO'=>'Pinar del Rio','LA_HABANA'=>'La Habana','ARTEMISA'=>'Artemisa','MAYABEQUE'=>'Mayabeque',
+		'MATANZAS'=>'Matanzas','VILLA_CLARA'=>'Villa Clara','CIENFUEGOS'=>'Cienfuegos','SANCTI_SPIRITUS'=>'Sancti Spiritus',
+		'CIEGO_DE_AVILA'=>'Ciego de Avila','CAMAGUEY'=>'Camaguey','LAS_TUNAS'=>'Las Tunas','HOLGUIN'=>'Holguin',
+		'GRANMA'=>'Granma','SANTIAGO_DE_CUBA'=>'Santiago de Cuba','GUANTANAMO'=>'Guantanamo','ISLA_DE_LA_JUVENTUD'=>'Isla de la Juventud', ''=>''
+	];
 	/**
 	 * Get the list of conversations, or post a note
 	 *
@@ -30,8 +36,8 @@ class Service
 				$chat->id = $message->note_id;
 				$chat->username = $message->username;
 				$chat->text = $message->text;
-				$chat->sent = date_format((new DateTime($message->sent)), 'd/m/Y - h:i a');
-				$chat->read = date('d/m/Y G:i', strtotime($message->read));
+				$chat->sent = date_format((new DateTime($message->sent)), 'd/m/Y h:i a');
+				$chat->read = date('d/m/Y h:i a', strtotime($message->read));
 				$chat->readed = $message->readed;
 				$chats[] = $chat;
 			}
@@ -42,7 +48,7 @@ class Service
 				"myusername" => $request->person->username,
 				"id" => $user->id,
 				"online" => $user->online,
-				'last' => date('d/m/Y G:i', strtotime($user->last_access))
+				'last' => date('d/m/Y h:i a', strtotime($user->last_access))
 			];
 
 			$response->setTemplate("chat.ejs", $content);
@@ -139,44 +145,27 @@ class Service
 		$users = $connection->query("
 			SELECT *
 			FROM person
-			WHERE active = 1
-			AND online = 1
+			WHERE online = 1
 			AND blocked = 0
-			AND email <> '{$request->email}'
+			AND id <> '{$request->person->id}'
 			ORDER BY last_access DESC
 			LIMIT 20");
 
-		// error if no users online
-		if(empty($users)) {
-
-			$response->setResponseSubject("No hay usuarios conectados");
-			$response->createFromText("No hay nadie conectado en este momento. Por favor vuelva a intentar mas tarde.");
-		}
-
 		// format users
 		$online = [];
-		$social = new Social();
-		foreach($users as $u) {
-			$profile = $social->prepareUserProfile($u);
-			$profile->picture = $profile->picture ? $profile->picture_public : "/images/user.jpg";
-			$online[] = $profile;
-		}
-
-		// add path to root folder
-		$di = \Phalcon\DI\FactoryDefault::getDefault();
-		$wwwroot = $di->get('path')['root'];
-
-		// get images for the web
-		$images = [];
-		if($request->environment == "web") {
-			foreach ($online as $user) {
-				$images[] = $user->picture_internal;
-				if($user->country) $images[] = "$wwwroot/public/images/flags/".strtolower($user->country).".png";
-			}
+		foreach($users as $user) {
+			$profile = Social::prepareUserProfile($user);
+			$online[] = [
+				'id' => $profile->id,
+				'username' => $profile->username,
+				'age' => $profile->age,
+				'province' => $this->provinces[$profile->province],
+				'gender' => $profile->gender
+			];
 		}
 
 		// send info to the view
-		$response->setResponseSubject("Usuarios conectados");
-		$response->setTemplate("online.tpl", ['users' => $online], $images);
+		$response->setCache(5);
+		$response->setTemplate("online.ejs", ['users' => $online]);
 	}
 }

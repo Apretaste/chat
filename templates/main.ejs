@@ -1,4 +1,4 @@
-<h2 class="center-align">Chats</h2>
+<h1>Chats</h1>
 
 <ul class="collection">
 	<%chats.forEach(function(chat){%>
@@ -10,12 +10,11 @@
 		<i class="circle <%=color%> lighten-2"><%=chat.username[0].toUpperCase()%></i>
 
 		<span>
-			<!-- SERVICE AND DATE -->
 			<b>@<%=chat.username%></b>
 			<%if(chat.online=="1"){%>
 				<i class="material-icons green-text" style="font-size:10px;">brightness_1</i>
 			<%}%>
-				<p class="right"><%=chat.last_sent%></p>
+				<small class="right"><%=chat.last_sent%></small>
 			<br/>
 
 			<!-- TEXT -->
@@ -33,23 +32,9 @@
 </ul>
 
 <div class="fixed-action-btn">
-	<a href="#searchModal" class="btn-floating btn-large waves-effect waves-light modal-trigger">
-		<i class="large material-icons">search</i>
+	<a onclick="apretaste.send({'command':'CHAT ONLINE'})" class="btn-floating btn-large waves-effect waves-light modal-trigger">
+		<i class="large material-icons">people</i>
 	</a>
-</div>
-
-<div id="searchModal" class="modal bottom-sheet">
-	<div class="modal-content">
-		<div class="input-field">
-          <textarea id="usernameToSearch" class="materialize-textarea"></textarea>
-		  <label for="usernameToSearch">Buscar</label>
-		  <span class="helper-text">Escriba un nombre de usuario</span>
-    	</div>
-	</div>	
-	<div class="modal-footer">
-		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
-		<a onclick="searchProfile()" class="modal-close waves-effect waves-green btn-flat">Buscar</a>
-	</div>
 </div>
 
 <div class="modal bottom-sheet" id="optionsModal">
