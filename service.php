@@ -105,7 +105,7 @@ class Service
 	 */
 	public function _escribir(Request $request, Response $response)
 	{
-		if(!isset($request->input->data->id)) return
+		if(!isset($request->input->data->id)) return;
 		$userTo = Utils::getPerson($request->input->data->id);
 		if(!$userTo) return;
 		$message = $request->input->data->message;
