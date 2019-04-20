@@ -1,0 +1,50 @@
+<h1>Usuarios Online</h1>
+
+<ul class="collection">
+	<%users.forEach(function(user){%>
+		<%var color = ""%>
+		<li class="collection-item avatar noselect openuser" id="<%=user.id%>" username="<%=user.username%>">
+
+		<%if(user.gender=="F") var color = "purple"; else if(user.gender=="M") var color = "blue";%>
+
+		<i class="circle <%=color%> lighten-2"><%=user.username[0].toUpperCase()%></i>
+
+		<span>
+			<b onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%=user.username%>'}})">@<%=user.username%></b>
+			<i class="material-icons green-text" style="font-size:10px;">brightness_1</i>
+
+			<br>
+			<%if(user.province!=""){%>
+				<%=user.province%>
+			<%}else{%>
+				Cuba
+			<%}%>
+			<%if(user.age!=""){%>
+				<br>
+				<%=user.age%> años
+			<%}%>
+		</span>
+		<a onclick="apretaste.send({'command':'CHAT', 'data':{'userId':'<%=user.id%>'}})" class="secondary-content"><i class="material-icons">message</i></a>
+		</li>
+	<%})%>
+</ul>
+
+<div class="fixed-action-btn">
+	<a href="#searchModal" class="btn-floating btn-large waves-effect waves-light modal-trigger">
+		<i class="large material-icons">search</i>
+	</a>
+</div>
+
+<div id="searchModal" class="modal bottom-sheet">
+	<div class="modal-content">
+		<div class="input-field">
+          <textarea id="usernameToSearch" class="materialize-textarea"></textarea>
+		  <label for="usernameToSearch">Buscar</label>
+		  <span class="helper-text">Escriba un nombre de usuario</span>
+    	</div>
+	</div>	
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
+		<a onclick="searchProfile()" class="modal-close waves-effect waves-green btn-flat">Buscar</a>
+	</div>
+</div>
