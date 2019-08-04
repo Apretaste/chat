@@ -2,6 +2,7 @@
 	<div class="col s12"><h1>Chats</h1></div>
 
 	<ul class="collection">
+		<% if (chats.length > 0) {%>
 		<%chats.forEach(function(chat){%>
 			<%var color = ""%>
 			<li class="collection-item avatar noselect openchat" id="<%=chat.id%>" username="<%=chat.username%>">
@@ -30,6 +31,10 @@
 			</span>
 			</li>
 		<%})%>
+		<% } else { %>
+			<p>Aún no has chateado con nadie. Busca <a onclick="apretaste.send({'command':'CHAT ONLINE'})" class="btn-floating btn-large waves-effect waves-light modal-trigger">
+		alguien con quien hablar</a> e inicia una conversación</p>
+		<% }%>
 	</ul>
 </div>
 
