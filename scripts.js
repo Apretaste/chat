@@ -52,12 +52,14 @@ $(function () {
 });
 
 function openChat() {
-  if (!optionsModalActive && !moved) apretaste.send({
-    'command': 'CHAT',
-    'data': {
-      'userId': activeChat
-    }
-  });
+  if (!optionsModalActive && !moved) {
+    apretaste.send({
+      'command': 'CHAT',
+      'data': {
+        'userId': activeChat
+      }
+    });
+  }
   optionsModalActive = false;
   moved = false;
   clearTimeout(timer);
@@ -81,7 +83,9 @@ function writeModalOpen() {
 function deleteModalOpen() {
   optionsModalActive = false;
   M.Modal.getInstance($('#optionsModal')).close();
-  if (typeof messages == "undefined") $('#deleteModal p').html('¿Esta seguro de eliminar su chat con @' + activeUsername + '?');
+  if (typeof messages == "undefined") {
+    $('#deleteModal p').html('¿Esta seguro de eliminar su chat con @' + activeUsername + '?');
+  }
   M.Modal.getInstance($('#deleteModal')).open();
 }
 
@@ -108,7 +112,10 @@ function resendMessage() {
         'data': username
       }
     });
-  } else showToast("Ingrese un username valido");
+  }
+  else {
+    showToast("Ingrese un username valido");
+  }
 }
 
 function searchProfile() {
@@ -121,7 +128,10 @@ function searchProfile() {
         'username': username
       }
     });
-  } else showToast("Ingrese un username valido");
+  }
+  else {
+    showToast("Ingrese un username valido");
+  }
 }
 
 function deleteChat() {
@@ -192,7 +202,10 @@ function sendMessage() {
         'data': message
       }
     });
-  } else showToast("Mensaje vacio");
+  }
+  else {
+    showToast("Mensaje vacio");
+  }
 }
 
 function sendMessageCallback(message) {
@@ -203,8 +216,11 @@ function sendMessageCallback(message) {
     }
 
     $('.chat').append("<div class=\"bubble me\" id=\"last\">" + "<small>" + "    <b>@" + myusername + "</b> - " + new Date(Date.now()).toLocaleString() + "</small>" + "<br>" + message + "</div>");
-  } else {
-    if (message.length > 70) message = message.substr(0, 70) + '...';
+  }
+  else {
+    if (message.length > 70) {
+      message = message.substr(0, 70) + '...';
+    }
     $('#' + activeChat + ' msg').html(message);
   }
 
@@ -216,7 +232,8 @@ function messageLengthValidate() {
 
   if (message.length <= 500) {
     $('.helper-text').html('Restante: ' + (500 - message.length));
-  } else {
+  }
+  else {
     $('.helper-text').html('Limite excedido');
   }
 }
@@ -227,7 +244,9 @@ function resizeChat() {
   }
 
   $('.chat').height($('.chat').height() - $('#messageField').outerHeight(true) - $('h3').outerHeight(true) - 20);
-  if (online == "0") $('.chat').height($('.chat').height() - $('small').outerHeight());
+  if (online == "0") {
+    $('.chat').height($('.chat').height() - $('small').outerHeight());
+  }
 }
 
 function showToast(text) {
