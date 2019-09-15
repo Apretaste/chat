@@ -212,7 +212,6 @@ function sendMessageCallback(message) {
   if (typeof messages != "undefined") {
     if (messages.length == 0) {
       $('#nochats').remove();
-      $('#messageField').insertBefore("<div class=\"chat\"></div>");
     }
 
     $('.chat').append("<div class=\"bubble me\" id=\"last\">" + "<small>" + "    <b>@" + myusername + "</b> - " + new Date(Date.now()).toLocaleString() + "</small>" + "<br>" + message + "</div>");
