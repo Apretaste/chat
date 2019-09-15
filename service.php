@@ -37,6 +37,7 @@ class ChatService extends ApretasteService
 
             // check if the username is valid
             if (!$user) {
+                $this->response->setLayout('chat.ejs');
                 $this->response->setTemplate('notFound.ejs');
 
                 return;
@@ -66,6 +67,7 @@ class ChatService extends ApretasteService
                 'last'       => date('d/m/Y h:i a', strtotime($user->last_access))
             ];
 
+            $this->response->setLayout('chat.ejs');
             $this->response->setTemplate('chat.ejs', $content);
 
             return;
@@ -73,7 +75,7 @@ class ChatService extends ApretasteService
 
         // get the list of people chatting with you
         $chats = Social::chatsOpen($this->request->person->id);
-
+        $this->response->setLayout('chat.ejs');
         $this->response->setTemplate('main.ejs', ['chats' => $chats, 'myusername' => $this->request->person->username]);
     }
 
@@ -109,6 +111,7 @@ class ChatService extends ApretasteService
         $username = $this->request->input->data->username;
         $user = Utils::getPerson($username);
         if (!$user) {
+            $this->response->setLayout('chat.ejs');
             $this->response->setTemplate('notFound.ejs');
 
             return;
@@ -195,6 +198,7 @@ class ChatService extends ApretasteService
 
         // send info to the view
         $this->response->setCache(5);
+        $this->response->setLayout('chat.ejs');
         $this->response->setTemplate('online.ejs', ['users' => $online]);
     }
 }
