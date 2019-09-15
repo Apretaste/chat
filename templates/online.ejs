@@ -1,37 +1,39 @@
 <div class="row">
-	<h1 class="valing-wrapper">
-		<i class="material-icons black-text" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i>
-		Usuarios Online
-	</h1>
+	<div class="col s12 l6 xl6 offset-l3 offset-xl3 m4 offset-m4">
+		<h1 class="valing-wrapper">
+			<i class="material-icons black-text" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i>
+			Usuarios Online
+		</h1>
 
-	<ul class="collection">
-		<%users.forEach(function(user){%>
-			<%var color = ""%>
-			<li class="collection-item avatar noselect openuser" id="<%=user.id%>" username="<%=user.username%>">
+		<ul class="collection">
+			<%users.forEach(function(user){%>
+				<%var color = ""%>
+				<li class="collection-item avatar noselect openuser" id="<%=user.id%>" username="<%=user.username%>">
 
-			<%if(user.gender=="F") var color = "purple"; else if(user.gender=="M") var color = "blue";%>
+				<%if(user.gender=="F") var color = "purple"; else if(user.gender=="M") var color = "blue";%>
 
-			<i class="circle <%=color%> lighten-2"><%=user.username[0].toUpperCase()%></i>
+				<i class="circle <%=color%> lighten-2"><%=user.username[0].toUpperCase()%></i>
 
-			<span>
-				<b onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%=user.username%>'}})">@<%=user.username%></b>
-				<i class="material-icons green-text" style="font-size:10px;">brightness_1</i>
+				<span>
+					<b onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%=user.username%>'}})">@<%=user.username%></b>
+					<i class="material-icons green-text" style="font-size:10px;">brightness_1</i>
 
-				<br>
-				<%if(user.province!=""){%>
-					<%=user.province%>
-				<%}else{%>
-					Cuba
-				<%}%>
-				<%if(user.age!=""){%>
 					<br>
-					<%=user.age%> años
-				<%}%>
-			</span>
-			<a onclick="apretaste.send({'command':'CHAT', 'data':{'userId':'<%=user.id%>'}})" class="secondary-content"><i class="material-icons">message</i></a>
-			</li>
-		<%})%>
-	</ul>
+					<%if(user.province!=""){%>
+						<%=user.province%>
+					<%}else{%>
+						Cuba
+					<%}%>
+					<%if(user.age!=""){%>
+						<br>
+						<%=user.age%> años
+					<%}%>
+				</span>
+				<a onclick="apretaste.send({'command':'CHAT', 'data':{'userId':'<%=user.id%>'}})" class="secondary-content"><i class="material-icons">message</i></a>
+				</li>
+			<%})%>
+		</ul>
+	</div>
 </div>
 
 <div class="fixed-action-btn">
