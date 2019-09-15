@@ -1,6 +1,12 @@
 .chat {
 	overflow:auto;
-	margin: 10px 0;
+  margin: 10px 0 60px;
+}
+
+#messageField{
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
 }
 
 html {
