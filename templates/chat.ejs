@@ -9,25 +9,25 @@
 		</h3>
 		<% if(online=="0"){ %><small style="padding-left: 26px;">Ultima vez: <%=last%></small><% } %>
 
-		<%if(messages.length>0){%>
-		<div class="chat">
-			<%messages.forEach(function(message) {%>
-			<%if(message.username == username) message.class = "you"; else message.class = "me";%>
-			<div class="bubble <%=message.class%>" id="<%=message.id%>">
-				<small>
-					<b>@<%=message.username%></b> - <%=message.sent%>
-				</small>
-				<br>
-				<msg><%=message.text%></msg>
-				<%if(message.readed == "1"){%><i class="material-icons tiny" onclick="alert('Leido el: <%=message.read%>')">check</i><%}%>
+		<% if(messages.length > 0) { %>
+			<div class="chat">
+				<% messages.forEach(function(message) { %>
+					<%if(message.username == username) message.class = "you"; else message.class = "me";%>
+					<div class="bubble <%=message.class%>" id="<%=message.id%>">
+						<small>
+							<b>@<%=message.username%></b> - <%=message.sent%>
+						</small>
+						<br>
+						<msg><%= atob(message.text) %></msg>
+						<%if(message.readed == "1"){%><i class="material-icons tiny" onclick="alert('Leido el: <%=message.read%>')">check</i><%}%>
+					</div>
+				<% }) %>
 			</div>
-			<%});%>
-		</div>
-		<%}else{%>
-		<p id="nochats" style="padding-left: 10px;">Usted no tienen ningun mensaje con este usuario.</p>
-		<div class="chat">
-		</div>
-		<%}%>
+		<%} else {%>
+			<p id="nochats" style="padding-left: 10px;">Usted no tienen ningun mensaje con este usuario.</p>
+			<div class="chat">
+			</div>
+		<% } %>
 
 		<div class="valign-wrapper" id="messageField">
 			<div class="input-field col s10 m11">
