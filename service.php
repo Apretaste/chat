@@ -46,7 +46,7 @@ class ChatService extends ApretasteService
 				$chat = new stdClass();
 				$chat->id = $message->note_id;
 				$chat->username = $message->username;
-				$chat->text = base64_encode($message->text);
+				$chat->text = $message->text;
 				$chat->sent = date_format(new DateTime($message->sent), 'd/m/Y h:i a');
 				$chat->read = date('d/m/Y h:i a', strtotime($message->read));
 				$chat->readed = $message->readed;
@@ -56,9 +56,10 @@ class ChatService extends ApretasteService
 			$content = [
 				'messages'   => $chats,
 				'username'   => $user->username,
-				'myusername' => $this->request->person->username,
+				'myuser' 	 => $this->request->person->id,
 				'id'         => $user->id,
 				'online'     => $user->online,
+				'gender'	 => $user->gender,
 				'last'       => date('d/m/Y h:i a', strtotime($user->last_access))
 			];
 
@@ -68,16 +69,15 @@ class ChatService extends ApretasteService
 
 		// get the list of people chatting with you
 		$chats = Social::chatsOpen($this->request->person->id);
-		foreach ($chats as $chat) $chat->last_note = base64_encode($chat->last_note);
 
 		// send data to the view
 		$this->response->setLayout('chat.ejs');
-		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myusername' => $this->request->person->username]);
+		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myuser' => $this->request->person->id]);
 	}
 
 	/**
 	 * Borrar un chat del usuario
-	 * 
+	 *
 	 * @author ricardo@apretaste.org
 	 * @param Request
 	 * @param Response
