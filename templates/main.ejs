@@ -1,8 +1,18 @@
+<div class="row">
+    <div class="col s12">
+        <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a href="#" class="active">Chats abiertos</a></li>
+            <li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT ONLINE'})">Usuarios online</a></li>
+        </ul>
+    </div>
+</div>
+
 <div class="row" style="margin-bottom: 4rem">
     <% if(chats.length > 0) { %>
         <section>
             <ul class="collection" id="chats-list">
                 <% chats.forEach(function(chat) { %>
+                    <%var color = "black"; if(chat.gender=="F") color = "#e61966"; else if(chat.gender=="M") color = "dodgerblue";%>
                     <li class="collection-item avatar openchat" id="<%= chat.id %>" username='<%= chat.username %>'>
                         <a onclick="openChat()">
                             <!-- PICTURE -->
@@ -12,7 +22,7 @@
                             </div>
 
                             <!-- FIRST NAME -->
-                            <h6 class="black-text name">@<%= chat.username %></h6>
+                            <h6 class="name" style="color: <%=color%>">@<%= chat.username %></h6>
                             <% if(chat.online == "1"){ %>
                                 <i class="material-icons online-icon">brightness_1</i>
                                 <%if(chat.unread > 0){
@@ -42,12 +52,6 @@
             </ul>
         </section>
     <% } %>
-</div>
-
-<div class="fixed-action-btn">
-    <a onclick="apretaste.send({'command':'CHAT ONLINE'})" class="btn-floating btn-large waves-effect waves-light modal-trigger">
-        <i class="large material-icons">chat</i>
-    </a>
 </div>
 
 <div id="deleteModal" class="modal">

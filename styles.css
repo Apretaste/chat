@@ -36,13 +36,13 @@ p#nochats{
 
 #chats-list #last_sent{
 	position: absolute;
-	right: 8px;
+	right: 16px;
 	top: 18px;
 }
 
 #chats-list .secondary-content {
 	top: 50%;
-	right: 4px;
+	right: 12px;
 	color: #707070;
 }
 
@@ -69,6 +69,8 @@ p#nochats{
 }
 
 msg{
+	display: inline-block;
+	max-width: calc(100% - 12px);
 	word-break: break-word;
 	text-overflow: ellipsis;
 }

@@ -8,9 +8,12 @@ var activeUsername;
 var timer;
 $(function () {
 	if (typeof messages != "undefined") {
-		/*resizeChat();
-		$(window).resize(() => resizeChat());
-		$('.chat').scrollTop($('.bubble:last-of-type').offset().top);*/
+		resizeChat();
+		$(window).resize(function () {
+			return resizeChat();
+		});
+		if (messages.length > 0) $('.chat').scrollTop($('.bubble:last-of-type').offset().top);
+
 		$('#message').focus();
 		activeChat = id;
 		activeUsername = username;
@@ -49,6 +52,10 @@ $(function () {
 		});
 	});
 });
+
+function resizeChat() {
+	$('.chat').height($(window).height() - $('#messageField').outerHeight(true) - 20);
+}
 
 function openChat() {
 	if (!optionsModalActive && !moved) {
@@ -227,17 +234,6 @@ function messageLengthValidate() {
 		$('.helper-text').html('Restante: ' + (500 - message.length));
 	} else {
 		$('.helper-text').html('Limite excedido');
-	}
-}
-
-function resizeChat() {
-	if ($('.row').length == 3) {
-		$('.chat').height($(window).height() - $($('.row')[0]).outerHeight(true) - $($('.row')[2]).outerHeight(true));
-	}
-
-	$('.chat').height($('.chat').height() - $('#messageField').outerHeight(true) - $('h3').outerHeight(true) - 20);
-	if (online == "0") {
-		$('.chat').height($('.chat').height() - $('small').outerHeight());
 	}
 }
 
