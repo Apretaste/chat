@@ -1,61 +1,62 @@
 <div class="row">
-	<div class="col s12">
-		<ul class="tabs tabs-fixed-width">
-			<li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT'})">Chats abiertos</a></li>
-			<li class="tab"><a href="#" class="active">Usuarios online</a></li>
-		</ul>
-	</div>
+    <div class="col s12">
+        <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT'})">Chats abiertos</a></li>
+            <li class="tab"><a href="#" class="active">Usuarios online</a></li>
+        </ul>
+    </div>
 </div>
 
 <div class="row" style="margin-bottom: 4rem">
-		<ul class="collection" id="online-list">
-			<%users.forEach(function(user){%>
-				<%var color = "black"; if(user.gender=="F") color = "#e61966"; else if(user.gender=="M") color = "dodgerblue";%>
-				<li class="collection-item avatar noselect openuser" id="<%=user.id%>" username="<%=user.username%>">
+    <ul class="collection" id="online-list">
+        <% users.forEach(function(user){ %>
+            <% var color = "black"; if (user.gender == "F") color = "#e61966"; else if (user.gender == "M") color = "dodgerblue"; %>
+            <li class="collection-item avatar noselect openuser" id="<%= user.id %>" username="<%= user.username %>">
 
-				<div class="avatar circle"
-					 style="background: <%= user.gender == "M" ? "dodgerblue" : (user.gender == "F" ? "#e61966" : "#707070") %>">
-					<i class="material-icons">person</i>
-				</div>
+                <div class="avatar circle"
+                     style="<%= getAvatar(user.avatar, "{{APP_SERVICE_PATH}}/images", 48) %> background-color: <%= colors[user.avatarColor] %>;">
+                </div>
 
-				<i class="material-icons online-icon">brightness_1</i>
+                <i class="material-icons online-icon">brightness_1</i>
 
-				<span>
-					<a style="color: <%=color%>" onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%=user.username%>'}})">@<%=user.username%></a>
+                <span>
+					<a style="color: <%= color %>"
+                       onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%= user.username %>'}})">@<%= user.username %></a>
 
 					<br>
-					<%if(user.age!=""){%>
-						<%=user.age%> años ·
-					<%}%>
-					<%if(user.province!=""){%>
-						<%=user.province%>
-					<%}else{%>
-						Cuba
-					<%}%>
+                    <% if(user.age != ""){ %>
+                    <%= user.age %> años ·
+                    <% } %>
+                    <% if(user.province != ""){ %>
+                    <%= user.province %>
+                    <% }else{ %>
+                        Cuba
+                    <% } %>
 
-				</span>
-				<a onclick="apretaste.send({'command':'CHAT', 'data':{'userId':'<%=user.id%>'}})" class="secondary-content"><i class="material-icons">message</i></a>
-				</li>
-			<%})%>
-		</ul>
+                </span>
+                <a onclick="apretaste.send({'command':'CHAT', 'data':{'userId':'<%= user.id %>'}})"
+                   class="secondary-content"><i class="material-icons">message</i></a>
+            </li>
+        <% }) %>
+    </ul>
 </div>
 
 <div class="fixed-action-btn">
-	<a href="#searchModal" class="btn-floating btn-large modal-trigger">
-		<i class="large material-icons">search</i>
-	</a>
+    <a href="#searchModal" class="btn-floating btn-large modal-trigger">
+        <i class="large material-icons">search</i>
+    </a>
 </div>
 
 <div id="searchModal" class="modal bottom-sheet">
-	<div class="modal-content">
-		<div class="input-field">
-          <textarea id="usernameToSearch" class="materialize-textarea"></textarea>
-		  <label for="usernameToSearch">Buscar</label>
-		  <span class="helper-text">Escriba un nombre de usuario</span>
-    	</div>
-	</div>
-	<div class="modal-footer">
-		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
-		<a onclick="searchProfile()" class="modal-close waves-effect waves-green btn-flat">Buscar</a>
-	</div>
+    <div class="modal-content">
+        <div class="input-field">
+            <textarea id="usernameToSearch" class="materialize-textarea"></textarea>
+            <label for="usernameToSearch">Buscar</label>
+            <span class="helper-text">Escriba un nombre de usuario</span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
+        <a onclick="searchProfile()" class="modal-close waves-effect waves-green btn-flat">Buscar</a>
+    </div>
 </div>

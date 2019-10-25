@@ -54,13 +54,13 @@ class ChatService extends ApretasteService
 			}
 
 			$content = [
-				'messages'   => $chats,
-				'username'   => $user->username,
-				'myuser' 	 => $this->request->person->id,
-				'id'         => $user->id,
-				'online'     => $user->online,
-				'gender'	 => $user->gender,
-				'last'       => date('d/m/Y h:i a', strtotime($user->last_access))
+				'messages' => $chats,
+				'username' => $user->username,
+				'myuser' => $this->request->person->id,
+				'id' => $user->id,
+				'online' => $user->online,
+				'gender' => $user->gender,
+				'last' => date('d/m/Y h:i a', strtotime($user->last_access))
 			];
 
 			$this->response->setLayout('chat.ejs');
@@ -78,9 +78,9 @@ class ChatService extends ApretasteService
 	/**
 	 * Borrar un chat del usuario
 	 *
-	 * @author ricardo@apretaste.org
 	 * @param Request
 	 * @param Response
+	 * @author ricardo@apretaste.org
 	 */
 	public function _borrar()
 	{
@@ -113,9 +113,9 @@ class ChatService extends ApretasteService
 	/**
 	 * Create a new chat without sending any emails, useful for the API
 	 *
-	 * @author salvipascual
 	 * @param Request
 	 * @param Response
+	 * @author salvipascual
 	 */
 	public function _escribir()
 	{
@@ -171,11 +171,13 @@ class ChatService extends ApretasteService
 		foreach ($users as $user) {
 			$profile = Social::prepareUserProfile($user);
 			$online[] = [
-				'id'       => $profile->id,
+				'id' => $profile->id,
 				'username' => $profile->username,
-				'age'      => $profile->age,
+				'age' => $profile->age,
 				'province' => $this->provinces[$profile->province],
-				'gender'   => $profile->gender
+				'avatar' => $profile->avatar,
+				'avatarColor' => $profile->avatarColor,
+				'gender' => $profile->gender
 			];
 		}
 

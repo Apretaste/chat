@@ -12,24 +12,24 @@
         <section>
             <ul class="collection" id="chats-list">
                 <% chats.forEach(function(chat) { %>
-                    <%var color = "black"; if(chat.gender=="F") color = "#e61966"; else if(chat.gender=="M") color = "dodgerblue";%>
+                    <% var color = "black"; if (chat.gender == "F") color = "#e61966"; else if (chat.gender == "M") color = "dodgerblue"; %>
                     <li class="collection-item avatar openchat" id="<%= chat.id %>" username='<%= chat.username %>'>
                         <a onclick="openChat()">
                             <!-- PICTURE -->
                             <div class="avatar circle"
-                                 style="background: <%= chat.gender == "M" ? "dodgerblue" : (chat.gender == "F" ? "#e61966" : "#707070") %>">
-                                <i class="material-icons">person</i>
+                                 style="<%= getAvatar(chat.avatar, "{{APP_SERVICE_PATH}}/images", 48) %> background-color: <%= colors[chat.avatarColor] %>;">
                             </div>
 
                             <!-- FIRST NAME -->
-                            <h6 class="name" style="color: <%=color%>">@<%= chat.username %></h6>
+                            <h6 class="name" style="color: <%= color %>">@<%= chat.username %></h6>
                             <% if(chat.online == "1"){ %>
-                                <i class="material-icons online-icon">brightness_1</i>
-                                <%if(chat.unread > 0){
+                            <i class="material-icons online-icon">brightness_1</i>
+                            <% if(chat.unread > 0){
                                 var left = chat.unread < 10 ? 52 : 49;
-                                %>
-                                <small id="unread-counter" class="white-text" style="left: <%=left%>px;"><%= chat.unread %></small>
-                                <%}%>
+                            %>
+                            <small id="unread-counter" class="white-text"
+                                   style="left: <%= left %>px;"><%= chat.unread %></small>
+                            <% } %>
                             <% } %>
                         </a>
                         <!-- TEXT -->
