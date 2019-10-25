@@ -69,6 +69,7 @@ var avatars = {
 };
 
 $(function () {
+	$('.tabs').tabs();
 	if (typeof messages != "undefined") {
 		resizeChat();
 		$(window).resize(function () {
