@@ -1,72 +1,27 @@
-<div class="row">
-	<div class="col s12 l6 xl6 offset-l3 offset-xl3 m4 offset-m4">
-		<h3 class="valign-wrapper" style="margin-bottom: 0;">
-			<i class="material-icons black-text" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i>
-			Chat con&nbsp;<a onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%=id%>'}})">@<%=username%></a>
-			<% if(online=="1"){ %>
-				&nbsp;<i class="material-icons green-text" style="font-size:15px;">brightness_1</i>
-			<% } %>
-		</h3>
-		<% if(online=="0"){ %><small style="padding-left: 26px;">Ultima vez: <%=last%></small><% } %>
-
-		<%if(messages.length>0){%>
-		<div class="chat">
-			<%messages.forEach(function(message) {%>
-			<%if(message.username == username) message.class = "you"; else message.class = "me";%>
-			<div class="bubble <%=message.class%>" id="<%=message.id%>">
-				<small>
-					<b>@<%=message.username%></b> - <%=message.sent%>
-				</small>
-				<br>
-				<msg><%=message.text%></msg>
-				<%if(message.readed == "1"){%><i class="material-icons tiny" onclick="alert('Leido el: <%=message.read%>')">check</i><%}%>
-			</div>
-			<%});%>
+<div class="row" id="chat-row">
+	<%if(messages.length>0){%>
+	<div class="chat">
+		<%messages.forEach(function(message){%>
+		<%if(message.username == username) message.class = "you"; else message.class = "me";%>
+		<%var color = "#707070"; if(gender=="F") color = "#e61966"; else if(gender=="M") color = "dodgerblue";%>
+		<div class="bubble <%=message.class%>" id="<%=message.id%>">
+			<%- message.username == username ? "<b style='color: " + color + "'>@" + username + "</b><br>" : "" %>
+			<msg><%=message.text%></msg>
+			<br>
+			<small><%=message.sent%></small>
 		</div>
-		<%}else{%>
-		<p id="nochats" style="padding-left: 10px;">Usted no tienen ningun mensaje con este usuario.</p>
-		<div class="chat">
-		</div>
-		<%}%>
-
-		<div class="valign-wrapper" id="messageField">
-			<div class="input-field col s10 m11">
-				<textarea id="message" class="materialize-textarea" oninput="messageLengthValidate()"></textarea>
-				<label for="message">Escribir</label>
-				<span class="helper-text">Restante: 500</span>
-			</div>
-			<div class="col s2 m1 center-align"><i class="material-icons" onclick="sendMessage()">send</i></div>
-		</div>
+		<%});%>
 	</div>
-</div>
+	<%}else{%>
+		<p id="nochats" class="center grey-text text-lighten-1">Usted no tiene ningun mensaje con este usuario.</p>
+	<%}%>
 
-<div class="modal bottom-sheet" id="optionsModal">
-	<ul class="collection">
-		<li class="collection-item" onclick="resendModalOpen()"><div>Reenviar mensaje<a class="secondary-content"><i class="material-icons">forward</i></a></div></li>
-		<li class="collection-item" onclick="deleteModalOpen()"><div>Borrar mensaje<a class="secondary-content"><i class="material-icons">delete</i></a></div></li>
-	</ul>
-</div>
-
-<div id="resendMessageModal" class="modal bottom-sheet">
-	<div class="modal-content">
-		<div class="input-field">
-          <textarea id="usernameToResend" class="materialize-textarea"></textarea>
-		  <label for="usernameToResend">Reenviar a</label>
-		  <span class="helper-text">Escriba un nombre de usuario</span>
-    	</div>
-	</div>	
-	<div class="modal-footer">
-		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
-		<a onclick="resendMessage()" class="modal-close waves-effect waves-green btn-flat">Enviar</a>
-	</div>
-</div>
-
-<div id="deleteModal" class="modal">
-	<div class="modal-content">
-		<p>¿Esta seguro de eliminar el mensaje seleccionado?</p>
-	</div>	
-	<div class="modal-footer">
-		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cancelar</a>
-		<a onclick="deleteMessage()" class="modal-close waves-effect waves-red btn-flat red-text">Eliminar</a>
+	<div class="valign-wrapper container" id="messageField">
+		<div class="col s2 m1 center-align"><i class="material-icons" style="color: #5ebb48" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i></div>
+		<div class="col s8 m10" style="margin-bottom: 0;">
+			<textarea id="message" placeholder="Escribe un mensaje" class="materialize-textarea" oninput="messageLengthValidate(500)"></textarea>
+			<!--span class="helper-text">Restante: 500</span-->
+		</div>
+		<div class="col s2 m1 center-align"><i class="material-icons" style="color: #5ebb48" onclick="sendMessage()">send</i></div>
 	</div>
 </div>

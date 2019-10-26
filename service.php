@@ -3,24 +3,23 @@
 class ChatService extends ApretasteService
 {
 	private $provinces = [
-		'PINAR_DEL_RIO'       => 'Pinar del Rio',
-		'LA_HABANA'           => 'La Habana',
-		'ARTEMISA'            => 'Artemisa',
-		'MAYABEQUE'           => 'Mayabeque',
-		'MATANZAS'            => 'Matanzas',
-		'VILLA_CLARA'         => 'Villa Clara',
-		'CIENFUEGOS'          => 'Cienfuegos',
-		'SANCTI_SPIRITUS'     => 'Sancti Spiritus',
-		'CIEGO_DE_AVILA'      => 'Ciego de Avila',
-		'CAMAGUEY'            => 'Camaguey',
-		'LAS_TUNAS'           => 'Las Tunas',
-		'HOLGUIN'             => 'Holguin',
-		'GRANMA'              => 'Granma',
-		'SANTIAGO_DE_CUBA'    => 'Santiago de Cuba',
-		'GUANTANAMO'          => 'Guantanamo',
+		'PINAR_DEL_RIO' => 'Pinar del Río',
+		'LA_HABANA' => 'La Habana',
+		'ARTEMISA' => 'Artemisa',
+		'MAYABEQUE' => 'Mayabeque',
+		'MATANZAS' => 'Matanzas',
+		'VILLA_CLARA' => 'Villa Clara',
+		'CIENFUEGOS' => 'Cienfuegos',
+		'SANCTI_SPIRITUS' => 'Sancti Spíritus',
+		'CIEGO_DE_AVILA' => 'Ciego de Ávila',
+		'CAMAGUEY' => 'Camagüey',
+		'LAS_TUNAS' => 'Las Tunas',
+		'HOLGUIN' => 'Holguín',
+		'GRANMA' => 'Granma',
+		'SANTIAGO_DE_CUBA' => 'Santiago de Cuba',
+		'GUANTANAMO' => 'Guantánamo',
 		'ISLA_DE_LA_JUVENTUD' => 'Isla de la Juventud',
-		''                    => ''
-	];
+		'' => ''];
 
 	/**
 	 * Get the list of conversations, or post a note
@@ -37,15 +36,12 @@ class ChatService extends ApretasteService
 			// check if the username is valid
 			if (!$user) {
 				$this->response->setLayout('chat.ejs');
-				$this->response->setTemplate('notFound.ejs');
-
-				return;
+				return $this->response->setTemplate('notFound.ejs');
 			}
 
+			// get and display messages
 			$messages = Social::chatConversation($this->request->person->id, $user->id);
-
 			$chats = [];
-
 			foreach ($messages as $message) {
 				$chat = new stdClass();
 				$chat->id = $message->note_id;
@@ -58,31 +54,32 @@ class ChatService extends ApretasteService
 			}
 
 			$content = [
-				'messages'   => $chats,
-				'username'   => $user->username,
-				'myusername' => $this->request->person->username,
-				'id'         => $user->id,
-				'online'     => $user->online,
-				'last'       => date('d/m/Y h:i a', strtotime($user->last_access))
+				'messages' => $chats,
+				'username' => $user->username,
+				'myuser' => $this->request->person->id,
+				'id' => $user->id,
+				'online' => $user->online,
+				'gender' => $user->gender,
+				'last' => date('d/m/Y h:i a', strtotime($user->last_access))
 			];
 
 			$this->response->setLayout('chat.ejs');
-			$this->response->setTemplate('chat.ejs', $content);
-
-			return;
+			return $this->response->setTemplate('chat.ejs', $content);
 		}
 
 		// get the list of people chatting with you
 		$chats = Social::chatsOpen($this->request->person->id);
+
+		// send data to the view
 		$this->response->setLayout('chat.ejs');
-		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myusername' => $this->request->person->username]);
+		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myuser' => $this->request->person->id]);
 	}
 
 	/**
+	 * Borrar un chat del usuario
 	 *
 	 * @param Request
 	 * @param Response
-	 *
 	 * @author ricardo@apretaste.org
 	 */
 	public function _borrar()
@@ -90,12 +87,8 @@ class ChatService extends ApretasteService
 		$deleteType = $this->request->input->data->type;
 		$idToHide = $this->request->input->data->id;
 
-		if ($deleteType === 'chat') {
-			Social::chatHide($this->request->person->id, $idToHide);
-		}
-		if ($deleteType === 'message') {
-			Social::chatMessageHide($this->request->person->id, $idToHide);
-		}
+		if ($deleteType === 'chat') Social::chatHide($this->request->person->id, $idToHide);
+		if ($deleteType === 'message') Social::chatMessageHide($this->request->person->id, $idToHide);
 	}
 
 	/**
@@ -104,16 +97,13 @@ class ChatService extends ApretasteService
 	 * @throws \Exception
 	 * @author ricardo@apretaste.org
 	 */
-
 	public function _buscar()
 	{
 		$username = $this->request->input->data->username;
 		$user = Utils::getPerson($username);
 		if (!$user) {
 			$this->response->setLayout('chat.ejs');
-			$this->response->setTemplate('notFound.ejs');
-
-			return;
+			return $this->response->setTemplate('notFound.ejs');
 		}
 
 		$this->request->input->data->userId = $user->id;
@@ -125,18 +115,13 @@ class ChatService extends ApretasteService
 	 *
 	 * @param Request
 	 * @param Response
-	 *
 	 * @author salvipascual
 	 */
-	public function _escribir(Request $request, Response &$response)
+	public function _escribir()
 	{
-		if (!isset($this->request->input->data->id)) {
-			return;
-		}
+		if (!isset($this->request->input->data->id)) return;
 		$userTo = Utils::getPerson($this->request->input->data->id);
-		if (!$userTo) {
-			return;
-		}
+		if (!$userTo) return;
 		$message = $this->request->input->data->message;
 
 		$blocks = Social::isBlocked($this->request->person->id, $userTo->id);
@@ -147,13 +132,12 @@ class ChatService extends ApretasteService
 				"{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}",
 				'error'
 			);
-
 			return;
 		}
 
 		// store the note in the database
-		$message = e($message, 499);
-		q("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$this->request->person->id},{$userTo->id},'$message')");
+		$message = Connection::escape($message, 499);
+		Connection::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$this->request->person->id},{$userTo->id},'$message')");
 
 		// send notification for the app
 		Utils::addNotification(
@@ -162,8 +146,6 @@ class ChatService extends ApretasteService
 			"{'command':'CHAT', 'data':{'id':'{$this->request->person->id}'}}",
 			'message'
 		);
-
-		Challenges::complete("chat", $this->request->person->id);
 	}
 
 	/**
@@ -175,7 +157,7 @@ class ChatService extends ApretasteService
 	public function _online()
 	{
 		// get online users
-		$users = q("
+		$users = Connection::query("
 			SELECT *
 			FROM person
 			WHERE online = 1
@@ -189,11 +171,13 @@ class ChatService extends ApretasteService
 		foreach ($users as $user) {
 			$profile = Social::prepareUserProfile($user);
 			$online[] = [
-				'id'       => $profile->id,
+				'id' => $profile->id,
 				'username' => $profile->username,
-				'age'      => $profile->age,
+				'age' => $profile->age,
 				'province' => $this->provinces[$profile->province],
-				'gender'   => $profile->gender
+				'avatar' => $profile->avatar,
+				'avatarColor' => $profile->avatarColor,
+				'gender' => $profile->gender
 			];
 		}
 
