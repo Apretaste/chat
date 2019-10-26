@@ -87,8 +87,12 @@ class ChatService extends ApretasteService
 		$deleteType = $this->request->input->data->type;
 		$idToHide = $this->request->input->data->id;
 
-		if ($deleteType === 'chat') Social::chatHide($this->request->person->id, $idToHide);
-		if ($deleteType === 'message') Social::chatMessageHide($this->request->person->id, $idToHide);
+		if ($deleteType === 'chat') {
+			Social::chatHide($this->request->person->id, $idToHide);
+		}
+		if ($deleteType === 'message') {
+			Social::chatMessageHide($this->request->person->id, $idToHide);
+		}
 	}
 
 	/**
@@ -113,15 +117,18 @@ class ChatService extends ApretasteService
 	/**
 	 * Create a new chat without sending any emails, useful for the API
 	 *
-	 * @param Request
-	 * @param Response
+	 * @throws \Exception
 	 * @author salvipascual
 	 */
 	public function _escribir()
 	{
-		if (!isset($this->request->input->data->id)) return;
+		if (!isset($this->request->input->data->id)) {
+			return;
+		}
 		$userTo = Utils::getPerson($this->request->input->data->id);
-		if (!$userTo) return;
+		if (!$userTo) {
+			return;
+		}
 		$message = $this->request->input->data->message;
 
 		$blocks = Social::isBlocked($this->request->person->id, $userTo->id);
@@ -146,6 +153,8 @@ class ChatService extends ApretasteService
 			"{'command':'CHAT', 'data':{'id':'{$this->request->person->id}'}}",
 			'message'
 		);
+
+		Challenges::complete("chat", $this->request->person->id);
 	}
 
 	/**
