@@ -122,13 +122,11 @@ class ChatService extends ApretasteService
 	 */
 	public function _escribir()
 	{
-		if (!isset($this->request->input->data->id)) {
-			return;
-		}
+		if (!isset($this->request->input->data->id)) return;
+
 		$userTo = Utils::getPerson($this->request->input->data->id);
-		if (!$userTo) {
-			return;
-		}
+		if (!$userTo) return;
+
 		$message = $this->request->input->data->message;
 
 		$blocks = Social::isBlocked($this->request->person->id, $userTo->id);
@@ -154,7 +152,11 @@ class ChatService extends ApretasteService
 			'message'
 		);
 
+		// complete challenge
 		Challenges::complete("chat", $this->request->person->id);
+
+		// add the experience
+		Level::setExperience('START_CHAT_FIRST', $this->request->person->id, $userTo->username);
 	}
 
 	/**
