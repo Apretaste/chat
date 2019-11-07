@@ -143,7 +143,7 @@ class ChatService extends ApretasteService
 		}
 
 		// store the note in the database
-		$message = Connection::escape($message, 499);
+		$message = Connection::escape($message, 499, 'utf8mb4');
 		Connection::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$this->request->person->id},{$userTo->id},'$message')");
 
 		// send notification for the app
