@@ -175,7 +175,7 @@ class ChatService extends ApretasteService
 			AND blocked = 0
 			AND id <> '{$this->request->person->id}'
 			ORDER BY last_access DESC
-			LIMIT 20");
+			LIMIT 20", true, 'utf8mb4');
 
 		// format users
 		$online = [];
