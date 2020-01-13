@@ -15,10 +15,8 @@
                     <% var color = "black"; if (chat.gender == "F") color = "#e61966"; else if (chat.gender == "M") color = "dodgerblue"; %>
                     <li class="collection-item avatar openchat" id="<%= chat.id %>" username='<%= chat.username %>'>
                         <a onclick="openChat()">
-                            <!-- PICTURE -->
-                            <div class="avatar circle"
-                                 style="<%= getAvatar(chat.avatar, "{{APP_SERVICE_PATH}}/images", 48) %> background-color: <%= colors[chat.avatarColor] %>;">
-                            </div>
+                            <!-- AVATAR -->
+                            <div class="person-avatar circle" face="<%=chat.avatar%>" color="<%=chat.avatarColor%>" size="48"></div>
 
                             <!-- FIRST NAME -->
                             <h6 class="name" style="color: <%= color %>">@<%= chat.username %></h6>

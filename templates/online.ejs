@@ -13,22 +13,20 @@
             <% var color = "black"; if (user.gender == "F") color = "#e61966"; else if (user.gender == "M") color = "dodgerblue"; %>
             <li class="collection-item avatar noselect openuser" id="<%= user.id %>" username="<%= user.username %>">
 
-                <div class="avatar circle"
-                     style="<%= getAvatar(user.avatar, "{{APP_SERVICE_PATH}}/images", 48) %> background-color: <%= colors[user.avatarColor] %>;">
-                </div>
+                <div class="person-avatar circle" face="<%= user.avatar %>" color="<%= user.avatarColor %>"
+                     size="48"></div>
 
                 <i class="material-icons online-icon">brightness_1</i>
-
                 <span>
 					<a style="color: <%= color %>"
                        onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%= user.username %>'}})">@<%= user.username %></a>
 
 					<br>
                     <% if(user.age != ""){ %>
-                    <%= user.age %> años ·
+                        <%= user.age %> años ·
                     <% } %>
                     <% if(user.province != ""){ %>
-                    <%= user.province %>
+                        <%= user.province %>
                     <% }else{ %>
                         Cuba
                     <% } %>
