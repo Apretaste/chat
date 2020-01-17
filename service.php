@@ -42,6 +42,7 @@ class ChatService extends ApretasteService
 			// get and display messages
 			$messages = Social::chatConversation($this->request->person->id, $user->id);
 			$chats = [];
+
 			foreach ($messages as $message) {
 				$chat = new stdClass();
 				$chat->id = $message->note_id;
@@ -70,9 +71,17 @@ class ChatService extends ApretasteService
 		// get the list of people chatting with you
 		$chats = Social::chatsOpen($this->request->person->id);
 
+		$images = [];
+		$pathToService = Utils::getPathToService($this->response->serviceName);
+
+		foreach ($chats as $chat) {
+			$chat->avatar = empty($chat->avatar) ? ($chat->gender === 'M' ? 'hombre' : ($chat->gender === 'F' ? 'sennorita' : 'hombre')) : $chat->avatar;
+			$images[] = "$pathToService/images/{$chat->avatar}.png";
+		}
+
 		// send data to the view
 		$this->response->setLayout('chat.ejs');
-		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myuser' => $this->request->person->id]);
+		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myuser' => $this->request->person->id], $images);
 	}
 
 	/**
@@ -179,8 +188,14 @@ class ChatService extends ApretasteService
 
 		// format users
 		$online = [];
+		$images = [];
+		$pathToService = Utils::getPathToService($this->response->serviceName);
 		foreach ($users as $user) {
 			$profile = Social::prepareUserProfile($user);
+
+			$profile->avatar = empty($profile->avatar) ? ($profile->gender === 'M' ? 'hombre' : ($profile->gender === 'F' ? 'sennorita' : 'hombre')) : $profile->avatar;
+			$images[] = "$pathToService/images/{$profile->avatar}.png";
+
 			$online[] = [
 				'id' => $profile->id,
 				'username' => $profile->username,
@@ -195,6 +210,6 @@ class ChatService extends ApretasteService
 		// send info to the view
 		$this->response->setCache(5);
 		$this->response->setLayout('chat.ejs');
-		$this->response->setTemplate('online.ejs', ['users' => $online]);
+		$this->response->setTemplate('online.ejs', ['users' => $online], $images);
 	}
 }
