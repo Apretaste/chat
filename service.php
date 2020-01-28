@@ -122,10 +122,14 @@ class ChatService extends ApretasteService
 	 */
 	public function _escribir()
 	{
-		if (!isset($this->request->input->data->id)) return;
+		if (!isset($this->request->input->data->id)) {
+			return;
+		}
 
 		$userTo = Utils::getPerson($this->request->input->data->id);
-		if (!$userTo) return;
+		if (!$userTo) {
+			return;
+		}
 
 		$message = $this->request->input->data->message;
 
