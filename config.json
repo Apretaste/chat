@@ -1,7 +1,7 @@
 {
   "name": "chat",
   "caption": "Chat",
-  "description": "Envía una nota privada a otro usuario, y proporciona un espacio para conocer amigos dentro y fuera de Cuba",
+  "description": "Envía notas privadas a otros usuarios, y proporciona un espacio para conocer amigos dentro y fuera de Cuba",
   "category": "social",
   "creator": "salvi@apretaste.org",
   "listed": true,

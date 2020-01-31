@@ -1,8 +1,3 @@
-.chat {
-	overflow: auto;
-	margin: 10px 0 60px;
-}
-
 html {
 	overflow-x: hidden;
 }
@@ -11,72 +6,17 @@ html {
 	margin-bottom: 10px;
 }
 
-#chats-list .collection-item .avatar {
-	width: 48px;
-	height: 48px;
-	left: 12px;
-	top: 20%;
-	color: white;
+.small {
+	font-size: x-small;
 }
 
-#chats-list .avatar.circle i {
-	font-size: 48px;
+/* blank space at the end of the page */
+
+.bottom-space {
+	margin-bottom: 60px;
 }
 
-#online-list .avatar.circle i {
-	font-size: 42px;
-	color: white;
-}
-
-p#nochats {
-	position: absolute;
-	top: 50%;
-	left: calc(50% - 160px);
-}
-
-#chats-list #last_sent {
-	position: absolute;
-	right: 16px;
-	top: 18px;
-}
-
-#chats-list .secondary-content {
-	top: 50%;
-	right: 12px;
-	color: #707070;
-}
-
-.online-icon {
-	position: absolute;
-	left: 44px;
-	bottom: 10px;
-	border-radius: 50%;
-	color: #1af10b;
-}
-
-#online-list .online-icon{
-	bottom: 1px;
-}
-
-#unread-counter {
-	position: absolute;
-	bottom: 10px;
-}
-
-#chats-list .online-icon {
-	font-size: 20px;
-}
-
-#online-list .online-icon {
-	font-size: 12px;
-}
-
-msg {
-	display: inline-block;
-	max-width: calc(100% - 12px);
-	word-break: break-word;
-	text-overflow: ellipsis;
-}
+/* chat bubbles */
 
 .chat {
 	overflow: auto;
@@ -141,12 +81,26 @@ msg {
 	-webkit-transform: rotate(0deg) skew(-35deg);
 }
 
-#messageField, #messageField textarea, #chat-row {
-	margin-bottom: 0;
+msg {
+	display: inline-block;
+	max-width: calc(100% - 12px);
+	word-break: break-word;
+	text-overflow: ellipsis;
 }
 
-#messageField {
+/* no chats message */
+
+#nochats {
 	position: absolute;
+	top: 40%;
+	left: calc(50% - 160px);
+	padding: 0px 50px;
+}
+
+/* box to send messages */
+
+#messageField {
+	position: fixed;
 	bottom: 0;
 	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
 	0 3px 1px -2px rgba(0, 0, 0, 0.12),
@@ -157,30 +111,50 @@ msg {
 	border: none;
 }
 
-.noselect {
-	-webkit-touch-callout: none; /* iOS Safari */
-	-webkit-user-select: none; /* Safari */
-	-khtml-user-select: none; /* Konqueror HTML */
-	-moz-user-select: none; /* Firefox */
-	-ms-user-select: none; /* Internet Explorer/Edge */
-	user-select: none;
-	/* Non-prefixed version, currently
-									   supported by Chrome and Opera */
+#messageField, #messageField textarea, #chat-row {
+	margin-bottom: 0;
 }
 
+/* gender colors */
 
-.chip.small {
-	height: 16px;
-	font-size: 10px;
-	line-height: 16px;
-	padding: 0 6px;
+.M {
+	color: #5c6bc0;
 }
 
-.collection .collection-item.avatar {
-	min-height: 62px;
+.F {
+	color: #ec407a;
 }
 
-.collection {
-	border: none;
-	width: 100%;
+/* changes to the cards */
+
+.card .person-avatar {
+	margin: 5px auto;
+}
+
+.card .content {
+	padding: 5px;
+}
+
+.card .action {
+	padding: 5px 0px;
+}
+
+.card .action .material-icons {
+	position: relative;
+	top: 3px;
+	font-size: 1.5rem;
+	margin: 0px 5px;
+}
+
+.card .action a {
+	color: inherit;
+}
+
+/* changes to the chips */
+
+.chip.tiny {
+	height: 20px;
+	padding: 0 10px;
+	line-height: 20px;
+	font-size: x-small;
 }

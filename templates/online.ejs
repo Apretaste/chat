@@ -1,60 +1,25 @@
 <div class="row">
-    <div class="col s12">
-        <ul class="tabs tabs-fixed-width">
-            <li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT'})">Chats abiertos</a></li>
-            <li class="tab"><a href="#" class="active">Usuarios online</a></li>
-        </ul>
-    </div>
+	<div class="col s12">
+		<ul class="tabs tabs-fixed-width">
+			<li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT OPEN'})">Abiertos</a></li>
+			<li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT SEARCH'})">Buscar</a></li>
+			<li class="tab"><a href="#" class="active">Online</a></li>
+		</ul>
+	</div>
 </div>
 
-<div class="row" style="margin-bottom: 4rem">
-    <ul class="collection" id="online-list">
-        <% users.forEach(function(user){ %>
-            <% var color = "black"; if (user.gender == "F") color = "#e61966"; else if (user.gender == "M") color = "dodgerblue"; %>
-            <li class="collection-item avatar noselect openuser" id="<%= user.id %>" username="<%= user.username %>">
-
-                <div class="person-avatar circle" face="<%= user.avatar %>" color="<%= user.avatarColor %>"
-                     size="48"></div>
-
-                <i class="material-icons online-icon">brightness_1</i>
-                <span>
-					<a style="color: <%= color %>"
-                       onclick="apretaste.send({'command':'PERFIL','data':{'username':'<%= user.username %>'}})">@<%= user.username %></a>
-
-					<br>
-                    <% if(user.age != ""){ %>
-                        <%= user.age %> años ·
-                    <% } %>
-                    <% if(user.province != ""){ %>
-                        <%= user.province %>
-                    <% }else{ %>
-                        Cuba
-                    <% } %>
-
-                </span>
-                <a onclick="apretaste.send({'command':'CHAT', 'data':{'userId':'<%= user.id %>'}})"
-                   class="secondary-content"><i class="material-icons">message</i></a>
-            </li>
-        <% }) %>
-    </ul>
-</div>
-
-<div class="fixed-action-btn">
-    <a href="#searchModal" class="btn-floating btn-large modal-trigger">
-        <i class="large material-icons">search</i>
-    </a>
-</div>
-
-<div id="searchModal" class="modal bottom-sheet">
-    <div class="modal-content">
-        <div class="input-field">
-            <textarea id="usernameToSearch" class="materialize-textarea"></textarea>
-            <label for="usernameToSearch">Buscar</label>
-            <span class="helper-text">Escriba un nombre de usuario</span>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-light btn-flat">Cerrar</a>
-        <a onclick="searchProfile()" class="modal-close waves-effect waves-green btn-flat">Buscar</a>
-    </div>
+<div class="row">
+	<% users.forEach(function(item){ %>
+		<div class="col s4 m2">
+			<div class="card center-align">
+				<div class="content" onclick="profile('<%= item.username %>')">
+					<div class="person-avatar circle" face="<%= item.avatar %>" color="<%= item.avatarColor %>" size="40" online="1"></div>
+					<div class="<%= item.gender %>">@<%= item.username %></div>
+				</div>
+				<div class="action grey lighten-2 green-text">
+					<a href="#!" onclick="chat('<%= item.id %>')"><i class="material-icons">chat</i></a>
+				</div>
+			</div>
+		</div>
+	<% }) %>
 </div>

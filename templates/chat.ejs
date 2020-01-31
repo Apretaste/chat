@@ -1,27 +1,37 @@
-<div class="row" id="chat-row">
-	<%if(messages.length>0){%>
-	<div class="chat">
-		<%messages.forEach(function(message){%>
-		<%if(message.username == username) message.class = "you"; else message.class = "me";%>
-		<%var color = "#707070"; if(gender=="F") color = "#e61966"; else if(gender=="M") color = "dodgerblue";%>
-		<div class="bubble <%=message.class%>" id="<%=message.id%>">
-			<%- message.username == username ? "<b style='color: " + color + "'>@" + username + "</b><br>" : "" %>
-			<msg><%=message.text%></msg>
-			<br>
-			<small><%=message.sent%></small>
-		</div>
-		<%});%>
-	</div>
-	<%}else{%>
-		<p id="nochats" class="center grey-text text-lighten-1">Usted no tiene ningun mensaje con este usuario.</p>
-	<%}%>
+<div class="row" id="chat-row" onload="scrollToEnd()">
+	<!-- NO CHATS TEXT -->
+	<% if(messages.length <= 0) { %>
+		<p id="nochats" class="center grey-text text-lighten-1">Usted no tiene ningún mensaje con este usuario.</p>
+	<% } %>
 
-	<div class="valign-wrapper container" id="messageField">
-		<div class="col s2 m1 center-align"><i class="material-icons" style="color: #5ebb48" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i></div>
-		<div class="col s8 m10" style="margin-bottom: 0;">
-			<textarea id="message" placeholder="Escribe un mensaje" class="materialize-textarea" oninput="messageLengthValidate(500)"></textarea>
-			<!--span class="helper-text">Restante: 500</span-->
+	<!-- BUBBLE CHATS -->
+	<div class="chat">
+		<% messages.forEach(function(message) { %>
+			<% var owner = message.username == username ? 'you' : 'me'; %>
+
+			<div id="<%= message.id %>" class="bubble <%= owner %>">
+				<% if (message.username == username) { %>
+					<b class="<%= gender %>">@<%= username %></b><br>
+				<% } %>
+				<msg><%= message.text %></msg>
+				<br>
+				<small><%= message.sent %></small>
+			</div>
+		<% }) %>
+	</div>
+
+	<div class="bottom-space"></div>
+
+	<!-- MESSAGE BOX -->
+	<div class="valign-wrapper container white" id="messageField">
+		<div class="col s2 m1 center-align">
+			<i class="material-icons green-text" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i>
 		</div>
-		<div class="col s2 m1 center-align"><i class="material-icons" style="color: #5ebb48" onclick="sendMessage()">send</i></div>
+		<div class="col s8 m10">
+			<textarea id="message" placeholder="Escribe un mensaje" class="materialize-textarea"></textarea>
+		</div>
+		<div class="col s2 m1 center-align">
+			<i class="material-icons green-text" onclick="sendMessage('<%= id %>')">send</i>
+		</div>
 	</div>
 </div>
