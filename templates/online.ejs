@@ -14,7 +14,7 @@
 			<div class="card center-align">
 				<div class="content" onclick="profile('<%= item.username %>')">
 					<div class="person-avatar circle" face="<%= item.avatar %>" color="<%= item.avatarColor %>" size="40" online="1"></div>
-					<div class="<%= item.gender %>">@<%= item.username %></div>
+					<div class="<%= item.gender %>">@<%= short(item.username) %></div>
 				</div>
 				<div class="action grey lighten-2 green-text">
 					<a href="#!" onclick="chat('<%= item.id %>')"><i class="material-icons">chat</i></a>

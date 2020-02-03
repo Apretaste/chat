@@ -15,7 +15,7 @@
 				<div class="content" onclick="profile('<%= item.username %>')">
 					<div class="person-avatar circle" face="<%= item.avatar %>" color="<%= item.avatarColor %>" size="40" online="<%= item.online ? 1 : 0 %>"></div>
 					<div class="<%= item.gender %>">
-						@<%= item.username %>
+						@<%= short(item.username) %>
 						<div class="small grey-text "><%= item.last_sent %></div>
 					</div>
 				</div>

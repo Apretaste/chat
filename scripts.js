@@ -119,3 +119,10 @@ function scrollToEndOfPage() {
 		scrollTop: $(document).height()
 	}, 1000);
 }
+
+function short(username) {
+	if (username.length > 9) {
+		return username.substring(0, 6) + '...';
+	}
+	return username;
+}
