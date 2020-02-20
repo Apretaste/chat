@@ -10,7 +10,7 @@
 
 <div class="row">
 	<% chats.forEach(function(item){ %>
-		<div class="col s4 m2">
+		<div class="col s4 m2" id="<%= item.id %>">
 			<div class="card center-align">
 				<div class="content" onclick="profile('<%= item.username %>')">
 					<div class="person-avatar circle" face="<%= item.avatar %>" color="<%= item.avatarColor %>" size="40" online="<%= item.online ? 1 : 0 %>"></div>

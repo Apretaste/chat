@@ -240,6 +240,7 @@ class Service
 	 */
 	public function _borrar(Request $request, Response $response)
 	{
+		die("nothing");
 		$deleteType = $request->input->data->type;
 		$idToHide = $request->input->data->id;
 
