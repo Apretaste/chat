@@ -51,7 +51,7 @@ class Service
 
 		// get content for the view
 		$content = [
-			'chats' => $chats, 
+			'chats' => $chats,
 			'myuser' => $request->person->id];
 
 		// send data to the view
@@ -71,9 +71,9 @@ class Service
 	{
 		// get content for the view
 		$content = [
-			'gender' => Core::$gender, 
-			'religions' => Core::$religions, 
-			'provinces' => Core::$provinces]; 
+			'gender' => Core::$gender,
+			'religions' => Core::$religions,
+			'provinces' => Core::$provinces];
 
 		// send data to the view
 		$response->setCache('year');
@@ -116,38 +116,38 @@ class Service
 		$religion = $request->input->data->religion;
 
 		// declare variables
-		$tags = []; $where = "";
+		$tags = [];
+		$where = "";
 
 		// search only by @username
-		if($username) {
+		if ($username) {
 			$where = "AND username = '$username'";
 			$tags[] = "@$username";
-		}
-		// if the @username was not passed
+		} // if the @username was not passed
 		else {
-			if($gender) {
+			if ($gender) {
 				$tags[] = Core::$gender[$gender];
 				$where .= "AND gender = '$gender' ";
 			}
 
-			if($min_age) {
+			if ($min_age) {
 				$tags[] = "< $min_age años";
 				$year = date('Y') - $min_age;
 				$where .= "AND year_of_birth <= $year ";
 			}
 
-			if($max_age) {
+			if ($max_age) {
 				$tags[] = "> $max_age años";
 				$year = date('Y') - $max_age;
 				$where .= "AND year_of_birth >= $year ";
 			}
 
-			if($province) {
+			if ($province) {
 				$tags[] = Core::$provinces[$province];
 				$where .= "AND province = '$province' ";
 			}
 
-			if($religion) {
+			if ($religion) {
 				$tags[] = Core::$religions[$religion]['name'];
 				$where .= "AND religion = '$religion'";
 			}
@@ -172,13 +172,13 @@ class Service
 		}
 
 		// add max reach tag
-		if(count($users) == 24) {
+		if (count($users) == 24) {
 			$tags[] = "Primeros 24";
 		}
 
 		// get content for the view
 		$content = [
-			'users' => $users, 
+			'users' => $users,
 			'tags' => $tags];
 
 		// send data to the view
@@ -191,7 +191,6 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 * @return
 	 * @throws Alert
 	 * @throws Exception
 	 * @author salvipascual
@@ -201,12 +200,13 @@ class Service
 		// ensure a person Id is passed
 		if (empty($request->input->data->userId)) {
 			$response->setCache();
-			return $response->setTemplate('message.ejs', [
+			$response->setTemplate('message.ejs', [
 				'header' => 'Usuario inexistente',
 				'icon' => 'sentiment_neutral',
 				'text' => 'Lo sentimos, el usuario que usted busca no existe. Puede que halla dejado de usar la app. Busque otro usuario y comience a chatear.',
 				'button' => ['href' => 'CHAT SEARCH', 'caption' => 'Buscar']
 			]);
+			return;
 		}
 
 		// get the username of the note
@@ -273,7 +273,7 @@ class Service
 
 		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
 		if ($blocks->blocked > 0 || $blocks->blockedByMe > 0) {
-			$text .= "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
+			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
 			Notifications::alert($request->person->id, $text, 'error', "{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}");
 			return;
 		}
@@ -283,7 +283,7 @@ class Service
 		Database::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$request->person->id},{$userTo->id},'$message')");
 
 		// send notification for the app
-		$text .= "@{$request->person->username} le ha enviado una nota";
+		$text = "@{$request->person->username} le ha enviado una nota";
 		Notifications::alert($userTo->id, $text, 'message', "{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}");
 
 		// complete challenge
