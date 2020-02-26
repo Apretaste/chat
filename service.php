@@ -102,13 +102,14 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
+	 * @return Response
 	 * @throws Alert
 	 * @author ricardo@apretaste.org
 	 */
 	public function _users(Request $request, Response $response)
 	{
 		// get data from the request 
-		$username = $request->input->data->username;
+		$username = str_replace('@', '', $request->input->data->username);
 		$province = $request->input->data->province;
 		$gender = $request->input->data->gender;
 		$min_age = $request->input->data->min_age;

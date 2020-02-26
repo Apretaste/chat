@@ -49,7 +49,7 @@ function deleteChat() {
 
 function searchUsers() {
 	// get values from the form
-	var username = $('#username').val();
+	var username = $('#username').val().replace('@', '');
 	var province = $('#province').val();
 	var gender = $('#gender').val();
 	var min_age = $('#min_age').val() * 1;
