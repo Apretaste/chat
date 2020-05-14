@@ -289,8 +289,5 @@ class Service
 
 		// complete challenge
 		Challenges::complete("chat", $request->person->id);
-
-		// add the experience
-		Level::setExperience('START_CHAT_FIRST', $request->person->id, $userTo->username);
 	}
 }
