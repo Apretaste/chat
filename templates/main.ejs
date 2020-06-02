@@ -1,65 +1,65 @@
 <div class="row">
-    <div class="col s12">
-        <ul class="tabs tabs-fixed-width">
-            <li class="tab"><a href="#" class="active">Chats abiertos</a></li>
-            <li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT ONLINE'})">Usuarios online</a></li>
-        </ul>
-    </div>
+	<div class="col s12">
+		<ul class="tabs tabs-fixed-width">
+			<li class="tab"><a href="#" class="active">Chats abiertos</a></li>
+			<li class="tab"><a href="#" onclick="apretaste.send({command: 'CHAT ONLINE'})">Usuarios online</a></li>
+		</ul>
+	</div>
 </div>
 
 <div class="row" style="margin-bottom: 4rem">
-    <% if(chats.length > 0) { %>
-        <section>
-            <ul class="collection" id="chats-list">
-                <% chats.forEach(function(chat) { %>
-                    <% var color = "black"; if (chat.gender == "F") color = "#e61966"; else if (chat.gender == "M") color = "dodgerblue"; %>
-                    <li class="collection-item avatar openchat" id="<%= chat.id %>" username='<%= chat.username %>'>
-                        <a onclick="openChat()">
-                            <!-- PICTURE -->
-                            <div class="avatar circle"
-                                 style="<%= getAvatar(chat.avatar, "{{APP_SERVICE_PATH}}/images") %> background-color: <%= colors[chat.avatarColor] %>;">
-                            </div>
+	<% if(chats.length > 0) { %>
+		<section>
+			<ul class="collection" id="chats-list">
+				<% chats.forEach(function(chat) { %>
+					<% var color = "black"; if (chat.gender == "F") color = "#e61966"; else if (chat.gender == "M") color = "dodgerblue"; %>
+					<li class="collection-item avatar openchat" id="<%= chat.id %>" username='<%= chat.username %>'>
+						<a onclick="openChat()">
+							<!-- PICTURE -->
+							<div class="avatar circle"
+								 style="<%= getAvatar(chat.avatar, "{{APP_SERVICE_PATH}}/images") %> background-color: <%= colors[chat.avatarColor] %>;">
+							</div>
 
-                            <!-- FIRST NAME -->
-                            <h6 class="name" style="color: <%= color %>">@<%= chat.username %></h6>
-                            <% if(chat.online == "1"){ %>
-                                <i class="material-icons online-icon">brightness_1</i>
-                                <% if(chat.unread > 0){
-                                    var left = chat.unread < 10 ? 52 : 49;
-                                %>
-                                <small id="unread-counter" class="white-text"
-                                       style="left: <%= left %>px;"><%= chat.unread %></small>
-                                <% } %>
-                            <% } %>
-                        </a>
-                        <!-- TEXT -->
-                        <msg onclick="openChat()">
-                            <% if(!chat.last_note_read && chat.last_note_user != myuser){ %>
-                                <b><%= chat.last_note %></b>
-                            <% }else{ %>
-                                <%= chat.last_note %>
-                            <% } %>
-                        </msg>
-                        <span class="secondary-content">
-                            <i class="material-icons" onclick="deleteModalOpen()">delete</i>
-                        </span>
-                        <span id="last_sent">
-						    <small class="right black-text"><%= chat.last_sent %></small>
-					    </span>
-                    </li>
+							<!-- FIRST NAME -->
+							<h6 class="name" style="color: <%= color %>">@<%= chat.username %></h6>
+							<% if(chat.online == "1"){ %>
+								<i class="material-icons online-icon">brightness_1</i>
+								<% if(chat.unread > 0){
+									var left = chat.unread < 10 ? 52 : 49;
+								%>
+								<small id="unread-counter" class="white-text"
+									   style="left: <%= left %>px;"><%= chat.unread %></small>
+								<% } %>
+							<% } %>
+						</a>
+						<!-- TEXT -->
+						<msg onclick="openChat()">
+							<% if(!chat.last_note_read && chat.last_note_user != myuser){ %>
+								<b><%= chat.last_note %></b>
+							<% }else{ %>
+								<%= chat.last_note %>
+							<% } %>
+						</msg>
+						<span class="secondary-content">
+							<i class="material-icons" onclick="deleteModalOpen()">delete</i>
+						</span>
+						<span id="last_sent">
+							<small class="right black-text"><%= chat.last_sent %></small>
+						</span>
+					</li>
 
-                <% }) %>
-            </ul>
-        </section>
-    <% } %>
+				<% }) %>
+			</ul>
+		</section>
+	<% } %>
 </div>
 
 <div id="deleteModal" class="modal">
-    <div class="modal-content">
-        <p></p>
-    </div>
-    <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-light btn-flat">Cancelar</a>
-        <a onclick="deleteChat()" class="modal-close waves-effect waves-green btn-flat green-text">Eliminar</a>
-    </div>
+	<div class="modal-content">
+		<p></p>
+	</div>
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-light btn-flat">Cancelar</a>
+		<a onclick="deleteChat()" class="modal-close waves-effect waves-green btn-flat green-text">Eliminar</a>
+	</div>
 </div>

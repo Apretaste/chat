@@ -1,219 +1,293 @@
 <?php
 
-class ChatService extends ApretasteService
-{
-	private $provinces = [
-		'PINAR_DEL_RIO' => 'Pinar del Río',
-		'LA_HABANA' => 'La Habana',
-		'ARTEMISA' => 'Artemisa',
-		'MAYABEQUE' => 'Mayabeque',
-		'MATANZAS' => 'Matanzas',
-		'VILLA_CLARA' => 'Villa Clara',
-		'CIENFUEGOS' => 'Cienfuegos',
-		'SANCTI_SPIRITUS' => 'Sancti Spíritus',
-		'CIEGO_DE_AVILA' => 'Ciego de Ávila',
-		'CAMAGUEY' => 'Camagüey',
-		'LAS_TUNAS' => 'Las Tunas',
-		'HOLGUIN' => 'Holguín',
-		'GRANMA' => 'Granma',
-		'SANTIAGO_DE_CUBA' => 'Santiago de Cuba',
-		'GUANTANAMO' => 'Guantánamo',
-		'ISLA_DE_LA_JUVENTUD' => 'Isla de la Juventud',
-		'' => ''];
+use Apretaste\Challenges;
+use Apretaste\Chats;
+use Apretaste\Level;
+use Apretaste\Notifications;
+use Apretaste\Person;
+use Apretaste\Request;
+use Apretaste\Response;
+use Framework\Core;
+use Framework\Alert;
+use Framework\Database;
 
+class Service
+{
 	/**
-	 * Get the list of conversations, or post a note
+	 * redirect to chat or the list of users
 	 *
-	 * @throws \Exception
+	 * @param Request $request
+	 * @param Response $response
+	 * @return
+	 * @throws Alert
+	 * @throws Exception
 	 * @author salvipascual
 	 */
-	public function _main()
+	public function _main(Request $request, Response $response)
 	{
-		if (isset($this->request->input->data->userId)) {
-			// get the username of the note
-			$user = Utils::getPerson($this->request->input->data->userId);
-
-			// check if the username is valid
-			if (!$user) {
-				$this->response->setLayout('chat.ejs');
-				return $this->response->setTemplate('notFound.ejs');
-			}
-
-			// get and display messages
-			$messages = Social::chatConversation($this->request->person->id, $user->id);
-			$chats = [];
-
-			foreach ($messages as $message) {
-				$chat = new stdClass();
-				$chat->id = $message->note_id;
-				$chat->username = $message->username;
-				$chat->text = $message->text;
-				$chat->sent = date_format(new DateTime($message->sent), 'd/m/Y h:i a');
-				$chat->read = date('d/m/Y h:i a', strtotime($message->read));
-				$chat->readed = $message->readed;
-				$chats[] = $chat;
-			}
-
-			$content = [
-				'messages' => $chats,
-				'username' => $user->username,
-				'myuser' => $this->request->person->id,
-				'id' => $user->id,
-				'online' => $user->online,
-				'gender' => $user->gender,
-				'last' => date('d/m/Y h:i a', strtotime($user->last_access))
-			];
-
-			$this->response->setLayout('chat.ejs');
-			return $this->response->setTemplate('chat.ejs', $content);
+		// get the list of open chats
+		if (empty($request->input->data->userId)) {
+			return $this->_open($request, $response);
 		}
 
+		// chat with a user
+		return $this->_chat($request, $response);
+	}
+
+	/**
+	 * Get the list of open conversations
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @return
+	 * @throws Alert
+	 * @throws Exception
+	 * @author salvipascual
+	 */
+	public function _open(Request $request, Response $response)
+	{
 		// get the list of people chatting with you
-		$chats = Social::chatsOpen($this->request->person->id);
+		$chats = Chats::open($request->person->id);
 
-		$images = [];
-		$pathToService = Utils::getPathToService($this->response->serviceName);
-
-		foreach ($chats as $chat) {
-			$chat->avatar = empty($chat->avatar) ? ($chat->gender === 'M' ? 'hombre' : ($chat->gender === 'F' ? 'sennorita' : 'hombre')) : $chat->avatar;
-			$images[] = "$pathToService/images/{$chat->avatar}.png";
-		}
+		// get content for the view
+		$content = [
+			'chats' => $chats,
+			'myuser' => $request->person->id];
 
 		// send data to the view
-		$this->response->setLayout('chat.ejs');
-		$this->response->setTemplate('main.ejs', ['chats' => $chats, 'myuser' => $this->request->person->id], $images);
+		$response->setCache('hour');
+		$response->setTemplate('open.ejs', $content);
+	}
+
+	/**
+	 * Search for a user
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
+	 * @author ricardo@apretaste.org
+	 */
+	public function _search(Request $request, Response $response)
+	{
+		// get content for the view
+		$content = [
+			'gender' => Core::$gender,
+			'religions' => Core::$religions,
+			'provinces' => Core::$provinces];
+
+		// send data to the view
+		$response->setCache('year');
+		$response->setTemplate('search.ejs', $content);
+	}
+
+	/**
+	 * Show the list of users online
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
+	 */
+	public function _online(Request $request, Response $response)
+	{
+		// get users who are online
+		$online = Chats::online($request->person->id);
+
+		// send info to the view
+		$response->setCache('hour');
+		$response->setTemplate('online.ejs', ['users' => $online]);
+	}
+
+	/**
+	 * Display the list of users found
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @return Response
+	 * @throws Alert
+	 * @author ricardo@apretaste.org
+	 */
+	public function _users(Request $request, Response $response)
+	{
+		// get data from the request 
+		$username = str_replace('@', '', $request->input->data->username);
+		$province = $request->input->data->province;
+		$gender = $request->input->data->gender;
+		$min_age = $request->input->data->min_age;
+		$max_age = $request->input->data->max_age;
+		$religion = $request->input->data->religion;
+
+		// declare variables
+		$tags = [];
+		$where = "";
+
+		// search only by @username
+		if ($username) {
+			$where = "AND username = '$username'";
+			$tags[] = "@$username";
+		} // if the @username was not passed
+		else {
+			if ($gender) {
+				$tags[] = Core::$gender[$gender];
+				$where .= "AND gender = '$gender' ";
+			}
+
+			if ($min_age) {
+				$tags[] = "< $min_age años";
+				$year = date('Y') - $min_age;
+				$where .= "AND year_of_birth <= $year ";
+			}
+
+			if ($max_age) {
+				$tags[] = "> $max_age años";
+				$year = date('Y') - $max_age;
+				$where .= "AND year_of_birth >= $year ";
+			}
+
+			if ($province) {
+				$tags[] = Core::$provinces[$province];
+				$where .= "AND province = '$province' ";
+			}
+
+			if ($religion) {
+				$tags[] = Core::$religions[$religion]['name'];
+				$where .= "AND religion = '$religion'";
+			}
+		}
+
+		// search for users
+		$users = Database::query("
+			SELECT id, username, avatar, avatarColor, gender, online
+			FROM person 
+			WHERE active = 1 $where
+			ORDER BY online DESC, last_access DESC
+			LIMIT 24");
+
+		// error if no users were found
+		if (empty($users)) {
+			return $response->setTemplate('message.ejs', [
+				'header' => 'No hay usuarios',
+				'icon' => 'sentiment_neutral',
+				'text' => 'Lo sentimos, pero no encontramos ningún usuario con esa combinación de datos. Cambie los paramétros de búsqueda e intente nuevamente.',
+				'button' => ['href' => 'CHAT SEARCH', 'caption' => 'Buscar']
+			]);
+		}
+
+		// add max reach tag
+		if (count($users) == 24) {
+			$tags[] = "Primeros 24";
+		}
+
+		// get content for the view
+		$content = [
+			'users' => $users,
+			'tags' => $tags];
+
+		// send data to the view
+		$response->setCache();
+		$response->setTemplate('users.ejs', $content);
+	}
+
+	/**
+	 * Get the list of conversations
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
+	 * @throws Exception
+	 * @author salvipascual
+	 */
+	public function _chat(Request $request, Response $response)
+	{
+		// ensure a person Id is passed
+		if (empty($request->input->data->userId)) {
+			$response->setCache();
+			$response->setTemplate('message.ejs', [
+				'header' => 'Usuario inexistente',
+				'icon' => 'sentiment_neutral',
+				'text' => 'Lo sentimos, el usuario que usted busca no existe. Puede que halla dejado de usar la app. Busque otro usuario y comience a chatear.',
+				'button' => ['href' => 'CHAT SEARCH', 'caption' => 'Buscar']
+			]);
+			return;
+		}
+
+		// get the username of the note
+		$user = Person::find($request->input->data->userId);
+
+		// get and display messages
+		$chats = Chats::conversation($request->person->id, $user->id);
+
+		// get content for the view
+		$content = [
+			'messages' => $chats,
+			'username' => $user->username,
+			'myuser' => $request->person->id,
+			'id' => $user->id,
+			'online' => $user->isOnline,
+			'gender' => $user->gender,
+			'last' => date('d/m/Y h:i a', strtotime($user->lastAccess))
+		];
+
+		// send data to the view
+		$response->setTemplate('chat.ejs', $content);
 	}
 
 	/**
 	 * Borrar un chat del usuario
 	 *
-	 * @param Request
-	 * @param Response
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
 	 * @author ricardo@apretaste.org
 	 */
-	public function _borrar()
+	public function _borrar(Request $request, Response $response)
 	{
-		$deleteType = $this->request->input->data->type;
-		$idToHide = $this->request->input->data->id;
+		$deleteType = $request->input->data->type;
+		$idToHide = $request->input->data->id;
 
 		if ($deleteType === 'chat') {
-			Social::chatHide($this->request->person->id, $idToHide);
+			Chats::hide($request->person->id, $idToHide);
 		}
+
 		if ($deleteType === 'message') {
-			Social::chatMessageHide($this->request->person->id, $idToHide);
+			Chats::hideMessage($request->person->id, $idToHide);
 		}
-	}
-
-	/**
-	 * Search an user by username
-	 *
-	 * @throws \Exception
-	 * @author ricardo@apretaste.org
-	 */
-	public function _buscar()
-	{
-		$username = $this->request->input->data->username;
-		$user = Utils::getPerson($username);
-		if (!$user) {
-			$this->response->setLayout('chat.ejs');
-			return $this->response->setTemplate('notFound.ejs');
-		}
-
-		$this->request->input->data->userId = $user->id;
-		$this->_main();
 	}
 
 	/**
 	 * Create a new chat without sending any emails, useful for the API
 	 *
-	 * @throws \Exception
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
 	 * @author salvipascual
 	 */
-	public function _escribir()
+	public function _escribir(Request $request, Response $response)
 	{
-		if (!isset($this->request->input->data->id)) {
+		if (!isset($request->input->data->id)) {
 			return;
 		}
 
-		$userTo = Utils::getPerson($this->request->input->data->id);
+		$userTo = Person::find($request->input->data->id);
 		if (!$userTo) {
 			return;
 		}
 
-		$message = $this->request->input->data->message;
-
-		$blocks = Social::isBlocked($this->request->person->id, $userTo->id);
+		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
 		if ($blocks->blocked > 0 || $blocks->blockedByMe > 0) {
-			Utils::addNotification(
-				$this->request->person->id,
-				"Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.",
-				"{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}",
-				'error'
-			);
+			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
+			Notifications::alert($request->person->id, $text, 'error', "{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}");
 			return;
 		}
 
 		// store the note in the database
-		$message = Connection::escape($message, 499, 'utf8mb4');
-		Connection::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$this->request->person->id},{$userTo->id},'$message')", true, 'utf8mb4');
+		$message = Database::escape($request->input->data->message, 499);
+		Database::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$request->person->id},{$userTo->id},'$message')");
 
 		// send notification for the app
-		Utils::addNotification(
-			$userTo->id,
-			"@{$this->request->person->username} le ha enviado una nota",
-			"{'command':'CHAT', 'data':{'id':'{$this->request->person->id}'}}",
-			'message'
-		);
+		$text = "@{$request->person->username} le ha enviado una nota";
+		Notifications::alert($userTo->id, $text, 'message', "{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}");
 
 		// complete challenge
-		Challenges::complete("chat", $this->request->person->id);
-
-		// add the experience
-		Level::setExperience('START_CHAT_FIRST', $this->request->person->id, $userTo->username);
-	}
-
-	/**
-	 * Sub-service ONLINE
-	 *
-	 * @return void
-	 * @throws \Exception
-	 */
-	public function _online()
-	{
-		// get online users
-		$users = Connection::query("
-			SELECT *
-			FROM person
-			WHERE online = 1
-			AND blocked = 0
-			AND id <> '{$this->request->person->id}'
-			ORDER BY last_access DESC
-			LIMIT 20", true, 'utf8mb4');
-
-		// format users
-		$online = [];
-		$images = [];
-		$pathToService = Utils::getPathToService($this->response->serviceName);
-		foreach ($users as $user) {
-			$profile = Social::prepareUserProfile($user);
-
-			$profile->avatar = empty($profile->avatar) ? ($profile->gender === 'M' ? 'hombre' : ($profile->gender === 'F' ? 'sennorita' : 'hombre')) : $profile->avatar;
-			$images[] = "$pathToService/images/{$profile->avatar}.png";
-
-			$online[] = [
-				'id' => $profile->id,
-				'username' => $profile->username,
-				'age' => $profile->age,
-				'province' => $this->provinces[$profile->province],
-				'avatar' => $profile->avatar,
-				'avatarColor' => $profile->avatarColor,
-				'gender' => $profile->gender
-			];
-		}
-
-		// send info to the view
-		$this->response->setCache(5);
-		$this->response->setLayout('chat.ejs');
-		$this->response->setTemplate('online.ejs', ['users' => $online], $images);
+		Challenges::complete("chat", $request->person->id);
 	}
 }
