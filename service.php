@@ -10,6 +10,8 @@ use Apretaste\Response;
 use Framework\Core;
 use Framework\Alert;
 use Framework\Database;
+use Framework\Images;
+use Framework\Utils;
 
 class Service
 {
@@ -216,6 +218,15 @@ class Service
 		// get and display messages
 		$chats = Chats::conversation($request->person->id, $user->id);
 
+		$images = [];
+		$chatImgDir = SHARED_PUBLIC_PATH . '/content/chat';
+		foreach ($chats as $chat) {
+			if ($chat->image) {
+				$chat->image .= '.jpg';
+				$images[] = "$chatImgDir/{$chat->image}";
+			}
+		}
+
 		// get content for the view
 		$content = [
 			'messages' => $chats,
@@ -228,7 +239,7 @@ class Service
 		];
 
 		// send data to the view
-		$response->setTemplate('chat.ejs', $content);
+		$response->setTemplate('chat.ejs', $content, $images);
 	}
 
 	/**
@@ -272,6 +283,20 @@ class Service
 			return;
 		}
 
+		$image = $request->input->data->image ?? false;
+		$fileName = '';
+
+		// get the image name and path
+		if ($image) {
+			$chatImgDir = SHARED_PUBLIC_PATH . '/content/chat';
+			$fileName = Utils::randomHash();
+			$filePath = "$chatImgDir/$fileName.jpg";
+
+			// save the optimized image on the user folder
+			file_put_contents($filePath, base64_decode($image));
+			Images::optimize($filePath);
+		}
+
 		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
 		if ($blocks->blocked > 0 || $blocks->blockedByMe > 0) {
 			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
@@ -281,7 +306,7 @@ class Service
 
 		// store the note in the database
 		$message = Database::escape($request->input->data->message, 499);
-		Database::query("INSERT INTO _note (from_user, to_user, `text`) VALUES ({$request->person->id},{$userTo->id},'$message')");
+		Database::query("INSERT INTO _note (from_user, to_user, `text`, image) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName')");
 
 		// send notification for the app
 		$text = "@{$request->person->username} le ha enviado una nota";

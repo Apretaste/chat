@@ -1,12 +1,13 @@
-$(document).ready(function() {
+$(document).ready(function () {
 	// initialize components
 	$('.tabs').tabs();
 	$('.modal').modal();
 	$('select').formSelect();
+	$('.materialboxed').materialbox();
 
 	// scroll to the bottom if in the chat page
 	var isAtChatPage = $('#chat-row').length == 1;
-	if(isAtChatPage) scrollToEndOfPage();
+	if (isAtChatPage) scrollToEndOfPage();
 });
 
 function chat(id) {
@@ -21,6 +22,35 @@ function profile(username) {
 		'command': 'PERFIL',
 		'data': {'username': username}
 	});
+}
+
+var messagePicture = null;
+
+function sendFile(base64File) {
+	if (base64File.length > 2584000) {
+		showToast("Imagen demasiado pesada");
+		$('input:file').val(null);
+		return false;
+	}
+
+	messagePicture = base64File;
+	var messagePictureSrc = "data:image/jpg;base64," + base64File;
+
+	if ($('#messagePictureBox').length == 0) {
+		$('#messageBox').append('<div id="messagePictureBox">' +
+			'<img id="messagePicture" class="responsive-img"/>' +
+			'<i class="material-icons red-text" onclick="removePicture()">cancel</i>' +
+			'</div>');
+	}
+
+	$('#messagePicture').attr('src', messagePictureSrc);
+}
+
+function removePicture() {
+	// clean the img if exists
+	messagePicture = null;
+	$('input:file').val(null);
+	$('#messagePictureBox').remove();
 }
 
 function deleteModalOpen(id, username) {
@@ -43,7 +73,7 @@ function deleteChat() {
 		'command': 'CHAT BORRAR',
 		'data': {'id': id, 'type': 'chat'},
 		'redirect': false,
-		'callback': {'name':'deleteChatCallback', 'data':id}
+		'callback': {'name': 'deleteChatCallback', 'data': id}
 	});
 }
 
@@ -57,7 +87,7 @@ function searchUsers() {
 	var religion = $('#religion').val();
 
 	// check the age range is valid
-	if(min_age < 0 || max_age > 120 || min_age > max_age) {
+	if (min_age < 0 || max_age > 120 || min_age > max_age) {
 		M.toast({html: 'Error en la edad'});
 		return false;
 	}
@@ -86,7 +116,7 @@ function sendMessage(toId) {
 	var message = $('#message').val().trim();
 
 	// do now allow short or empty messages
-	if (message.length <= 3) {
+	if (message.length <= 3 && messagePicture == null) {
 		M.toast({html: "Mínimo 3 letras"});
 		return false;
 	}
@@ -94,9 +124,9 @@ function sendMessage(toId) {
 	// send the message
 	apretaste.send({
 		'command': "CHAT ESCRIBIR",
-		'data': {'id':toId, 'message':message},
+		'data': {'id': toId, 'message': message, 'image': messagePicture},
 		'redirect': false,
-		'callback': {'name':'sendMessageCallback', 'data':message}
+		'callback': {'name': 'sendMessageCallback', 'data': message}
 	});
 }
 
@@ -105,12 +135,26 @@ function sendMessageCallback(message) {
 	$('#nochats').remove();
 
 	// add a new chat bubble
-	$('.chat').append('<div class="bubble me" id="last">' + message + '<br><small>' + new Date().toLocaleString('es-ES') + '</small></div>');
+	var messageContent = '<div class="bubble me" id="last">' + message + '<br>';
+
+	if (messagePicture != null) {
+		messageContent += '<img src="data:image/jpg;base64,' + messagePicture + '" class="responsive-img materialboxed"/><br>';
+	}
+
+	messageContent += '<small>' + new Date().toLocaleString('es-ES') + '</small></div>';
+
+	$('.chat').append(messageContent);
 
 	// clean the text box
 	$('#message').val('');
 
+	// clean the img if exists
+	messagePicture = null;
+	$('input:file').val(null);
+	$('#messagePictureBox').remove();
+
 	// scroll to the end of the page
+	$('.materialboxed').materialbox();
 	scrollToEndOfPage();
 }
 
