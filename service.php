@@ -149,7 +149,7 @@ class Service
 			}
 
 			if ($religion) {
-				$tags[] = Core::$religions[$religion]['name'];
+				$tags[] = Core::$religions[$religion];
 				$where .= "AND religion = '$religion'";
 			}
 		}
