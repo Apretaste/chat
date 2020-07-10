@@ -1,44 +1,42 @@
-<div class="row" id="chat-row" onload="scrollToEnd()">
-    <!-- NO CHATS TEXT -->
-    <% if(messages.length <= 0) { %>
-        <p id="nochats" class="center grey-text text-lighten-1">Usted no tiene ningún mensaje con este usuario.</p>
-    <% } %>
+<div class="row" id="chat-row">
+    <div class="col s12">
+        <% if(messages.length > 0){ %>
+            <ul class="chat">
+                <% messages.forEach(function(message){ %>
+                    <% if (message.username == myUsername) message.class = "right"; else message.class = "left"; %>
 
-    <!-- BUBBLE CHATS -->
-    <div class="chat">
-        <% messages.forEach(function(message) { %>
-            <% var owner = message.username == username ? 'you' : 'me'; %>
-
-            <div id="<%= message.id %>" class="bubble <%= owner %>">
-                <% if (message.username == username) { %>
-                    <b class="<%= gender %>">@<%= username %></b><br>
-                <% } %>
-
-                <msg><%= message.text %></msg>
-                <br>
-                <% if(message.image){ %>
-                    <img class="responsive-img materialboxed" src="{{APP_IMAGE_PATH}}/<%= message.image %>"/>
-                    <br>
-                <% } %>
-                <small><%= message.sent %></small>
-            </div>
-        <% }) %>
+                    <li class="<%= message.class %>" id="<%= message.id %>">
+                        <div class="person-avatar message-avatar circle" face="<%= message.avatar %>"
+                             color="<%= message.avatarColor %>" size="30"></div>
+                        <div class="head">
+                            <a href="#!" class="<%= message.gender %>">@<%= message.username %></a>
+                            <span class="date"><%= message.sent %></span>
+                        </div>
+                        <span class="text">
+                            <% if(message.image){ %>
+                                <img class="responsive-img materialboxed"
+                                     src="{{APP_IMAGE_PATH}}/<%= message.image %>"/>
+                                <br>
+                            <% } %>
+                            <%= message.text %>
+                        </span>
+                    </li>
+                <% }); %>
+            </ul>
+        <% }else{ %>
+            <p id="nochats" class="center grey-text text-lighten-1">Usted no tiene ningun mensaje con este usuario.</p>
+        <% } %>
     </div>
-
-    <div class="bottom-space"></div>
 
     <!-- MESSAGE BOX -->
     <div class="valign-wrapper container white" id="messageField">
-        <div class="col s2 m1 center-align">
-            <i class="material-icons green-text" onclick="apretaste.send({'command':'CHAT'})">arrow_back</i>
-        </div>
-        <div class="col s7 m9" id="messageBox">
+        <div class="col s9 m10" id="messageBox">
             <textarea id="message" placeholder="Escribe un mensaje" class="materialize-textarea"></textarea>
         </div>
         <div class="col s3 m2 center-align">
             <input type="file" id="picture" accept="image/*" class="hide">
-            <i class="material-icons green-text" onclick="loadFileToBase64()">photo</i>
-            <i class="material-icons green-text" onclick="sendMessage('<%= id %>')">send</i>
+            <i class="material-icons" onclick="loadFileToBase64()">photo</i>
+            <i class="material-icons" onclick="sendMessage()">send</i>
         </div>
     </div>
 </div>

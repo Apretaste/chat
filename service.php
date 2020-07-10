@@ -16,24 +16,38 @@ use Framework\Utils;
 class Service
 {
 	/**
-	 * redirect to chat or the list of users
+	 * user friends list
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 * @return
 	 * @throws Alert
-	 * @throws Exception
-	 * @author salvipascual
+	 * @author ricardo
 	 */
+
 	public function _main(Request $request, Response $response)
 	{
 		// get the list of open chats
 		if (empty($request->input->data->userId)) {
-			return $this->_open($request, $response);
+			$friends = $request->person->getFriends();
+
+			foreach ($friends as &$friend) {
+				$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
+				$friend = $user;
+
+				// get the person's avatar
+				$friend->avatar = $friend->avatar ?? ($friend->gender === 'F' ? 'chica' : 'hombre');
+
+				// get the person's avatar color
+				$friend->avatarColor = $friend->avatarColor ?? 'verde';
+			}
+
+			$response->setLayout('chats.ejs');
+			$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Amigos']);
+			return;
 		}
 
 		// chat with a user
-		return $this->_chat($request, $response);
+		$this->_chat($request, $response);
 	}
 
 	/**
@@ -41,7 +55,6 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 * @return
 	 * @throws Alert
 	 * @throws Exception
 	 * @author salvipascual
@@ -62,27 +75,6 @@ class Service
 	}
 
 	/**
-	 * Search for a user
-	 *
-	 * @param Request $request
-	 * @param Response $response
-	 * @throws Alert
-	 * @author ricardo@apretaste.org
-	 */
-	public function _search(Request $request, Response $response)
-	{
-		// get content for the view
-		$content = [
-			'gender' => Core::$gender,
-			'religions' => Core::$religions,
-			'provinces' => Core::$provinces];
-
-		// send data to the view
-		$response->setCache('year');
-		$response->setTemplate('search.ejs', $content);
-	}
-
-	/**
 	 * Show the list of users online
 	 *
 	 * @param Request $request
@@ -96,7 +88,8 @@ class Service
 
 		// send info to the view
 		$response->setCache('hour');
-		$response->setTemplate('online.ejs', ['users' => $online]);
+		$response->setLayout('chats.ejs');
+		$response->setTemplate('online.ejs', ['users' => $online, 'title' => 'Online']);
 	}
 
 	/**
@@ -200,8 +193,10 @@ class Service
 	 */
 	public function _chat(Request $request, Response $response)
 	{
+		$id = $request->input->data->userId ?? false;
+		$user = $id ? Person::find($id) : false;
 		// ensure a person Id is passed
-		if (empty($request->input->data->userId)) {
+		if (!$user) {
 			$response->setCache();
 			$response->setTemplate('message.ejs', [
 				'header' => 'Usuario inexistente',
@@ -212,8 +207,16 @@ class Service
 			return;
 		}
 
-		// get the username of the note
-		$user = Person::find($request->input->data->userId);
+		if (!$request->person->isFriendOf($user->id)) {
+			$response->setLayout('chats.ejs');
+			$response->setTemplate('message.ejs', [
+				'header' => 'Oops!',
+				'icon' => 'sentiment_neutral',
+				'text' => "Parece que tú y @{$user->username} aún no son amígos, envíale una solicitud desde su perfíl para poder chatear.",
+				'button' => ['href' => 'PERFIL', 'caption' => 'Ir al perfíl', 'data' => "username: {$user->id}"]
+			]);
+			return;
+		}
 
 		// get and display messages
 		$chats = Chats::conversation($request->person->id, $user->id);
@@ -231,7 +234,10 @@ class Service
 		$content = [
 			'messages' => $chats,
 			'username' => $user->username,
-			'myuser' => $request->person->id,
+			'myAvatar' => $request->person->avatar,
+			'myColor' => $request->person->avatarColor,
+			'myGender' => $request->person->gender,
+			'myUsername' => $request->person->username,
 			'id' => $user->id,
 			'online' => $user->isOnline,
 			'gender' => $user->gender,
@@ -239,6 +245,7 @@ class Service
 		];
 
 		// send data to the view
+		$response->setLayout('chats.ejs');
 		$response->setTemplate('chat.ejs', $content, $images);
 	}
 
