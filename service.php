@@ -84,7 +84,7 @@ class Service
 	public function _online(Request $request, Response $response)
 	{
 		// get users who are online
-		$online = Chats::online($request->person->id);
+		$online = Chats::online($request->person->id, $request->person->getFriends());
 
 		// send info to the view
 		$response->setCache('hour');

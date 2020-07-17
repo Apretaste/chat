@@ -14,12 +14,6 @@
                             chat
                         </i>
                     </a>
-                    <a href="#!">
-                        <i class="material-icons green-text"
-                           onclick="openProfile('<%= friend.id %>')">
-                            person
-                        </i>
-                    </a>
                 </div>
             </div>
         </div>
@@ -28,12 +22,4 @@
     <% if(friends.length == 0){ %>
         <p class="middle-center center grey-text">Usted aún no tiene amigos para chatear.</p>
     <% } %>
-
-    <!-- SUBMIT -->
-    <div class="fixed-action-btn">
-        <a class="btn-floating btn-large waves-effect waves-light green" href="#!"
-           onclick="openSearchModal()">
-            <i class="material-icons">search</i>
-        </a>
-    </div>
 </div>

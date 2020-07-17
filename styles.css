@@ -133,6 +133,8 @@ msg {
 
 .card .content {
     padding: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .card .action {
