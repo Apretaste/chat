@@ -5,7 +5,7 @@
                 <div class="person-avatar circle"
                      face="<%= avatar %>" color="<%= avatarColor %>"
                      size="45" online="<%= online %>"
-                     onclick="openProfile(id)"></div>
+                     onclick="openProfile(<%= id %>)"></div>
                 <span class="title <%= gender %>">@<%= username %></span>
                 <p class="valign-wrapper grey-text text-darken-1">
                     ⚡ <%= experience %>
@@ -13,7 +13,7 @@
                 <a onclick="apretaste.back()" class="secondary-content green-text second">
                     <i class="material-icons">arrow_back</i>
                 </a>
-                <a onclick="openProfile(id)" class="secondary-content green-text first">
+                <a onclick="openProfile(<%= id %>)" class="secondary-content green-text first">
                     <i class="material-icons">person</i>
                 </a>
             </li>

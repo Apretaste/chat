@@ -304,7 +304,7 @@ function blockUser() {
 }
 
 function openProfile(id) {
-	apretaste.send({command: 'perfil', data: {username: id}});
+	apretaste.send({command: 'perfil', data: {id: id}});
 }
 
 function showToast(text) {
