@@ -26,28 +26,31 @@ class Service
 
 	public function _main(Request $request, Response $response)
 	{
-		// get the list of open chats
-		if (empty($request->input->data->userId)) {
-			$friends = $request->person->getFriends();
+		$data = $request->input->data;
+		$needle = $data->username ?? $data->id ?? $data->userId ?? false;
 
-			foreach ($friends as &$friend) {
-				$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
-				$friend = $user;
-
-				// get the person's avatar
-				$friend->avatar = $friend->avatar ?? ($friend->gender === 'F' ? 'chica' : 'hombre');
-
-				// get the person's avatar color
-				$friend->avatarColor = $friend->avatarColor ?? 'verde';
-			}
-
-			$response->setLayout('chats.ejs');
-			$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Amigos']);
+		// chat with a user
+		if ($needle) {
+			$this->_chat($request, $response);
 			return;
 		}
 
-		// chat with a user
-		$this->_chat($request, $response);
+		// get the list of open chats
+		$friends = $request->person->getFriends();
+
+		foreach ($friends as &$friend) {
+			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
+			$friend = $user;
+
+			// get the person's avatar
+			$friend->avatar = $friend->avatar ?? ($friend->gender === 'F' ? 'chica' : 'hombre');
+
+			// get the person's avatar color
+			$friend->avatarColor = $friend->avatarColor ?? 'verde';
+		}
+
+		$response->setLayout('chats.ejs');
+		$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Amigos']);
 	}
 
 	/**
@@ -193,8 +196,10 @@ class Service
 	 */
 	public function _chat(Request $request, Response $response)
 	{
-		$id = $request->input->data->userId ?? false;
-		$user = $id ? Person::find($id) : false;
+		$data = $request->input->data;
+		$needle = $data->username ?? $data->id ?? $data->userId ?? false;
+
+		$user = $needle ? Person::find($needle) : false;
 		// ensure a person Id is passed
 		if (!$user) {
 			$response->setCache();
