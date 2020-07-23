@@ -11,9 +11,9 @@ $(document).ready(function () {
 });
 
 function resizeChat() {
-	if ($('.row').length == 3) {
-		$('.chat').height($(window).height() - $($('.row')[0]).outerHeight(true) - $('#messageField').outerHeight(true) - 20);
-	} else $('.chat').height($(window).height() - $('#messageField').outerHeight(true) - 20);
+	if ($('.row').length == 2) {
+		$('.chat').height($(window).height() - $($('.row')[0]).outerHeight(true) - $('#messageField').outerHeight(true) - $('.collection.profile').outerHeight(true) - 20);
+	} else $('.chat').height($(window).height() - $('#messageField').outerHeight(true) - $('.collection.profile').outerHeight(true) - 10);
 }
 
 function chat(id) {
@@ -256,10 +256,15 @@ function addFriend(message) {
 		data: {id: currentUser},
 		redirect: false,
 		callback: {
-			name: 'showToast',
-			data: message
+			name: 'addFriendCallback',
+			data: {id: id, message: message}
 		}
 	});
+}
+
+function addFriendCallback(data) {
+	showToast(data.message);
+	$('#' + id).remove();
 }
 
 function deleteFriend() {

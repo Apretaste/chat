@@ -207,7 +207,7 @@ class Service
 				'header' => 'Usuario inexistente',
 				'icon' => 'sentiment_neutral',
 				'text' => 'Lo sentimos, el usuario que usted busca no existe. Puede que halla dejado de usar la app. Busque otro usuario y comience a chatear.',
-				'button' => ['href' => 'CHAT SEARCH', 'caption' => 'Buscar']
+				'button' => ['href' => 'CHAT', 'caption' => 'Atras']
 			]);
 			return;
 		}
@@ -238,19 +238,21 @@ class Service
 		// get content for the view
 		$content = [
 			'messages' => $chats,
+			'id' => $user->id,
+			'online' => $user->isOnline,
+			'gender' => $user->gender,
 			'username' => $user->username,
+			'avatar' => $user->avatar,
+			'avatarColor' => $user->avatarColor,
+			'experience' => $user->experience,
 			'myAvatar' => $request->person->avatar,
 			'myColor' => $request->person->avatarColor,
 			'myGender' => $request->person->gender,
 			'myUsername' => $request->person->username,
-			'id' => $user->id,
-			'online' => $user->isOnline,
-			'gender' => $user->gender,
 			'last' => date('d/m/Y h:i a', strtotime($user->lastAccess))
 		];
 
 		// send data to the view
-		$response->setLayout('chats.ejs');
 		$response->setTemplate('chat.ejs', $content, $images);
 	}
 
