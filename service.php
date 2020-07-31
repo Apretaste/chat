@@ -213,7 +213,6 @@ class Service
 		}
 
 		if (!$request->person->isFriendOf($user->id)) {
-			$response->setLayout('chats.ejs');
 			$response->setTemplate('message.ejs', [
 				'header' => 'Oops!',
 				'icon' => 'sentiment_neutral',

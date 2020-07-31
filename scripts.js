@@ -141,7 +141,7 @@ function sendMessageCallback(message) {
 		// Jquery Bug, fixed in 1.9, insertBefore or After deletes the element and inserts nothing
 		// $('#messageField').insertBefore("<div class=\"chat\"></div>");
 		$('#nochats').remove();
-		$('#chat-row .col').append("<ul class=\"chat\"></ul>");
+		$('#chat-row > .col').append("<ul class=\"chat\"></ul>");
 	}
 
 	var pictureContent = "";
@@ -171,6 +171,10 @@ function sendMessageCallback(message) {
 
 	$('.materialboxed').materialbox();
 
+	$('.person-avatar').each(function (i, item) {
+		setElementAsAvatar(item)
+	});
+
 	// scroll to the end of the page
 	scrollToEndOfPage();
 }
@@ -178,7 +182,7 @@ function sendMessageCallback(message) {
 function scrollToEndOfPage() {
 	console.log("to the end!");
 	$(".chat").animate({
-		scrollTop: $(document).height()
+		scrollTop: $(".chat").height() + 1000
 	}, 1000);
 }
 
@@ -257,14 +261,15 @@ function addFriend(message) {
 		redirect: false,
 		callback: {
 			name: 'addFriendCallback',
-			data: {id: id, message: message}
+			data: {id: currentUser, message: message}
 		}
 	});
 }
 
 function addFriendCallback(data) {
+	console.log(data)
 	showToast(data.message);
-	$('#' + id).remove();
+	$('#' + data.id).remove();
 }
 
 function deleteFriend() {

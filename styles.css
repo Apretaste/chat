@@ -317,6 +317,10 @@ ul.chat li {
     position: relative;
 }
 
+#messagePictureBox > img{
+    max-height: 25vh;
+}
+
 #messagePictureBox > i {
     position: absolute;
     top: 2px;
