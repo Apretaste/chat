@@ -86,12 +86,13 @@ class Service
 	 */
 	public function _online(Request $request, Response $response)
 	{
+
 		// get users who are online
-		$exclude = $request->person->getFriends()
-			+ array_map(function ($item) {
+		$exclude = array_unique(array_merge($request->person->getFriends()
+			, array_map(function ($item) {
 				return $item->id;
 			}, $request->person->getFriendRequests())
-			+ $request->person->getPeopleBlocked();
+			, $request->person->getPeopleBlocked()));
 
 
 		$online = Chats::online($request->person->id, $exclude);
