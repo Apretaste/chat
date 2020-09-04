@@ -494,16 +494,17 @@ ul.chat li {
     right: 60px !important;
 }
 
-/* PREVIEW COLLECTION */
-
-.collection.preview {
-    margin: 20px 0px 0px 0px;
-}
-
 /* ONE LINE COLLECTION */
 
 .collection.one-line .avatar {
     min-height: 63px;
+}
+
+/* PREVIEW COLLECTION */
+
+.collection.preview {
+    margin: 20px 0px 0px 0px;
+    min-height: 65px;
 }
 
 /* NUMBERS LIST */
