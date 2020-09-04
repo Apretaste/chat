@@ -93,8 +93,8 @@ msg {
 #nochats {
     position: absolute;
     top: 40%;
-    left: calc(50% - 160px);
-    padding: 0px 50px;
+    left: 50%;
+    transform: translateX(-50%)
 }
 
 /* box to send messages */
@@ -317,7 +317,7 @@ ul.chat li {
     position: relative;
 }
 
-#messagePictureBox > img{
+#messagePictureBox > img {
     max-height: 25vh;
 }
 
@@ -704,4 +704,17 @@ ul.chat li {
     width: 45px;
     height: 45px;
     line-height: 58px;
+}
+
+/* Unread */
+
+.icon-alert {
+    background-color: #ff0000;
+    width: 12px;
+    height: 12px;
+    border: 1px solid white;
+    border-radius: 10px;
+    position: absolute;
+    top: 10px;
+    right: calc(50% - 22px);
 }
