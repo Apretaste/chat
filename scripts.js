@@ -135,6 +135,8 @@ function sendMessage() {
 		'redirect': false,
 		'callback': {'name': 'sendMessageCallback', 'data': message}
 	});
+
+
 }
 
 function sendMessageCallback(message) {
@@ -163,7 +165,9 @@ function sendMessageCallback(message) {
 
 	$('.chat').append(newMessage);
 
-	$('#message').val('');
+	$('#messageField').val('');
+	$('#messageField').trigger('autoresize');
+	M.textareaAutoResize($("#messageField"));
 
 	// clean the img if exists
 	messagePicture = null;
