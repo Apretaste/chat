@@ -165,9 +165,10 @@ function sendMessageCallback(message) {
 
 	$('.chat').append(newMessage);
 
-	$('#messageField').val('');
-	$('#messageField').trigger('autoresize');
-	M.textareaAutoResize($("#messageField"));
+	$('#message').val('');
+	M.textareaAutoResize($("#message"));
+	$('#message').trigger('autoresize');
+
 
 	// clean the img if exists
 	messagePicture = null;
