@@ -47,6 +47,7 @@ class Service
 
 			// get the person's avatar color
 			$friend->avatarColor = $friend->avatarColor ?? 'verde';
+			$friend->unreadCount = Chats::getUnreadCount($friend->id, $request->person->id);
 		}
 
 		$response->setLayout('chats.ejs');

@@ -4,7 +4,11 @@
             <div class="card user-card center-align">
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
                     <div class="person-avatar circle" face="<%= friend.avatar %>" color="<%= friend.avatarColor %>"
-                         size="40" online="<%= friend.online %>"></div>
+                         size="40" online="<%= friend.online %>">
+                        <% if(friend.unreadCount > 0){ %>
+                            <div class="icon-alert"></div>
+                        <% } %>
+                    </div>
                     <span class="<%= friend.gender %>">@<%= friend.username %></span>
                 </div>
                 <div class="action grey lighten-2 green-text">

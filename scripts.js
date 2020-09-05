@@ -8,6 +8,7 @@ $(document).ready(function () {
 	// scroll to the bottom if in the chat page
 	resizeChat();
 	scrollToEndOfPage();
+	$(window).resize(resizeChat);
 });
 
 function resizeChat() {
@@ -155,7 +156,7 @@ function sendMessageCallback(message) {
 		"      face=\"" + myAvatar + "\" color=\"" + myColor + "\" size=\"30\"></div>\n" +
 		"     <div class=\"head\">\n" +
 		"         <a href=\"#!\" class=\"" + myGender + "\">" + myUsername + "</a>\n" +
-		"         <span class=\"date\">" + new Date().toLocaleString('es-ES') + "</span>\n" +
+		"         <span class=\"date\">" + moment().format('DD/MM/Y h:m a') + "</span>\n" +
 		"     </div>\n" +
 		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
 		"</li>"
