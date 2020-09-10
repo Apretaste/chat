@@ -123,8 +123,7 @@ function sendMessage() {
 	var message = $('#message').val().trim();
 
 	// do now allow short or empty messages
-	if (message.length <= 3 && messagePicture == null) {
-		M.toast({html: "Mínimo 3 letras"});
+	if (message.length === 0 && messagePicture == null) {
 		return false;
 	}
 
@@ -165,9 +164,12 @@ function sendMessageCallback(message) {
 
 	$('.chat').append(newMessage);
 
-	$('#message').val('');
+	var msgBox = $('#message');
+
+	msgBox.val('');
+	msgBox.height(0);
 	M.textareaAutoResize($("#message"));
-	$('#message').trigger('autoresize');
+	msgBox.trigger('autoresize');
 
 
 	// clean the img if exists
@@ -187,8 +189,10 @@ function sendMessageCallback(message) {
 
 function scrollToEndOfPage() {
 	console.log("to the end!");
-	$(".chat").animate({
-		scrollTop: $(".chat").height() + 1000
+	var chat = $(".chat");
+
+	chat.animate({
+		scrollTop: chat[0].scrollHeight
 	}, 1000);
 }
 

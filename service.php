@@ -51,7 +51,7 @@ class Service
 		}
 
 		$response->setLayout('chats.ejs');
-		$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Amigos']);
+		$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Mis amigos']);
 	}
 
 	/**
@@ -306,6 +306,10 @@ class Service
 		}
 
 		$image = $request->input->data->image ?? false;
+		$message = $request->input->data->message ?? '';
+
+		if (!$image && empty($message)) return;
+
 		$fileName = '';
 
 		// get the image name and path
