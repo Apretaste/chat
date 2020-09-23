@@ -318,9 +318,8 @@ class Service
 			$fileName = Utils::randomHash();
 			$filePath = "$chatImgDir/$fileName.jpg";
 
-			// save the optimized image on the user folder
-			file_put_contents($filePath, base64_decode($image));
-			Images::optimize($filePath);
+			// save the optimized image
+			Images::saveBase64Image($image, $filePath);
 		}
 
 		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
