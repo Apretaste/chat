@@ -42,6 +42,8 @@ class Service
 			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
 			$friend = $user;
 
+			if(empty($friend)) continue;
+
 			// get the person's avatar
 			$friend->avatar = $friend->avatar ?? ($friend->gender === 'F' ? 'chica' : 'hombre');
 
