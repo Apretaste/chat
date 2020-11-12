@@ -188,12 +188,14 @@ function sendMessageCallback(message) {
 }
 
 function scrollToEndOfPage() {
-	console.log("to the end!");
 	var chat = $(".chat");
 
-	chat.animate({
-		scrollTop: chat[0].scrollHeight
-	}, 1000);
+	if (chat.length > 0) {
+		console.log("to the end!");
+		chat.animate({
+			scrollTop: chat[0].scrollHeight
+		}, 1000);
+	}
 }
 
 function short(username) {
