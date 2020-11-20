@@ -164,7 +164,6 @@ function sendMessageCallback(message) {
 }
 
 function chatNewMessageHandler(data) {
-	var decodedData = JSON.parse(data);
 	if (data.fromUser == currentUser) {
 		switch (decodedData.messageType) {
 			case 'text':
