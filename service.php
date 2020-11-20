@@ -338,14 +338,11 @@ class Service
 
 		// send notification for the app
 		$text = "@{$request->person->username} le ha enviado una nota";
-		Notifications::alert($userTo->id, $text, 'message', "{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}");
-
-		PushNotifications::callAppHandler(
-			$userTo->id,
-			'chatNewMessageHandler',
-			['fromUser' => $request->person->id, 'message' => $message, 'image' => $image]
+		Notifications::alert(
+			$userTo->id, $text, 'message', "{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}",
+			'chatNewMessageHandler', ['fromUser' => $request->person->id, 'message' => $message, 'image' => $image],
 		);
-
+		
 		// complete challenge
 		Challenges::complete("chat", $request->person->id);
 	}
