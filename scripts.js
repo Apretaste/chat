@@ -169,7 +169,8 @@ function chatNewMessageHandler(data) {
 			'left', data.message, avatar, avatarColor,
 			gender, username, data.image
 		)
-	}
+		return true;
+	} else return false;
 }
 
 function appendMessage(align, message, avatar, color, gender, username, imgData) {
