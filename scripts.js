@@ -197,7 +197,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	}
 
 	var newMessage =
-		"<li class=\"" + direction + "\" id=\"last\">\n" +
+		"<li class=\"" + align + "\" id=\"last\">\n" +
 		"     <div class=\"person-avatar message-avatar circle\"\n" +
 		"      face=\"" + avatar + "\" color=\"" + color + "\" size=\"30\"></div>\n" +
 		"     <div class=\"head\">\n" +
