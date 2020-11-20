@@ -343,7 +343,7 @@ class Service
 		PushNotifications::callAppHandler(
 			$userTo->id,
 			'chatNewMessageHandler',
-			['fromUser' => $request->person->id, 'message' => $text, 'image' => $image]
+			['fromUser' => $request->person->id, 'message' => $message, 'image' => $image]
 		);
 
 		// complete challenge
