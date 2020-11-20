@@ -165,10 +165,10 @@ function sendMessageCallback(message) {
 
 function chatNewMessageHandler(data) {
 	if (data.fromUser == id) {
-		switch (decodedData.messageType) {
+		switch (data.messageType) {
 			case 'text':
 				appendMessage(
-					'left', decodedData.message, avatar, avatarColor,
+					'left', data.message, avatar, avatarColor,
 					gender, username
 				);
 				break;
@@ -176,7 +176,7 @@ function chatNewMessageHandler(data) {
 			case 'image':
 				appendMessage(
 					'left', '', avatar, avatarColor,
-					gender, username, decodedData.message
+					gender, username, data.message
 				);
 				break;
 		}
