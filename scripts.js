@@ -181,7 +181,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	}
 
 	var pictureContent = "";
-	if (imgData != null) {
+	if (imgData != null && imgData) {
 		pictureContent += '<img src="data:image/jpg;base64,' + imgData + '" class="responsive-img materialboxed"/>';
 	}
 
