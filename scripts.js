@@ -164,7 +164,7 @@ function sendMessageCallback(message) {
 }
 
 function chatNewMessageHandler(data) {
-	if (data.fromUser == currentUser) {
+	if (data.fromUser == id) {
 		switch (decodedData.messageType) {
 			case 'text':
 				appendMessage(
