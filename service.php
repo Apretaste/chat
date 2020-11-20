@@ -5,6 +5,7 @@ use Apretaste\Chats;
 use Apretaste\Level;
 use Apretaste\Notifications;
 use Apretaste\Person;
+use Apretaste\PushNotifications;
 use Apretaste\Request;
 use Apretaste\Response;
 use Framework\Core;
@@ -42,7 +43,7 @@ class Service
 			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
 			$friend = $user;
 
-			if(empty($friend)) continue;
+			if (empty($friend)) continue;
 
 			// get the person's avatar
 			$friend->avatar = $friend->avatar ?? ($friend->gender === 'F' ? 'chica' : 'hombre');
@@ -338,6 +339,12 @@ class Service
 		// send notification for the app
 		$text = "@{$request->person->username} le ha enviado una nota";
 		Notifications::alert($userTo->id, $text, 'message', "{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}");
+
+		PushNotifications::callAppHandler(
+			$userTo->id,
+			'chatNewMessageHandler',
+			['fromUser' => $request->person->id, 'message' => $text, 'image' => $image]
+		);
 
 		// complete challenge
 		Challenges::complete("chat", $request->person->id);

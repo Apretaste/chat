@@ -165,21 +165,10 @@ function sendMessageCallback(message) {
 
 function chatNewMessageHandler(data) {
 	if (data.fromUser == id) {
-		switch (data.messageType) {
-			case 'text':
-				appendMessage(
-					'left', data.message, avatar, avatarColor,
-					gender, username
-				);
-				break;
-
-			case 'image':
-				appendMessage(
-					'left', '', avatar, avatarColor,
-					gender, username, data.message
-				);
-				break;
-		}
+		appendMessage(
+			'left', data.message, avatar, avatarColor,
+			gender, username, data.image
+		)
 	}
 }
 
