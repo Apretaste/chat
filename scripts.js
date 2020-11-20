@@ -139,30 +139,10 @@ function sendMessage() {
 }
 
 function sendMessageCallback(message) {
-	if (messages.length == 0) {
-		// Jquery Bug, fixed in 1.9, insertBefore or After deletes the element and inserts nothing
-		// $('#messageField').insertBefore("<div class=\"chat\"></div>");
-		$('#nochats').remove();
-		$('#chat-row > .col').append("<ul class=\"chat\"></ul>");
-	}
-
-	var pictureContent = "";
-	if (messagePicture != null) {
-		pictureContent += '<img src="data:image/jpg;base64,' + messagePicture + '" class="responsive-img materialboxed"/>';
-	}
-
-	var newMessage =
-		"<li class=\"right\" id=\"last\">\n" +
-		"     <div class=\"person-avatar message-avatar circle\"\n" +
-		"      face=\"" + myAvatar + "\" color=\"" + myColor + "\" size=\"30\"></div>\n" +
-		"     <div class=\"head\">\n" +
-		"         <a href=\"#!\" class=\"" + myGender + "\">" + myUsername + "</a>\n" +
-		"         <span class=\"date\">" + moment().format('DD/MM/Y h:m a') + "</span>\n" +
-		"     </div>\n" +
-		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
-		"</li>"
-
-	$('.chat').append(newMessage);
+	appendMessage(
+		'right', message, myAvatar, myColor,
+		myGender, myUsername, messagePicture
+	);
 
 	var msgBox = $('#message');
 
@@ -176,6 +156,59 @@ function sendMessageCallback(message) {
 	messagePicture = null;
 	$('input:file').val(null);
 	$('#messagePictureBox').remove();
+
+	$('.materialboxed').materialbox();
+
+	// scroll to the end of the page
+	scrollToEndOfPage();
+}
+
+function chatNewMessageHandler(data) {
+	var decodedData = JSON.parse(data);
+	if (data.fromUser == currentUser) {
+		switch (decodedData.messageType) {
+			case 'text':
+				appendMessage(
+					'left', decodedData.message, avatar, avatarColor,
+					gender, username
+				);
+				break;
+
+			case 'image':
+				appendMessage(
+					'left', '', avatar, avatarColor,
+					gender, username, decodedData.message
+				);
+				break;
+		}
+	}
+}
+
+function appendMessage(align, message, avatar, color, gender, username, imgData) {
+	if (messages.length == 0) {
+		// Jquery Bug, fixed in 1.9, insertBefore or After deletes the element and inserts nothing
+		// $('#messageField').insertBefore("<div class=\"chat\"></div>");
+		$('#nochats').remove();
+		$('#chat-row > .col').append("<ul class=\"chat\"></ul>");
+	}
+
+	var pictureContent = "";
+	if (imgData != null) {
+		pictureContent += '<img src="data:image/jpg;base64,' + imgData + '" class="responsive-img materialboxed"/>';
+	}
+
+	var newMessage =
+		"<li class=\"" + direction + "\" id=\"last\">\n" +
+		"     <div class=\"person-avatar message-avatar circle\"\n" +
+		"      face=\"" + avatar + "\" color=\"" + color + "\" size=\"30\"></div>\n" +
+		"     <div class=\"head\">\n" +
+		"         <a href=\"#!\" class=\"" + gender + "\">" + username + "</a>\n" +
+		"         <span class=\"date\">" + moment().format('DD/MM/Y h:m a') + "</span>\n" +
+		"     </div>\n" +
+		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
+		"</li>"
+
+	$('.chat').append(newMessage);
 
 	$('.materialboxed').materialbox();
 
