@@ -164,10 +164,19 @@ function sendMessageCallback(message) {
 }
 
 function chatNewMessageHandler(data) {
+	var imagePath = null;
+
 	if (data.fromUser == id) {
+		if (data.image !== '') {
+			imagePath = apretaste.apiHandler({
+				handlerName: 'chat/image',
+				handlerData: {'image': data.image},
+			});
+		}
+
 		appendMessage(
 			'left', data.message, avatar, avatarColor,
-			gender, username, data.image
+			gender, username, imagePath
 		)
 		return true;
 	} else return false;
@@ -183,7 +192,12 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 
 	var pictureContent = "";
 	if (imgData != null && imgData) {
-		pictureContent += '<img src="data:image/jpg;base64,' + imgData + '" class="responsive-img materialboxed"/>';
+		var src = imgData;
+		if (imgData.indexOf('file://') === -1) {
+			src = 'data:image/jpg;base64,' + imgData;
+		}
+
+		pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
 	}
 
 	var newMessage =
