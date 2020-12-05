@@ -168,13 +168,18 @@ function chatNewMessageHandler(data) {
 
 	if (data.fromUser == id) {
 		if (data.image !== '') {
-			imagePath = apretaste.apiHandler({
+			apretaste.apiHandler({
 				handlerName: 'chat/image',
 				handlerData: {'file': data.image},
 				isFile: true,
+			}).then(function (imgPath) {
+				appendMessage(
+					'left', data.message, avatar, avatarColor,
+					gender, username, imgPath
+				)
 			});
 
-			if(imagePath == null) return false;
+			return true;
 		}
 
 		appendMessage(
