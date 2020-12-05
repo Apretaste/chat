@@ -220,7 +220,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		"      face=\"" + avatar + "\" color=\"" + color + "\" size=\"30\"></div>\n" +
 		"     <div class=\"head\">\n" +
 		"         <a href=\"#!\" class=\"" + gender + "\">" + username + "</a>\n" +
-		"         <span class=\"date\">" + moment().format('DD/MM/Y h:m a') + "</span>\n" +
+		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +
 		"     </div>\n" +
 		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
 		"</li>"
