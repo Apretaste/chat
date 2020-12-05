@@ -168,16 +168,22 @@ function chatNewMessageHandler(data) {
 
 	if (data.fromUser == id) {
 		if (data.image !== '') {
-			apretaste.apiHandler({
-				handlerName: 'chat/image',
-				handlerData: {'file': data.image},
-				isFile: true,
-			}).then(function (imgPath) {
-				appendMessage(
-					'left', data.message, avatar, avatarColor,
-					gender, username, imgPath
-				)
-			});
+			try{
+				apretaste.apiHandler({
+					handlerName: 'chat/image',
+					handlerData: {'file': data.image},
+					isFile: true,
+				}).then(function (imgPath) {
+					console.log(imgPath);
+					appendMessage(
+						'left', data.message, avatar, avatarColor,
+						gender, username, imgPath
+					)
+				});
+			} catch (e){
+				console.log(e);
+			}
+
 
 			return true;
 		}
