@@ -173,6 +173,8 @@ function chatNewMessageHandler(data) {
 				handlerData: {'image': data.image},
 				isFile: true,
 			});
+
+			if(imagePath == null) return false;
 		}
 
 		appendMessage(
