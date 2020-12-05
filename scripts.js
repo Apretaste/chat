@@ -170,7 +170,7 @@ function chatNewMessageHandler(data) {
 		if (data.image !== '') {
 			imagePath = apretaste.apiHandler({
 				handlerName: 'chat/image',
-				handlerData: {'image': data.image},
+				handlerData: {'file': data.image},
 				isFile: true,
 			});
 
