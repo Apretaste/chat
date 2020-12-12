@@ -174,7 +174,6 @@ function sendMessage() {
 
 function sendMessageCallback(message) {
 	var imgSource = messagePicture != null ? messagePicture : messagePicturePath;
-	console.log('callback', imgSource)
 	appendMessage(
 		'right', message, myAvatar, myColor,
 		myGender, myUsername, imgSource
@@ -244,13 +243,13 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	var pictureContent = "";
 	if (imgData != null && imgData) {
 		var src = imgData;
+		var isFile = imgData.indexOf('file://') !== -1 || (imgData[0] === '/' && imgData.length < 200);
 
-		if (imgData.indexOf('file://') === -1 && imgData[0] !== '/') {
+		if (!isFile) {
 			src = 'data:image/jpg;base64,' + imgData;
 		}
 
 		pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
-		console.log('append', src)
 	}
 
 	var newMessage =
@@ -280,7 +279,6 @@ function scrollToEndOfPage() {
 	var chat = $(".chat");
 
 	if (chat.length > 0) {
-		console.log("to the end!");
 		chat.animate({
 			scrollTop: chat[0].scrollHeight
 		}, 1000);
