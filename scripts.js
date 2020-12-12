@@ -32,6 +32,20 @@ function profile(username) {
 }
 
 var messagePicture = null;
+var messagePicturePath = null;
+
+function loadImage() {
+	if (typeof apretaste.loadImage != 'undefined') {
+		apretaste.loadImage('onImageLoaded')
+	} else {
+		loadFileToBase64();
+	}
+}
+
+function onImageLoaded(path) {
+	showLoadedImage(path);
+	messagePicturePath = path;
+}
 
 function sendFile(base64File) {
 	if (base64File.length > 2584000) {
@@ -42,33 +56,40 @@ function sendFile(base64File) {
 
 	messagePicture = base64File;
 	var messagePictureSrc = "data:image/jpg;base64," + base64File;
+	showLoadedImage(messagePictureSrc)
+}
 
-	if ($('#messagePictureBox').length == 0) {
-		$('#messageBox').append('<div id="messagePictureBox">' +
+function showLoadedImage(imageSource) {
+	if ($('#messagePictureBox').length === 0) {
+		$('#messageBox').append(
+			'<div id="messagePictureBox">' +
 			'<img id="messagePicture" class="responsive-img"/>' +
 			'<i class="material-icons red-text" onclick="removePicture()">cancel</i>' +
-			'</div>');
+			'</div>'
+		);
 	}
 
-	$('#messagePicture').attr('src', messagePictureSrc);
+	$('#messagePicture').attr('src', imageSource);
 }
 
 function removePicture() {
 	// clean the img if exists
 	messagePicture = null;
+	messagePicturePath = null;
 	$('input:file').val(null);
 	$('#messagePictureBox').remove();
 }
 
 function deleteModalOpen(id, username) {
+	var modal = $('#deleteModal')
 	// add to id to the modal so the modal knows what to delete
-	$('#deleteModal').attr('data-value', id);
+	modal.attr('data-value', id);
 
 	// change the modal's message
 	$('#deleteModalUsername').html(username);
 
 	// open the modal
-	M.Modal.getInstance($('#deleteModal')).open();
+	M.Modal.getInstance(modal).open();
 }
 
 function deleteChat() {
@@ -123,8 +144,23 @@ function sendMessage() {
 	var message = $('#message').val().trim();
 
 	// do now allow short or empty messages
-	if (message.length === 0 && messagePicture == null) {
+	if (message.length === 0 && messagePicture == null && messagePicturePath == null) {
 		return false;
+	}
+
+	if (messagePicturePath != null) {
+		var basename = messagePicturePath.split(/[\\/]/).pop()
+
+		// send the message with the file
+		apretaste.send({
+			'command': "CHAT ESCRIBIR",
+			'data': {'id': id, 'message': message, 'imageName': basename},
+			'redirect': false,
+			'files': [messagePicturePath],
+			'callback': {'name': 'sendMessageCallback', 'data': message}
+		});
+
+		return;
 	}
 
 	// send the message
@@ -134,14 +170,14 @@ function sendMessage() {
 		'redirect': false,
 		'callback': {'name': 'sendMessageCallback', 'data': message}
 	});
-
-
 }
 
 function sendMessageCallback(message) {
+	var imgSource = messagePicture != null ? messagePicture : messagePicturePath;
+
 	appendMessage(
 		'right', message, myAvatar, myColor,
-		myGender, myUsername, messagePicture
+		myGender, myUsername, imgSource
 	);
 
 	var msgBox = $('#message');
@@ -154,6 +190,7 @@ function sendMessageCallback(message) {
 
 	// clean the img if exists
 	messagePicture = null;
+	messagePicturePath = null;
 	$('input:file').val(null);
 	$('#messagePictureBox').remove();
 
@@ -207,7 +244,8 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	var pictureContent = "";
 	if (imgData != null && imgData) {
 		var src = imgData;
-		if (imgData.indexOf('file://') === -1) {
+
+		if (imgData.indexOf('file://') === -1 && imgData[0] !== '/') {
 			src = 'data:image/jpg;base64,' + imgData;
 		}
 
@@ -265,12 +303,6 @@ var currentUser = null;
 
 function openSearchModal() {
 	M.Modal.getInstance($('#searchModal')).open();
-}
-
-function deleteModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#deleteModal')).open();
 }
 
 function rejectModalOpen(id, username) {

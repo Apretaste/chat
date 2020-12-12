@@ -309,20 +309,26 @@ class Service
 		}
 
 		$image = $request->input->data->image ?? false;
+		$imageName = $request->input->data->imageName ?? false;
 		$message = $request->input->data->message ?? '';
 
-		if (!$image && empty($message)) return;
+		if (!$image && !$imageName && empty($message)) return;
 
 		$fileName = '';
 
 		// get the image name and path
-		if ($image) {
+		if ($image || $imageName) {
 			$chatImgDir = SHARED_PUBLIC_PATH . '/content/chat';
 			$fileName = Utils::randomHash();
 			$filePath = "$chatImgDir/$fileName.jpg";
 
-			// save the optimized image
-			Images::saveBase64Image($image, $filePath);
+			if($image){
+				// save the optimized image
+				Images::saveBase64Image($image, $filePath);
+			} else {
+				$tempImagePath = $request->input->files[$imageName];
+				rename($tempImagePath, $filePath);
+			}
 		}
 
 		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
