@@ -174,7 +174,7 @@ function sendMessage() {
 
 function sendMessageCallback(message) {
 	var imgSource = messagePicture != null ? messagePicture : messagePicturePath;
-
+	console.log('callback', imgSource)
 	appendMessage(
 		'right', message, myAvatar, myColor,
 		myGender, myUsername, imgSource
@@ -245,11 +245,12 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	if (imgData != null && imgData) {
 		var src = imgData;
 
-		if (imgData.indexOf('file://') === -1) {
+		if (imgData.indexOf('file://') === -1 && imgData[0] !== '/') {
 			src = 'data:image/jpg;base64,' + imgData;
 		}
 
 		pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
+		console.log('append', src)
 	}
 
 	var newMessage =
