@@ -245,7 +245,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	if (imgData != null && imgData) {
 		var src = imgData;
 
-		if (imgData.indexOf('file://') === -1 && imgData[0] !== '/') {
+		if (imgData.indexOf('file://') === -1) {
 			src = 'data:image/jpg;base64,' + imgData;
 		}
 
@@ -257,7 +257,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		"     <div class=\"person-avatar message-avatar circle\"\n" +
 		"      face=\"" + avatar + "\" color=\"" + color + "\" size=\"30\"></div>\n" +
 		"     <div class=\"head\">\n" +
-		"         <a href=\"#!\" class=\"" + gender + "\">" + username + "</a>\n" +
+		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>\n" +
 		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +
 		"     </div>\n" +
 		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
