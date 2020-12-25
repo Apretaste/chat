@@ -2,14 +2,29 @@
     <div class="col s12">
         <ul class="collection profile">
             <li class="collection-item avatar">
-                <div class="person-avatar circle"
-                     face="<%= avatar %>" color="<%= avatarColor %>"
+                <div class="person-avatar circle left"
+                     color="<%= avatarColor %>"
                      size="45" online="<%= online %>"
-                     onclick="openProfile(<%= id %>)"></div>
+                     face="<%= avatar %>"
+                     onclick="openProfile(<%= id %>)"
+                <% if(isInfluencer){ %>
+                     creator_image="{{APP_SERVICE_PATH}}/images/<%= username %>.png"
+                     state="gold"
+                        <% } %>
+                >
+                </div>
+
                 <span class="title <%= gender %>">@<%= username %></span>
                 <p class="valign-wrapper">
                     <span class="clear">
-                        <i class="fa fa-bolt"></i> <%= experience %>
+                        <% if(isInfluencer){ %>
+                            <%= influencerData.first_category %>
+                            <% if(influencerData.second_category != null){ %>
+                                | <%= influencerData.second_category %>
+                            <% } %>
+                        <% } else { %>
+                            <i class="fa fa-bolt"></i> <%= experience %>
+                        <% } %>
                     </span>
                 </p>
                 <a onclick="apretaste.back()" class="secondary-content green-text second">
@@ -28,7 +43,12 @@
 
                     <li class="<%= message.class %>" id="<%= message.id %>">
                         <div class="person-avatar message-avatar circle" face="<%= message.avatar %>"
-                             color="<%= message.avatarColor %>" size="30"></div>
+                             color="<%= message.avatarColor %>" size="30"
+                        <% if(message.isInfluencer){ %>
+                             creator_image="{{APP_SERVICE_PATH}}/images/<%= message.username %>.png"
+                             state="gold"
+                                <% } %>
+                        ></div>
                         <div class="head">
                             <a href="#!" class="<%= message.gender %>">@<%= message.username %></a>
                             <span class="date"><%= message.sent %></span>
@@ -61,3 +81,5 @@
         </div>
     </div>
 </div>
+
+<%- '<serviceImgPath data="{{APP_SERVICE_PATH}}/images/"></serviceImgPath>' %>

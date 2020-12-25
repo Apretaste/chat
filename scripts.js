@@ -252,10 +252,16 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
 	}
 
+	avatar = 'face="' + avatar + '"';
+	if (username === myUsername && iAmInfluencer) {
+		var serviceImgPath = $('serviceImgPath').attr('data');
+		avatar += ' creator_image="' + serviceImgPath + myUsername + '.png" state="gold"'
+	}
+
 	var newMessage =
 		"<li class=\"" + align + "\" id=\"last\">\n" +
 		"     <div class=\"person-avatar message-avatar circle\"\n" +
-		"      face=\"" + avatar + "\" color=\"" + color + "\" size=\"30\"></div>\n" +
+		avatar + " color=\"" + color + "\" size=\"30\"></div>\n" +
 		"     <div class=\"head\">\n" +
 		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>\n" +
 		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +

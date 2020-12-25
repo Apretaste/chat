@@ -74,7 +74,8 @@ class Service
 		// get content for the view
 		$content = [
 			'chats' => $chats,
-			'myuser' => $request->person->id];
+			'myuser' => $request->person->id
+		];
 
 		// send data to the view
 		$response->setCache('hour');
@@ -254,12 +255,15 @@ class Service
 			'gender' => $user->gender,
 			'username' => $user->username,
 			'avatar' => $user->avatar,
+			'isInfluencer' => $user->isInfluencer,
+			'influencerData' => $user->getInfluencerData(),
 			'avatarColor' => $user->avatarColor,
 			'experience' => $user->experience,
 			'myAvatar' => $request->person->avatar,
 			'myColor' => $request->person->avatarColor,
 			'myGender' => $request->person->gender,
 			'myUsername' => $request->person->username,
+			'iAmInfluencer' => $request->person->isInfluencer,
 			'last' => date('d/m/Y h:i a', strtotime($user->lastAccess))
 		];
 
