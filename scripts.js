@@ -31,6 +31,16 @@ function profile(username) {
 	});
 }
 
+function recordVoiceNote(){
+	if (typeof apretaste.recordVoice != 'undefined') {
+		apretaste.recordVoice('onVoiceRecorded')
+	}
+}
+
+function onVoiceRecorded(path){
+	console.log(path);
+}
+
 var messagePicture = null;
 var messagePicturePath = null;
 

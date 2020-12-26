@@ -76,6 +76,9 @@
         </div>
         <div class="col s3 m2 right-align">
             <input type="file" id="picture" accept="image/*" class="hide">
+            <%if (typeof apretaste.recordVoice != 'undefined') {%>
+                <i class="material-icons" onclick="recordVoiceNote()">keyboard_voice</i>
+            <%}%>
             <i class="material-icons" onclick="loadImage()">photo</i>
             <i class="material-icons" onclick="sendMessage()">send</i>
         </div>
