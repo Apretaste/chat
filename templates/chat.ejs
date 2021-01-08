@@ -55,8 +55,14 @@
                         </div>
                         <span class="text">
                             <% if(message.image){ %>
-                                <img class="responsive-img materialboxed"
-                                     src="{{APP_IMAGE_PATH}}/<%= message.image %>"/>
+                                <% var src = '{{APP_IMAGE_PATH}}/' + message.image %>
+                                <% if(typeof apretaste.showImage != 'undefined'){ %>
+                                    <img class="responsive-img" style="width: 100%; object-fit: cover;"
+                                         src="<%= src %>" onclick="apretaste.showImage('<%= src %>')">
+                                <% } else { %>
+                                    <img class="responsive-img materialboxed" style="width: 100%; object-fit: cover;"
+                                         src="<%= src %>">
+                                <% } %>
                                 <br>
                             <% } %>
                             <%= message.text %>
@@ -76,9 +82,9 @@
         </div>
         <div class="col s3 m2 right-align">
             <input type="file" id="picture" accept="image/*" class="hide">
-            <%if (typeof apretaste.recordVoice != 'undefined') {%>
+            <% if (typeof apretaste.recordVoice != 'undefined') { %>
                 <i class="material-icons" onclick="recordVoiceNote()">keyboard_voice</i>
-            <%}%>
+            <% } %>
             <i class="material-icons" onclick="loadImage()">photo</i>
             <i class="material-icons" onclick="sendMessage()">send</i>
         </div>
