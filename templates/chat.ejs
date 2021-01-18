@@ -18,9 +18,9 @@
                 <p class="valign-wrapper">
                     <span class="clear">
                         <% if(isInfluencer){ %>
-                            <%= influencerData.first_category %>
-                            <% if(influencerData.second_category != null){ %>
-                                | <%= influencerData.second_category %>
+                            <%= influencerData.firstCategoryCaption %>
+                            <% if(influencerData.secondCategoryCaption != null){ %>
+                                | <%= influencerData.secondCategoryCaption %>
                             <% } %>
                         <% } else { %>
                             <i class="fa fa-bolt"></i> <%= experience %>
