@@ -31,13 +31,13 @@ function profile(username) {
 	});
 }
 
-function recordVoiceNote(){
+function recordVoiceNote() {
 	if (typeof apretaste.recordVoice != 'undefined') {
 		apretaste.recordVoice('onVoiceRecorded')
 	}
 }
 
-function onVoiceRecorded(path){
+function onVoiceRecorded(path) {
 	console.log(path);
 }
 
@@ -259,7 +259,13 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 			src = 'data:image/jpg;base64,' + imgData;
 		}
 
-		pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
+		if (typeof apretaste.showImage != 'undefined' && isFile) {
+			pictureContent += '<img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
+		} else {
+			pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
+		}
+
+
 	}
 
 	avatar = 'face="' + avatar + '"';
