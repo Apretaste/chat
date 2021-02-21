@@ -365,8 +365,7 @@ class Service
 					FROM person WHERE 
 					  active = 1
 						AND (
-							(lower(coalesce(country,'')) = 'cu' AND province = '{$request->person->provinceCode}') -- de cuba y misma provincia
-							OR (lower(coalesce(country,'')) = '' AND province = '{$request->person->provinceCode}') -- de la misma provincia, country vacio
+							(lower(coalesce(NULLIF(country,''),'cu')) = 'cu' AND province = '{$request->person->provinceCode}' AND (lower('{$request->person->countryCode}') = 'cu' OR '{$request->person->countryCode}' = '')) -- de cuba y misma provincia
 							OR (lower(country) = lower('{$request->person->countryCode}') -- mismo pais y ...
 									AND (lower(trim(coalesce(city, ''))) = lower(trim('{$request->person->city}')))) -- ... misma ciudad
 						)
