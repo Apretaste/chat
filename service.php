@@ -368,7 +368,7 @@ class Service
 							(lower(coalesce(country,'')) = 'cu' AND province = '{$request->person->provinceCode}') -- de cuba y misma provincia
 							OR (lower(coalesce(country,'')) = '' AND province = '{$request->person->provinceCode}') -- de la misma provincia, country vacio
 							OR (lower(country) = lower('{$request->person->countryCode}') -- mismo pais y ...
-									AND (lower(trim(coalesce(city, '')) = lower(trim('{$request->person->city}')))) -- ... misma ciudad
+									AND (lower(trim(coalesce(city, ''))) = lower(trim('{$request->person->city}')))) -- ... misma ciudad
 						)
 					  AND id <> {$request->person->id} 
 					  order by online DESC, last_access DESC limit 33;");
