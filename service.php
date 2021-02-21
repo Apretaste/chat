@@ -364,7 +364,9 @@ class Service
 		$list = Database::query("SELECT id, username, gender, avatar, avatarColor, online 
 					FROM person WHERE province <> '' AND province is not null
 					              AND active = 1
-					              AND province = '{$request->person->provinceCode}' 
+					              AND country = '{$request->person->countryCode}'
+					              AND (province = '{$request->person->provinceCode}' OR '{$request->person->countryCode}' <> 'CU') 
+					              AND (lower(trim(city)) = lower(trim('{$request->person->city}')) OR '{$request->person->countryCode}' = 'CU')
 								  AND id <> {$request->person->id} 
 					              order by online DESC, last_access DESC limit 33;");
 

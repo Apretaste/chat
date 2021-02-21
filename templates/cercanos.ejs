@@ -23,7 +23,10 @@
         </div>
     <% }) %>
 
-    <% if(list.length == 0){ %>
-        <p class="middle-center center grey-text">No hay nadie cercano para chatear.</p>
+    <% if (list.length == 0) { %>
+        <p class="middle-center center grey-text">
+            No hay nadie cercano para chatear o no has puesto en tu perfil de donde eres.
+            Para revisar tu perfil pincha <a onclick="apretaste.send({command: 'PERFIL EDITAR'});">aqu&iacute;</a>
+        </p>
     <% } %>
 </div>
