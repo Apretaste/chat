@@ -370,7 +370,8 @@ class Service
 
 		$response->setLayout('chats.ejs');
 		$response->setTemplate('cercanos.ejs', [
-			'list' => $list
+			'list' => $list,
+			'title' => 'Cercanos'
 		]);
 	}
 }
