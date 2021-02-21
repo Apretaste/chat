@@ -367,6 +367,7 @@ class Service
 					              AND province = '{$request->person->provinceCode}' 
 					              order by online DESC, last_access DESC limit 33;");
 
+		$response->setLayout('chats.ejs');
 		$response->setTemplate('cercanos.ejs', [
 			'list' => $list
 		]);
