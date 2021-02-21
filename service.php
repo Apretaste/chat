@@ -362,13 +362,16 @@ class Service
 	public function _cercanos(Request $request, Response $response) {
 
 		$list = Database::query("SELECT id, username, gender, avatar, avatarColor, online 
-					FROM person WHERE province <> '' AND province is not null
-					              AND active = 1
-					              AND (lower(country) = lower('{$request->person->countryCode}') OR country is NULL) 
-					              AND (province = '{$request->person->provinceCode}' OR lower('{$request->person->countryCode}') <> 'cu') 
-					              AND (lower(trim(city)) = lower(trim('{$request->person->city}')) OR coalesce(city,'') = '' OR lower('{$request->person->countryCode}') = 'cu')
-								  AND id <> {$request->person->id} 
-					              order by online DESC, last_access DESC limit 33;");
+					FROM person WHERE 
+					  active = 1
+						AND (
+							(lower(coalesce(country,'')) = 'cu' AND province = '{$request->person->provinceCode}') -- de cuba y misma provincia
+							OR (lower(coalesce(country,'')) = '' AND province = '{$request->person->provinceCode}') -- de la misma provincia, country vacio
+							OR (lower(country) = lower('{$request->person->countryCode}') -- mismo pais y ...
+									AND (lower(trim(coalesce(city, '')) = lower(trim('{$request->person->city}')))) -- ... misma ciudad
+						)
+					  AND id <> {$request->person->id} 
+					  order by online DESC, last_access DESC limit 33;");
 
 		$response->setLayout('chats.ejs');
 		$response->setTemplate('cercanos.ejs', [
