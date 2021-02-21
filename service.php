@@ -365,6 +365,7 @@ class Service
 					FROM person WHERE province <> '' AND province is not null
 					              AND active = 1
 					              AND province = '{$request->person->provinceCode}' 
+								  AND id <> {$request->person->id} 
 					              order by online DESC, last_access DESC limit 33;");
 
 		$response->setLayout('chats.ejs');
