@@ -358,4 +358,17 @@ class Service
 		// complete challenge
 		Challenges::complete("chat", $request->person->id);
 	}
+
+	public function _cercanos(Request $request, Response $response) {
+
+		$list = Database::query("SELECT id, username, gender, avatar, avatarColor, online 
+					FROM person WHERE province <> '' AND province is not null
+					              AND active = 1
+					              AND province = '{$request->person->provinceCode}' 
+					              order by online DESC, last_access DESC limit 33;");
+
+		$response->setTemplate('cercanos.ejs', [
+			'list' => $list
+		]);
+	}
 }
