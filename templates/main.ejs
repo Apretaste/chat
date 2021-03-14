@@ -1,7 +1,13 @@
+<div id="filters" class="row">
+    <div class="col s12 scrolleable">
+                <span id="buscar" class="chip tiny" onclick="filtrar('buscar')"><i class="fas fa-search"></i><span class="filter"><input onkeyup="buscar()" type=""></span></span>
+    </div>
+</div>
+
 <div class="col s12">
     <% friends.forEach(function(friend){ %>
         <div class="col s4 m2">
-            <div class="card user-card center-align">
+            <div class="card user-card center-align" data-value="<%= friend.username %>">
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
                     <div class="person-avatar circle" face="<%= friend.avatar %>" color="<%= friend.avatarColor %>"
                          size="40" online="<%= friend.online %>">

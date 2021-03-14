@@ -37,7 +37,22 @@ class Service
 		}
 
 		// get the list of open chats
-		$friends = $request->person->getFriends();
+		$friends = [];
+		$rows = Database::query("
+			SELECT * FROM (						
+				SELECT user2 as id, 
+				(SELECT count(*) FROM _note WHERE _note.to_user = {$request->person->id} AND _note.from_user = user2 AND _note.read_date IS NULL AND (active=01 OR active=11)) AS unread
+				FROM person_relation_friend WHERE user1 = {$request->person->id}
+				UNION SELECT user1 as id,
+				(SELECT count(*) FROM _note WHERE _note.to_user = {$request->person->id} AND _note.from_user = user1 AND _note.read_date IS NULL AND (active=01 OR active=11)) AS unread
+				FROM person_relation_friend WHERE user2 = {$request->person->id}
+				) subq ORDER BY unread DESC");
+
+		foreach ($rows as $item) {
+			$friends[] = $item->id;
+		}
+
+		//	$request->person->getFriends();
 
 		foreach ($friends as &$friend) {
 			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
@@ -53,6 +68,7 @@ class Service
 			$friend->unreadCount = Chats::getUnreadCount($friend->id, $request->person->id);
 		}
 
+		$response->setCache(30);
 		$response->setLayout('chats.ejs');
 		$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Mis amigos']);
 	}
@@ -372,6 +388,7 @@ class Service
 					  AND id <> {$request->person->id} 
 					  order by online DESC, last_access DESC limit 33;");
 
+		$response->setCache(30);
 		$response->setLayout('chats.ejs');
 		$response->setTemplate('cercanos.ejs', [
 			'list' => $list,

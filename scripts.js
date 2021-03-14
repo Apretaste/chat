@@ -158,8 +158,15 @@ function sendMessage() {
 		return false;
 	}
 
+	var imgSource = messagePicture != null ? messagePicture : messagePicturePath;
+
 	if (messagePicturePath != null) {
 		var basename = messagePicturePath.split(/[\\/]/).pop()
+
+		appendMessage(
+			'right', message, myAvatar, myColor,
+			myGender, myUsername, imgSource
+		);
 
 		// send the message with the file
 		apretaste.send({
@@ -173,6 +180,11 @@ function sendMessage() {
 		return;
 	}
 
+	appendMessage(
+		'right', message, myAvatar, myColor,
+		myGender, myUsername, imgSource
+	);
+
 	// send the message
 	apretaste.send({
 		'command': "CHAT ESCRIBIR",
@@ -183,11 +195,6 @@ function sendMessage() {
 }
 
 function sendMessageCallback(message) {
-	var imgSource = messagePicture != null ? messagePicture : messagePicturePath;
-	appendMessage(
-		'right', message, myAvatar, myColor,
-		myGender, myUsername, imgSource
-	);
 
 	var msgBox = $('#message');
 
@@ -432,4 +439,54 @@ function showToast(text) {
 
 function setCurrentUsername(username) {
 	$('.username').html('@' + username);
+}
+
+
+// filter by service category
+function filtrar(category) {
+	// select category
+	selectedCategory = category;
+
+	// highlight the category
+	$('.filter').addClass('hidden');
+	$('#'+category).find('.filter').removeClass('hidden');
+
+	// scroll to the filters
+	$('html, body').animate({scrollTop: $('#filters').offset().top}, 1000);
+
+	// show msg only on the favorite category
+	$('#empty-note').hide();
+
+	$('.user-card').slideDown('fast');
+	$('#buscar input').val('').focus();
+	return false;
+
+}
+
+// search for a service on the list
+function buscar() {
+	// get text to search by
+	var text = cleanUpSpecialChars($('#buscar input').val().toLowerCase());
+
+	$('.user-card').show().each(function(i, e) {
+		// get the caption
+		var caption = cleanUpSpecialChars($(e).attr('data-value').toLowerCase());
+
+		// hide if caption does not match
+		if(caption.indexOf(text) < 0) {
+			$(e).hide();
+		}
+	})
+}
+
+// clean special chars
+function cleanUpSpecialChars(str) {
+	return str
+		.replace(/Á/g,"A").replace(/a/g,"a")
+		.replace(/É/g,"E").replace(/é/g,"e")
+		.replace(/Í/g,"I").replace(/í/g,"i")
+		.replace(/Ó/g,"O").replace(/ó/g,"o")
+		.replace(/Ú/g,"U").replace(/ú/g,"u")
+		.replace(/Ñ/g,"N").replace(/ñ/g,"n")
+		.replace(/[^a-z0-9]/gi,''); // final clean up
 }
