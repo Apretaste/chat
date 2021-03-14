@@ -336,7 +336,7 @@ class Service
 		}
 
 		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
-		if ($blocks->blocked > 0 || $blocks->blockedByMe > 0) {
+		if ($blocks->blocked > 0 || $blocks->blockedByMe > 0 || $request->person->isBlocked($userTo->id)) {
 			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
 			Notifications::alert($request->person->id, $text, 'error', "{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}");
 			return;
