@@ -490,3 +490,11 @@ function cleanUpSpecialChars(str) {
 		.replace(/Ñ/g,"N").replace(/ñ/g,"n")
 		.replace(/[^a-z0-9]/gi,''); // final clean up
 }
+
+
+function openProfile(username) {
+	apretaste.send({
+		'command': 'PERFIL',
+		'data': {'username': '@' + username}
+	});
+}

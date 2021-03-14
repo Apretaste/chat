@@ -9,13 +9,26 @@
         <div class="col s4 m2">
             <div class="card user-card center-align" data-value="<%= friend.username %>">
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
+                    <% if (!friend.isInfluencer) { %>
+
                     <div class="person-avatar circle" face="<%= friend.avatar %>" color="<%= friend.avatarColor %>"
                          size="40" online="<%= friend.online %>">
-                        <% if(friend.unreadCount > 0){ %>
-                            <div class="icon-alert"></div>
-                        <% } %>
+                     <% } else { %>
+                        <div class="person-avatar circle"
+                             creator_image="{{APP_SERVICE_PATH}}/images/<%= friend.username %>.png"
+                             state="gold"
+                             color="<%= friend.avatarColor %>"
+                             size="40" online="<%= friend.online %>"
+                             onclick="openProfile('<%= friend.username %>')"
+                        >
+                    <% } %>
+
+                    <% if(friend.unreadCount > 0){ %>
+                        <div class="icon-alert"></div>
+                    <% } %>
                     </div>
                     <span class="<%= friend.gender %>">@<%= friend.username %></span>
+
                 </div>
                 <div class="action grey lighten-2 green-text">
                     <a href="#!">
