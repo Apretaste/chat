@@ -9,7 +9,7 @@
         <div class="col s4 m2">
             <div class="card user-card center-align" data-value="<%= friend.username %>">
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
-                    <% if (!friend.isInfluencer) { %>
+                    <% if (!friend.is_influencer) { %>
 
                     <div class="person-avatar circle" face="<%= friend.avatar %>" color="<%= friend.avatarColor %>"
                          size="40" online="<%= friend.online %>">

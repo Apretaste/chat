@@ -55,7 +55,7 @@ class Service
 		//	$request->person->getFriends();
 
 		foreach ($friends as &$friend) {
-			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online FROM person WHERE id='{$friend}' LIMIT 1");
+			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online, is_influencer FROM person WHERE id='{$friend}' LIMIT 1");
 			$friend = $user;
 
 			if (empty($friend)) continue;
