@@ -6,14 +6,6 @@
 					<%= friends.length %> <%= friends.length > 1 ? 'amigos' : 'amigo' %>
 				</span>
         </div>
-        <% if(waiting.length > 0){ %>
-            <div class="chip tiny">
-                <i class="fa fa-user-clock"></i>
-                <span id="waitingCounter">
-						<%= waiting.length %> <%= waiting.length > 1 ? 'peticiones' : 'petición' %>
-					</span>
-            </div>
-        <% } %>
 
         <span class="chip tiny" onclick="openSearch()">
                 <i class="fas fa-search"></i>
