@@ -46,7 +46,7 @@ class Service
 				UNION SELECT user1 as id,
 				(SELECT count(*) FROM _note WHERE _note.to_user = {$request->person->id} AND _note.from_user = user1 AND _note.read_date IS NULL AND (active=01 OR active=11)) AS unread
 				FROM person_relation_friend WHERE user2 = {$request->person->id}
-				) subq ORDER BY unread DESC");
+				) subq INNER JOIN person ON person.id = subq.id ORDER BY unread DESC, person.username");
 
 		foreach ($rows as $item) {
 			$friends[] = $item->id;
@@ -351,8 +351,7 @@ class Service
 			}
 		}
 
-		$blocks = Chats::isBlocked($request->person->id, $userTo->id);
-		if ($blocks->blocked > 0 || $blocks->blockedByMe > 0 || $request->person->isBlocked($userTo->id)) {
+		if ($request->person->isBlocked($userTo->id)) {
 			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
 			Notifications::alert($request->person->id, $text, 'error', "{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}");
 			return;
