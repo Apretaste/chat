@@ -466,7 +466,7 @@ function filtrar(category) {
 // search for a service on the list
 function buscar() {
 	// get text to search by
-	var text = cleanUpSpecialChars($('#buscar input').val().toLowerCase());
+	var text = cleanUpSpecialChars($('#buscar').val().toLowerCase());
 
 	$('.user-card-col').show().each(function(i, e) {
 		// get the caption
