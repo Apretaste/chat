@@ -1,12 +1,32 @@
-<div id="filters" class="row">
-    <div class="col s12 scrolleable">
-                <span id="buscar" class="chip tiny" onclick="filtrar('buscar')"><i class="fas fa-search"></i><span class="filter"><input onkeyup="buscar()" type=""></span></span>
+<div class="col s12">
+    <div class="tags">
+        <div class="chip tiny">
+            <i class="fa fa-user-alt"></i>
+            <span id="friendsCounter">
+					<%= friends.length %> <%= friends.length > 1 ? 'amigos' : 'amigo' %>
+				</span>
+        </div>
+        <% if(waiting.length > 0){ %>
+            <div class="chip tiny">
+                <i class="fa fa-user-clock"></i>
+                <span id="waitingCounter">
+						<%= waiting.length %> <%= waiting.length > 1 ? 'peticiones' : 'petición' %>
+					</span>
+            </div>
+        <% } %>
+
+        <span class="chip tiny" onclick="openSearch()">
+                <i class="fas fa-search"></i>
+                <span class="hide filter">
+                    <input id="buscar" onkeyup="buscar()" type="" style="border: none;" onfocusout="closeSearch()">
+                </span>
+            </span>
     </div>
 </div>
 
 <div class="col s12">
     <% friends.forEach(function(friend){ %>
-        <div class="col s4 m2">
+        <div class="col s4 m2 user-card-col">
             <div class="card user-card center-align" data-value="<%= friend.username %>">
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
                     <% if (!friend.is_influencer) { %>

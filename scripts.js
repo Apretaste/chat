@@ -468,7 +468,7 @@ function buscar() {
 	// get text to search by
 	var text = cleanUpSpecialChars($('#buscar input').val().toLowerCase());
 
-	$('.user-card').show().each(function(i, e) {
+	$('.user-card-col').show().each(function(i, e) {
 		// get the caption
 		var caption = cleanUpSpecialChars($(e).attr('data-value').toLowerCase());
 
@@ -497,4 +497,15 @@ function openProfile(username) {
 		'command': 'PERFIL',
 		'data': {'username': '@' + username}
 	});
+}
+
+
+// open search input
+function openSearch() {
+	$('.filter').removeClass('hide');
+	$('#buscar').focus();
+}
+
+function closeSearch() {
+	$('.filter').addClass('hide');
 }
