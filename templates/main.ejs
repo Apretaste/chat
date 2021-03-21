@@ -18,8 +18,8 @@
 
 <div class="col s12">
     <% friends.forEach(function(friend){ %>
-        <div class="col s4 m2 user-card-col">
-            <div class="card user-card center-align" data-value="<%= friend.username %>">
+        <div class="col s4 m2 user-card-col" data-value="<%= friend.username %>">
+            <div class="card user-card center-align" >
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
                     <% if (!friend.is_influencer) { %>
 
