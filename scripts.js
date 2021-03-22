@@ -429,9 +429,6 @@ function blockUser() {
 	});
 }
 
-function openProfile(id) {
-	apretaste.send({command: 'perfil', data: {id: id}});
-}
 
 function showToast(text) {
 	M.toast({html: text});
@@ -492,12 +489,16 @@ function cleanUpSpecialChars(str) {
 }
 
 
+function openProfile(id) {
+	apretaste.send({command: 'perfil', data: {id: id}});
+}
+/*
 function openProfile(username) {
 	apretaste.send({
 		'command': 'PERFIL',
 		'data': {'username': '@' + username}
 	});
-}
+}*/
 
 
 // open search input
