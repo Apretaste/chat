@@ -68,7 +68,7 @@ class Service
 			$friend->unreadCount = Chats::getUnreadCount($friend->id, $request->person->id);
 		}
 
-		$response->setCache(30);
+		//$response->setCache(30);
 		$response->setLayout('chats.ejs');
 		$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Mis amigos']);
 	}
