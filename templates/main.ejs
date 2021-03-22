@@ -21,7 +21,7 @@
         <div class="col s4 m2 user-card-col" data-value="<%= friend.username %>">
             <div class="card user-card center-align" >
                 <div class="content" onclick="openProfile('<%= friend.id %>')">
-                    <% if (!friend.is_influencer) { %>
+                    <% if (!(friend.is_influencer*1)) { %>
 
                     <div class="person-avatar circle" face="<%= friend.avatar %>" color="<%= friend.avatarColor %>"
                          size="40" online="<%= friend.online %>">
