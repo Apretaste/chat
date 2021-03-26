@@ -267,9 +267,9 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		}
 
 		if (typeof apretaste.showImage != 'undefined' && isFile) {
-			pictureContent += '<img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
+			pictureContent += '<br><img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
 		} else {
-			pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
+			pictureContent += '<br><img src="' + src + '" class="responsive-img materialboxed"/>';
 		}
 
 
@@ -289,7 +289,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>\n" +
 		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +
 		"     </div>\n" +
-		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
+		"     <span class=\"text\">" + message + pictureContent + "</span>\n" +
 		"</li>"
 
 	$('.chat').append(newMessage);
