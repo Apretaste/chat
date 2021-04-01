@@ -192,18 +192,11 @@ function sendMessage() {
 		'redirect': false,
 		'callback': {'name': 'sendMessageCallback', 'data': message}
 	});
+
+	clearMsgBox();
 }
 
 function sendMessageCallback(message) {
-
-	var msgBox = $('#message');
-
-	msgBox.val('');
-	msgBox.height(0);
-	M.textareaAutoResize($("#message"));
-	msgBox.trigger('autoresize');
-
-
 	// clean the img if exists
 	messagePicture = null;
 	messagePicturePath = null;
@@ -214,6 +207,15 @@ function sendMessageCallback(message) {
 
 	// scroll to the end of the page
 	scrollToEndOfPage();
+}
+
+function clearMsgBox(){
+	var msgBox = $('#message');
+
+	msgBox.val('');
+	msgBox.height(0);
+	M.textareaAutoResize(msgBox);
+	msgBox.trigger('autoresize');
 }
 
 var currentHandlerData;
@@ -255,6 +257,9 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		// $('#messageField').insertBefore("<div class=\"chat\"></div>");
 		$('#nochats').remove();
 		$('#chat-row > .col').append("<ul class=\"chat\"></ul>");
+
+		// TODO msg object
+		messages.push(1);
 	}
 
 	var pictureContent = "";
