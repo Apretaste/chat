@@ -30,7 +30,7 @@
                 <a onclick="apretaste.back()" class="secondary-content green-text second">
                     <i class="material-icons">arrow_back</i>
                 </a>
-                <a onclick="deleteModalOpen(id, username)" class="secondary-content red-text first">
+                <a onclick="deleteModalOpen('<%= id %>', '<%= username %>')" class="secondary-content red-text first">
                     <i class="material-icons">delete</i>
                 </a>
             </li>
@@ -42,16 +42,21 @@
                     <% if (message.username == myUsername) message.class = "right"; else message.class = "left"; %>
 
                     <li class="<%= message.class %>" id="<%= message.id %>">
-                        <div class="person-avatar message-avatar circle" face="<%= message.avatar %>"
-                             color="<%= message.avatarColor %>" size="30"
+                        <div class="person-avatar message-avatar circle"
+                             face="<%= message.avatar %>"
+                             color="<%= message.avatarColor %>"
+                             size="30"
+                             onclick="openProfile('<%= username %>')"
                         <% if(message.isInfluencer){ %>
                              creator_image="{{APP_SERVICE_PATH}}/images/<%= message.username %>.png"
                              state="gold"
                                 <% } %>
                         ></div>
                         <div class="head">
-                            <a href="#!" class="<%= message.gender %>">@<%= message.username %></a>
-                            <span class="date"><%= message.sent %></span>
+                            <a class="<%= message.gender %>" onclick="openProfile('<%= username %>')">
+                                @<%= message.username %>
+                            </a>
+                            <span class="date"><%= moment(message.sent).format('DD/MM/Y hh:mm a') %></span>
                         </div>
                         <span class="text">
                             <% if(message.image){ %>
@@ -63,6 +68,8 @@
                                     <img class="responsive-img materialboxed" style="width: 100%; object-fit: cover;"
                                          src="<%= src %>">
                                 <% } %>
+                            <% } %>
+                            <% if(message.image && message.text != ''){ %>
                                 <br>
                             <% } %>
                             <%- message.text %>

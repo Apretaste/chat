@@ -92,14 +92,15 @@ function removePicture() {
 
 function deleteModalOpen(id, username) {
 	var modal = $('#deleteModal')
+
+	// open the modal
+	M.Modal.getInstance(modal).open();
+
 	// add to id to the modal so the modal knows what to delete
 	modal.attr('data-value', id);
 
 	// change the modal's message
 	$('#deleteModalUsername').html(username);
-
-	// open the modal
-	M.Modal.getInstance(modal).open();
 }
 
 function deleteChat() {
@@ -274,12 +275,14 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		}
 
 		if (typeof apretaste.showImage != 'undefined' && isFile) {
-			pictureContent += '<br><img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
+			pictureContent += '<img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
 		} else {
-			pictureContent += '<br><img src="' + src + '" class="responsive-img materialboxed"/>';
+			pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
 		}
 
-
+		if (message != '') {
+			pictureContent += '<br>';
+		}
 	}
 
 	avatar = 'face="' + avatar + '"';
@@ -296,7 +299,7 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>\n" +
 		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +
 		"     </div>\n" +
-		"     <span class=\"text\">" + message + pictureContent + "</span>\n" +
+		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
 		"</li>"
 
 	$('.chat').append(newMessage);
@@ -472,7 +475,7 @@ function buscar() {
 	// get text to search by
 	var text = cleanUpSpecialChars($('#buscar').val().toLowerCase());
 
-	$('.user-card-col').show().each(function (i, e) {
+	$('.collection-item.avatar').show().each(function (i, e) {
 		// get the caption
 		var caption = cleanUpSpecialChars($(e).attr('data-value').toLowerCase());
 

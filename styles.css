@@ -719,3 +719,7 @@ ul.chat li {
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
+.person-avatar.circle{
+    overflow: visible !important;
+}
