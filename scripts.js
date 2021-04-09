@@ -17,7 +17,7 @@ function resizeChat() {
 	} else $('.chat').height($(window).height() - $('#messageField').outerHeight(true) - $('.collection.profile').outerHeight(true) - 10);
 }
 
-function chat(id) {
+function openChat(id) {
 	apretaste.send({
 		'command': 'CHAT',
 		'data': {'userId': id}
@@ -145,6 +145,8 @@ function searchUsers() {
 }
 
 function deleteChatCallback(chatId) {
+	apretaste.send({command: 'chat', useCache: false});
+
 	$('#' + chatId).remove();
 	M.toast({html: 'Chat eliminado'});
 }
@@ -209,7 +211,7 @@ function sendMessageCallback(message) {
 	scrollToEndOfPage();
 }
 
-function clearMsgBox(){
+function clearMsgBox() {
 	var msgBox = $('#message');
 
 	msgBox.val('');
@@ -451,7 +453,7 @@ function filtrar(category) {
 
 	// highlight the category
 	$('.filter').addClass('hidden');
-	$('#'+category).find('.filter').removeClass('hidden');
+	$('#' + category).find('.filter').removeClass('hidden');
 
 	// scroll to the filters
 	$('html, body').animate({scrollTop: $('#filters').offset().top}, 1000);
@@ -470,12 +472,12 @@ function buscar() {
 	// get text to search by
 	var text = cleanUpSpecialChars($('#buscar').val().toLowerCase());
 
-	$('.user-card-col').show().each(function(i, e) {
+	$('.user-card-col').show().each(function (i, e) {
 		// get the caption
 		var caption = cleanUpSpecialChars($(e).attr('data-value').toLowerCase());
 
 		// hide if caption does not match
-		if(caption.indexOf(text) < 0) {
+		if (caption.indexOf(text) < 0) {
 			$(e).hide();
 		}
 	})
@@ -484,19 +486,20 @@ function buscar() {
 // clean special chars
 function cleanUpSpecialChars(str) {
 	return str
-		.replace(/Á/g,"A").replace(/a/g,"a")
-		.replace(/É/g,"E").replace(/é/g,"e")
-		.replace(/Í/g,"I").replace(/í/g,"i")
-		.replace(/Ó/g,"O").replace(/ó/g,"o")
-		.replace(/Ú/g,"U").replace(/ú/g,"u")
-		.replace(/Ñ/g,"N").replace(/ñ/g,"n")
-		.replace(/[^a-z0-9]/gi,''); // final clean up
+		.replace(/Á/g, "A").replace(/a/g, "a")
+		.replace(/É/g, "E").replace(/é/g, "e")
+		.replace(/Í/g, "I").replace(/í/g, "i")
+		.replace(/Ó/g, "O").replace(/ó/g, "o")
+		.replace(/Ú/g, "U").replace(/ú/g, "u")
+		.replace(/Ñ/g, "N").replace(/ñ/g, "n")
+		.replace(/[^a-z0-9]/gi, ''); // final clean up
 }
 
 
 function openProfile(id) {
 	apretaste.send({command: 'perfil', data: {id: id}});
 }
+
 /*
 function openProfile(username) {
 	apretaste.send({

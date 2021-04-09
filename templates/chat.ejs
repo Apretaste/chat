@@ -30,8 +30,8 @@
                 <a onclick="apretaste.back()" class="secondary-content green-text second">
                     <i class="material-icons">arrow_back</i>
                 </a>
-                <a onclick="openProfile(<%= id %>)" class="secondary-content green-text first">
-                    <i class="material-icons">person</i>
+                <a onclick="deleteModalOpen(id, username)" class="secondary-content red-text first">
+                    <i class="material-icons">delete</i>
                 </a>
             </li>
         </ul>
@@ -88,6 +88,19 @@
             <i class="material-icons" onclick="loadImage()">photo</i>
             <i class="material-icons" onclick="sendMessage()">send</i>
         </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal" data-value="">
+    <div class="modal-content">
+        <p>
+            ¿Está seguro que quiere borrar su conversación con @<span id="deleteModalUsername"></span>?
+            Ninguno podrá ver los chats nunca más.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-light btn-flat">Cancelar</a>
+        <a onclick="deleteChat()" class="modal-close waves-effect waves-green btn-flat green-text">Eliminar</a>
     </div>
 </div>
 

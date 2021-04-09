@@ -17,14 +17,14 @@ use Framework\Utils;
 class Service
 {
 	/**
-	 * user friends list
+	 * Get the list of open conversations
 	 *
 	 * @param Request $request
 	 * @param Response $response
 	 * @throws Alert
-	 * @author ricardo
+	 * @throws Exception
+	 * @author salvipascual
 	 */
-
 	public function _main(Request $request, Response $response)
 	{
 		$data = $request->input->data;
@@ -35,183 +35,18 @@ class Service
 			$this->_chat($request, $response);
 			return;
 		}
-
-		// get the list of open chats
-		$friends = [];
-		$rows = Database::query("
-			SELECT * FROM (						
-				SELECT user2 as id, 
-				(SELECT count(*) FROM _note WHERE _note.to_user = {$request->person->id} AND _note.from_user = user2 AND _note.read_date IS NULL AND (active=01 OR active=11)) AS unread
-				FROM person_relation_friend WHERE user1 = {$request->person->id}
-				UNION SELECT user1 as id,
-				(SELECT count(*) FROM _note WHERE _note.to_user = {$request->person->id} AND _note.from_user = user1 AND _note.read_date IS NULL AND (active=01 OR active=11)) AS unread
-				FROM person_relation_friend WHERE user2 = {$request->person->id}
-				) subq INNER JOIN person ON person.id = subq.id ORDER BY unread DESC, person.username");
-
-		foreach ($rows as $item) {
-			$friends[] = $item->id;
-		}
-
-		//	$request->person->getFriends();
-
-		foreach ($friends as &$friend) {
-			$user = Database::queryFirst("SELECT id, username, gender, avatar, avatarColor, online, is_influencer FROM person WHERE id='{$friend}' LIMIT 1");
-			$friend = $user;
-
-			if (empty($friend)) continue;
-
-			// get the person's avatar
-			$friend->avatar = $friend->avatar ?? ($friend->gender === 'F' ? 'chica' : 'hombre');
-
-			// get the person's avatar color
-			$friend->avatarColor = $friend->avatarColor ?? 'verde';
-			$friend->unreadCount = Chats::getUnreadCount($friend->id, $request->person->id);
-		}
-
-		//$response->setCache(30);
-		$response->setLayout('chats.ejs');
-		$response->setTemplate('main.ejs', ['friends' => $friends, 'title' => 'Mis amigos']);
-	}
-
-	/**
-	 * Get the list of open conversations
-	 *
-	 * @param Request $request
-	 * @param Response $response
-	 * @throws Alert
-	 * @throws Exception
-	 * @author salvipascual
-	 */
-	public function _open(Request $request, Response $response)
-	{
 		// get the list of people chatting with you
 		$chats = Chats::open($request->person->id);
 
 		// get content for the view
 		$content = [
 			'chats' => $chats,
-			'myuser' => $request->person->id
+			'myUser' => $request->person->id
 		];
 
 		// send data to the view
 		$response->setCache('hour');
-		$response->setTemplate('open.ejs', $content);
-	}
-
-	/**
-	 * Show the list of users online
-	 *
-	 * @param Request $request
-	 * @param Response $response
-	 * @throws Alert
-	 */
-	public function _online(Request $request, Response $response)
-	{
-
-		// get users who are online
-		$exclude = array_unique(array_merge($request->person->getFriends()
-			, array_map(function ($item) {
-				return $item->id;
-			}, $request->person->getFriendRequests())
-			, $request->person->getPeopleBlocked()));
-
-
-		$online = Chats::online($request->person->id, $exclude);
-
-		// send info to the view
-		$response->setCache('hour');
-		$response->setLayout('chats.ejs');
-		$response->setTemplate('online.ejs', ['users' => $online, 'title' => 'Online']);
-	}
-
-	/**
-	 * Display the list of users found
-	 *
-	 * @param Request $request
-	 * @param Response $response
-	 * @return Response
-	 * @throws Alert
-	 * @author ricardo@apretaste.org
-	 */
-	public function _users(Request $request, Response $response)
-	{
-		// get data from the request 
-		$username = str_replace('@', '', $request->input->data->username);
-		$province = $request->input->data->province;
-		$gender = $request->input->data->gender;
-		$min_age = $request->input->data->min_age;
-		$max_age = $request->input->data->max_age;
-		$religion = $request->input->data->religion;
-
-		// declare variables
-		$tags = [];
-		$where = "";
-
-		// search only by @username
-		if ($username) {
-			$where = "AND username = '$username'";
-			$tags[] = "@$username";
-		} // if the @username was not passed
-		else {
-			if ($gender) {
-				$tags[] = Core::$gender[$gender];
-				$where .= "AND gender = '$gender' ";
-			}
-
-			if ($min_age) {
-				$tags[] = "< $min_age años";
-				$year = date('Y') - $min_age;
-				$where .= "AND year_of_birth <= $year ";
-			}
-
-			if ($max_age) {
-				$tags[] = "> $max_age años";
-				$year = date('Y') - $max_age;
-				$where .= "AND year_of_birth >= $year ";
-			}
-
-			if ($province) {
-				$tags[] = Core::$provinces[$province];
-				$where .= "AND province = '$province' ";
-			}
-
-			if ($religion) {
-				$tags[] = Core::$religions[$religion];
-				$where .= "AND religion = '$religion'";
-			}
-		}
-
-		// search for users
-		$users = Database::query("
-			SELECT id, username, avatar, avatarColor, gender, online
-			FROM person 
-			WHERE active = 1 $where
-			ORDER BY online DESC, last_access DESC
-			LIMIT 24");
-
-		// error if no users were found
-		if (empty($users)) {
-			return $response->setTemplate('message.ejs', [
-				'header' => 'No hay usuarios',
-				'icon' => 'sentiment_neutral',
-				'text' => 'Lo sentimos, pero no encontramos ningún usuario con esa combinación de datos. Cambie los paramétros de búsqueda e intente nuevamente.',
-				'button' => ['href' => 'CHAT SEARCH', 'caption' => 'Buscar']
-			]);
-		}
-
-		// add max reach tag
-		if (count($users) == 24) {
-			$tags[] = "Primeros 24";
-		}
-
-		// get content for the view
-		$content = [
-			'users' => $users,
-			'tags' => $tags];
-
-		// send data to the view
-		$response->setCache();
-		$response->setTemplate('users.ejs', $content);
+		$response->setTemplate('main.ejs', $content);
 	}
 
 	/**
@@ -342,7 +177,7 @@ class Service
 			$fileName = Utils::randomHash();
 			$filePath = "$chatImgDir/$fileName.jpg";
 
-			if($image){
+			if ($image) {
 				// save the optimized image
 				Images::saveBase64Image($image, $filePath);
 			} else {
@@ -372,26 +207,5 @@ class Service
 
 		// complete challenge
 		Challenges::complete("chat", $request->person->id);
-	}
-
-	public function _cercanos(Request $request, Response $response) {
-
-		$list = Database::query("SELECT id, username, gender, avatar, avatarColor, online 
-					FROM person WHERE 
-					  active = 1
-						AND (
-							(lower(coalesce(NULLIF(country,''),'cu')) = 'cu' AND province = '{$request->person->provinceCode}' AND (lower('{$request->person->countryCode}') = 'cu' OR '{$request->person->countryCode}' = '')) -- de cuba y misma provincia
-							OR (lower(country) = lower('{$request->person->countryCode}') -- mismo pais y ...
-									AND (lower(trim(coalesce(city, ''))) = lower(trim('{$request->person->city}')))) -- ... misma ciudad
-						)
-					  AND id <> {$request->person->id} 
-					  order by online DESC, last_access DESC limit 33;");
-
-		$response->setCache(30);
-		$response->setLayout('chats.ejs');
-		$response->setTemplate('cercanos.ejs', [
-			'list' => $list,
-			'title' => 'Cercanos'
-		]);
 	}
 }
