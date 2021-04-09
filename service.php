@@ -132,11 +132,14 @@ class Service
 	 */
 	public function _borrar(Request $request, Response $response)
 	{
-		$deleteType = $request->input->data->type;
+		$deleteType = $request->input->data->type ?? 'chat';
 		$idToHide = $request->input->data->id;
 
 		if ($deleteType === 'chat') {
 			Chats::hide($request->person->id, $idToHide);
+
+			// hide for both
+			Chats::hide($idToHide, $request->person->id);
 		}
 
 		if ($deleteType === 'message') {
