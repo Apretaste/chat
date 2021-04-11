@@ -477,6 +477,11 @@ ul.chat li {
 
 .collection.profile .avatar {
     min-height: 63px;
+    border: 1px solid #e0e0e0;
+}
+
+.collection.profile .avatar ~ li{
+    border-top: none;
 }
 
 .collection.profile .secondary-content i {

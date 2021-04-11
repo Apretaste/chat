@@ -6,7 +6,7 @@
                      color="<%= avatarColor %>"
                      size="45" online="<%= online %>"
                      face="<%= avatar %>"
-                     onclick="openProfile(<%= id %>)"
+                     onclick="openProfile('<%= username %>')"
                 <% if(isInfluencer){ %>
                      creator_image="{{APP_SERVICE_PATH}}/images/<%= username %>.png"
                      state="gold"
@@ -14,7 +14,7 @@
                 >
                 </div>
 
-                <span class="title <%= gender %>">@<%= username %></span>
+                <span class="title <%= gender %>" onclick="openProfile('<%= username %>')">@<%= username %></span>
                 <p class="valign-wrapper">
                     <span class="clear">
                         <% if(isInfluencer){ %>
@@ -46,14 +46,14 @@
                              face="<%= message.avatar %>"
                              color="<%= message.avatarColor %>"
                              size="30"
-                             onclick="openProfile('<%= username %>')"
+                             onclick="openProfile('<%= message.username %>')"
                         <% if(message.isInfluencer){ %>
                              creator_image="{{APP_SERVICE_PATH}}/images/<%= message.username %>.png"
                              state="gold"
                                 <% } %>
                         ></div>
                         <div class="head">
-                            <a class="<%= message.gender %>" onclick="openProfile('<%= username %>')">
+                            <a class="<%= message.gender %>" onclick="openProfile('<%= message.username %>')">
                                 @<%= message.username %>
                             </a>
                             <span class="date"><%= moment(message.sent).format('DD/MM/Y hh:mm a') %></span>

@@ -116,6 +116,30 @@ function deleteChat() {
 	});
 }
 
+function deleteChatCallback(chatId) {
+	apretaste.send({command: 'chat', useCache: false});
+
+	$('#' + chatId).remove();
+	M.toast({html: 'Chat eliminado'});
+}
+
+function deleteMessage(id) {
+	// delete the chat
+	apretaste.send({
+		'command': 'CHAT BORRAR',
+		'data': {'id': id, 'type': 'message'},
+		'redirect': false,
+		'callback': {'name': 'deleteMessageCallback', 'data': id}
+	});
+}
+
+function deleteMessageCallback(chatId) {
+	apretaste.send({command: 'chat', useCache: false});
+
+	$('#' + chatId).remove();
+	M.toast({html: 'Chat eliminado'});
+}
+
 function searchUsers() {
 	// get values from the form
 	var username = $('#username').val().replace('@', '');
@@ -143,13 +167,6 @@ function searchUsers() {
 			'religion': religion
 		}
 	});
-}
-
-function deleteChatCallback(chatId) {
-	apretaste.send({command: 'chat', useCache: false});
-
-	$('#' + chatId).remove();
-	M.toast({html: 'Chat eliminado'});
 }
 
 function sendMessage() {
@@ -324,130 +341,15 @@ function scrollToEndOfPage() {
 	}
 }
 
-function short(username) {
-	if (username.length > 9) {
-		return username.substring(0, 6) + '...';
-	}
-	return username;
-}
-
 $(function () {
 	// initialize components
 	$('.tabs').tabs();
 	$('.modal').modal();
 });
 
-var currentUser = null;
-
-function openSearchModal() {
-	M.Modal.getInstance($('#searchModal')).open();
-}
-
-function rejectModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#rejectModal')).open();
-}
-
-function cancelRequestModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#cancelRequestModal')).open();
-}
-
-function blockModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#blockModal')).open();
-}
-
-function addFriendModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#addFriendModal')).open();
-}
-
-function acceptModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#acceptFriendModal')).open();
-}
-
-function searchUser() {
-	var username = $('#search').val();
-	if (username.length < 4) {
-		showToast('Minimo 4 caracteres');
-		return;
-	} else if (username.length > 16) {
-		showToast('Maximo 16 caracteres');
-		return;
-	}
-
-	apretaste.send({command: 'amigos buscar', data: {username: username}});
-}
-
-function addFriend(message) {
-	apretaste.send({
-		command: 'amigos agregar',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'addFriendCallback',
-			data: {id: currentUser, message: message}
-		}
-	});
-}
-
-function addFriendCallback(data) {
-	showToast(data.message);
-	$('#' + data.id).remove();
-}
-
-function deleteFriend() {
-	apretaste.send({
-		command: 'amigos eliminar',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'showToast',
-			data: 'Amigo eliminado'
-		}
-	});
-}
-
-function rejectFriend(message) {
-	apretaste.send({
-		command: 'amigos rechazar',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'showToast',
-			data: message
-		}
-	});
-}
-
-function blockUser() {
-	apretaste.send({
-		command: 'amigos bloquear',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'showToast',
-			data: 'Usuario bloqueado'
-		}
-	});
-}
-
-
 function showToast(text) {
 	M.toast({html: text});
 }
-
-function setCurrentUsername(username) {
-	$('.username').html('@' + username);
-}
-
 
 // filter by service category
 function filtrar(category) {
@@ -499,8 +401,8 @@ function cleanUpSpecialChars(str) {
 }
 
 
-function openProfile(id) {
-	apretaste.send({command: 'perfil', data: {id: id}});
+function openProfile(username) {
+	apretaste.send({command: 'perfil', data: {username: username}});
 }
 
 /*

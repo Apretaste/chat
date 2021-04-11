@@ -18,7 +18,7 @@
     </div>
 
     <div class="col s12">
-        <ul class="collection profile">
+        <ul class="collection profile" style="border: none">
             <% chats.forEach(function (chat) { %>
                 <li class="collection-item avatar" id="<%= chat.id %>" data-value="<%= chat.username %>">
                     <% if (!chat.isInfluencer) { %>
@@ -42,7 +42,7 @@
                         @<%= chat.username %>
                         <div class="chip tiny clear" style="margin-left: 5px">
                             <i class="material-icons icon">perm_contact_calendar</i>
-                            <b><%= chat.lastSent %></b>
+                            <%= chat.lastSent %>
                         </div>
                     </span>
                     <div>
@@ -65,6 +65,12 @@
             <% }) %>
         </ul>
     </div>
+
+    <% if(chats.length === 0){ %>
+        <p class="middle-center center grey-text">
+            No tiene ninguna conversación abierta. Abra su <a onclick="apretaste.send({command: 'amigos'})">lista de amigos</a> y escoja un amigo para conversar.
+        </p>
+    <% } %>
 </div>
 
 <div id="deleteModal" class="modal" data-value="">

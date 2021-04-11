@@ -144,6 +144,9 @@ class Service
 
 		if ($deleteType === 'message') {
 			Chats::hideMessage($request->person->id, $idToHide);
+
+			// hide for both
+			Chats::hideMessage($idToHide, $request->person->id);
 		}
 	}
 
