@@ -133,11 +133,9 @@ function deleteMessage(id) {
 	});
 }
 
-function deleteMessageCallback(chatId) {
-	apretaste.send({command: 'chat', useCache: false});
-
-	$('#' + chatId).remove();
-	M.toast({html: 'Chat eliminado'});
+function deleteMessageCallback(id) {
+	$('#' + id).remove();
+	M.toast({html: 'Mensaje eliminado'});
 }
 
 function searchUsers() {
@@ -309,14 +307,17 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	}
 
 	var newMessage =
-		"<li class=\"" + align + "\" id=\"last\">\n" +
-		"     <div class=\"person-avatar message-avatar circle\"\n" +
-		avatar + " color=\"" + color + "\" size=\"30\"></div>\n" +
-		"     <div class=\"head\">\n" +
-		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>\n" +
-		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +
-		"     </div>\n" +
-		"     <span class=\"text\">" + pictureContent + message + "</span>\n" +
+		"<li class=\"" + align + "\" id=\"last\">" +
+		"     <div class=\"person-avatar message-avatar circle\"" +
+		avatar + " color=\"" + color + "\" size=\"30\"></div>" +
+		"     <div class=\"head\">" +
+		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>" +
+		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>" +
+		"     </div>" +
+		"     <span class=\"text\">" + pictureContent + message + "</span>" +
+		"     <i class=\"material-icons small red-text\" style=\"display: inline-block\" onclick=\"deleteMessage('last')\">" +
+		"        delete" +
+		"     </i>" +
 		"</li>"
 
 	$('.chat').append(newMessage);

@@ -480,7 +480,7 @@ ul.chat li {
     border: 1px solid #e0e0e0;
 }
 
-.collection.profile .avatar ~ li{
+.collection.profile .avatar ~ li {
     border-top: none;
 }
 
@@ -725,6 +725,11 @@ ul.chat li {
     overflow: hidden;
 }
 
-.person-avatar.circle{
+.person-avatar.circle {
     overflow: visible !important;
+}
+
+.chat .deleteButton {
+    font-size: 1.2rem;
+    display: block;
 }
