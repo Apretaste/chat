@@ -188,11 +188,12 @@ function sendMessage() {
 
 		// send the message with the file
 		apretaste.send({
-			'command': "CHAT ESCRIBIR",
-			'data': {'id': id, 'message': message, 'imageName': basename},
-			'redirect': false,
-			'files': [messagePicturePath],
-			'callback': {'name': 'sendMessageCallback', 'data': message}
+			command: "CHAT ESCRIBIR",
+			data: {id: id, message: message, imageName: basename},
+			redirect: false,
+			files: [messagePicturePath],
+			callback: {'name': 'sendMessageCallback'},
+			async: true
 		});
 
 		return;
@@ -205,16 +206,17 @@ function sendMessage() {
 
 	// send the message
 	apretaste.send({
-		'command': "CHAT ESCRIBIR",
-		'data': {'id': id, 'message': message, 'image': messagePicture},
-		'redirect': false,
-		'callback': {'name': 'sendMessageCallback', 'data': message}
+		command: "CHAT ESCRIBIR",
+		data: {id: id, message: message, image: messagePicture},
+		redirect: false,
+		callback: {name: 'sendMessageCallback'},
+		async: true
 	});
 
 	clearMsgBox();
 }
 
-function sendMessageCallback(message) {
+function sendMessageCallback(data, images) {
 	// clean the img if exists
 	messagePicture = null;
 	messagePicturePath = null;
@@ -222,6 +224,15 @@ function sendMessageCallback(message) {
 	$('#messagePictureBox').remove();
 
 	$('.materialboxed').materialbox();
+
+
+	var lastMessage = $('#last');
+	lastMessage.attr('id', data.id)
+	lastMessage.find('.deleteButton').click(
+		function () {
+			deleteMessage(data.id);
+		}
+	)
 
 	// scroll to the end of the page
 	scrollToEndOfPage();
@@ -308,16 +319,17 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 
 	var newMessage =
 		"<li class=\"" + align + "\" id=\"last\">" +
-		"     <div class=\"person-avatar message-avatar circle\"" +
+		"    <div class=\"person-avatar message-avatar circle\"" +
 		avatar + " color=\"" + color + "\" size=\"30\"></div>" +
-		"     <div class=\"head\">" +
-		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>" +
-		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>" +
-		"     </div>" +
-		"     <span class=\"text\">" + pictureContent + message + "</span>" +
-		"     <i class=\"material-icons small red-text\" style=\"display: inline-block\" onclick=\"deleteMessage('last')\">" +
+		"    <div class=\"head\">" +
+		"        <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>" +
+		"        <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>" +
+		"    </div>" +
+		"    <span class=\"text\">" + pictureContent + message + "</span>" +
+		"    <br>" +
+		"    <i class=\"material-icons small red-text deleteButton\" onclick=\"deleteMessage('last')\">" +
 		"        delete" +
-		"     </i>" +
+		"    </i>" +
 		"</li>"
 
 	$('.chat').append(newMessage);

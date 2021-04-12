@@ -143,10 +143,18 @@ class Service
 		}
 
 		if ($deleteType === 'message') {
-			Chats::hideMessage($request->person->id, $idToHide);
+			if ($idToHide == 'last') {
+				$idToHide = Database::queryFirst("SELECT MAX(id) AS id FROM _note WHERE from_user={$request->person->id}")->id;
+			}
 
-			// hide for both
-			Chats::hideMessage($idToHide, $request->person->id);
+			$result = Database::queryFirst("SELECT id FROM _note WHERE from_user={$request->person->id} AND id=$idToHide");
+
+			if ($result != null) {
+				Chats::hideMessage($request->person->id, $idToHide);
+
+				// hide for both
+				Chats::hideMessage($idToHide, $request->person->id);
+			}
 		}
 	}
 
@@ -161,11 +169,19 @@ class Service
 	public function _escribir(Request $request, Response $response)
 	{
 		if (!isset($request->input->data->id)) {
+			$response->setContent([
+				'error' => true,
+				'message' => 'Mensaje sin destinatario'
+			]);
 			return;
 		}
 
 		$userTo = Person::find($request->input->data->id);
 		if (!$userTo) {
+			$response->setContent([
+				'error' => true,
+				'message' => 'Usuario no encontrado'
+			]);
 			return;
 		}
 
@@ -173,7 +189,13 @@ class Service
 		$imageName = $request->input->data->imageName ?? false;
 		$message = $request->input->data->message ?? '';
 
-		if (!$image && !$imageName && empty($message)) return;
+		if (!$image && !$imageName && empty($message)) {
+			$response->setContent([
+				'error' => true,
+				'message' => 'Mensaje sin contenido'
+			]);
+			return;
+		}
 
 		$fileName = '';
 
@@ -195,12 +217,17 @@ class Service
 		if ($request->person->isBlocked($userTo->id)) {
 			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
 			Notifications::alert($request->person->id, $text, 'error', "{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}");
+
+			$response->setContent([
+				'error' => true,
+				'message' => 'No puedes escribirle a este usuario'
+			]);
 			return;
 		}
 
 		// store the note in the database
 		$message = Database::escape($request->input->data->message, 499);
-		Database::query("INSERT INTO _note (from_user, to_user, `text`, image) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName')");
+		$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName')");
 
 		// send notification for the app
 		$text = "@{$request->person->username} le ha enviado una nota";
@@ -213,5 +240,10 @@ class Service
 
 		// complete challenge
 		Challenges::complete("chat", $request->person->id);
+
+		$response->setContent([
+			'error' => false,
+			'id' => $newMessageId
+		]);
 	}
 }

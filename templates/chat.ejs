@@ -74,9 +74,12 @@
                             <% } %>
                             <%- message.text %>
                         </span>
-                        <i class="material-icons small red-text deleteButton" onclick="deleteMessage(<%= message.id %>)">
-                            delete
-                        </i>
+                        <% if(message.username == myUsername){ %>
+                            <br>
+                            <i class="material-icons small red-text deleteButton" onclick="deleteMessage(<%= message.id %>)">
+                                delete
+                            </i>
+                        <% } %>
                     </li>
                 <% }); %>
             </ul>
