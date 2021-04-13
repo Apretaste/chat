@@ -257,7 +257,12 @@ class Service
 		foreach ($chats as $chat) {
 			if ($chat->image) {
 				$chat->image .= '.jpg';
-				$images[] = Bucket::download('chat', $chat->image);
+				try {
+					$images[] = Bucket::download('chat', $chat->image);
+				} catch(Exception $e) {
+
+				}
+
 			}
 		}
 
