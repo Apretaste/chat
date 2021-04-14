@@ -348,7 +348,8 @@ class Service
 			}
 
 			$filePath = Images::saveBase64Image($image, TEMP_PATH . $fileName);
-
+			$fileName = basename($filePath);
+			if (stripos($fileName, '.') === false) $fileName .= '.jpg';
 			Bucket::save("chat", $filePath, $fileName);
 		}
 
