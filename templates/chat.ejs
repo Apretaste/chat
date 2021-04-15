@@ -6,7 +6,7 @@
                      color="<%= avatarColor %>"
                      size="45" online="<%= online %>"
                      face="<%= avatar %>"
-                     onclick="openProfile(<%= id %>)"
+                     onclick="openProfile('<%= username %>')"
                 <% if(isInfluencer){ %>
                      creator_image="{{APP_SERVICE_PATH}}/images/<%= username %>.png"
                      state="gold"
@@ -14,7 +14,7 @@
                 >
                 </div>
 
-                <span class="title <%= gender %>">@<%= username %></span>
+                <span class="title <%= gender %>" onclick="openProfile('<%= username %>')">@<%= username %></span>
                 <p class="valign-wrapper">
                     <span class="clear">
                         <% if(isInfluencer){ %>
@@ -30,8 +30,8 @@
                 <a onclick="apretaste.back()" class="secondary-content green-text second">
                     <i class="material-icons">arrow_back</i>
                 </a>
-                <a onclick="openProfile(<%= id %>)" class="secondary-content green-text first">
-                    <i class="material-icons">person</i>
+                <a onclick="deleteModalOpen('<%= id %>', '<%= username %>')" class="secondary-content red-text first">
+                    <i class="material-icons">delete</i>
                 </a>
             </li>
         </ul>
@@ -42,16 +42,21 @@
                     <% if (message.username == myUsername) message.class = "right"; else message.class = "left"; %>
 
                     <li class="<%= message.class %>" id="<%= message.id %>">
-                        <div class="person-avatar message-avatar circle" face="<%= message.avatar %>"
-                             color="<%= message.avatarColor %>" size="30"
+                        <div class="person-avatar message-avatar circle"
+                             face="<%= message.avatar %>"
+                             color="<%= message.avatarColor %>"
+                             size="30"
+                             onclick="openProfile('<%= message.username %>')"
                         <% if(message.isInfluencer){ %>
                              creator_image="{{APP_SERVICE_PATH}}/images/<%= message.username %>.png"
                              state="gold"
                                 <% } %>
                         ></div>
                         <div class="head">
-                            <a href="#!" class="<%= message.gender %>">@<%= message.username %></a>
-                            <span class="date"><%= message.sent %></span>
+                            <a class="<%= message.gender %>" onclick="openProfile('<%= message.username %>')">
+                                @<%= message.username %>
+                            </a>
+                            <span class="date"><%= moment(message.sent).format('DD/MM/Y hh:mm a') %></span>
                         </div>
                         <span class="text">
                             <% if(message.image){ %>
@@ -63,10 +68,18 @@
                                     <img class="responsive-img materialboxed" style="width: 100%; object-fit: cover;"
                                          src="<%= src %>">
                                 <% } %>
+                            <% } %>
+                            <% if(message.image && message.text != ''){ %>
                                 <br>
                             <% } %>
                             <%- message.text %>
                         </span>
+                        <% if(message.username == myUsername){ %>
+                            <br>
+                            <i class="material-icons small red-text deleteButton" onclick="deleteMessage(<%= message.id %>)">
+                                delete
+                            </i>
+                        <% } %>
                     </li>
                 <% }); %>
             </ul>
@@ -88,6 +101,19 @@
             <i class="material-icons" onclick="loadImage()">photo</i>
             <i class="material-icons" onclick="sendMessage()">send</i>
         </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal" data-value="">
+    <div class="modal-content">
+        <p>
+            ¿Está seguro que quiere borrar su conversación con @<span id="deleteModalUsername"></span>?
+            Ninguno podrá ver los chats nunca más.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-light btn-flat">Cancelar</a>
+        <a onclick="deleteChat()" class="modal-close waves-effect waves-green btn-flat green-text">Eliminar</a>
     </div>
 </div>
 

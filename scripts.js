@@ -17,7 +17,7 @@ function resizeChat() {
 	} else $('.chat').height($(window).height() - $('#messageField').outerHeight(true) - $('.collection.profile').outerHeight(true) - 10);
 }
 
-function chat(id) {
+function openChat(id) {
 	apretaste.send({
 		'command': 'CHAT',
 		'data': {'userId': id}
@@ -92,14 +92,15 @@ function removePicture() {
 
 function deleteModalOpen(id, username) {
 	var modal = $('#deleteModal')
+
+	// open the modal
+	M.Modal.getInstance(modal).open();
+
 	// add to id to the modal so the modal knows what to delete
 	modal.attr('data-value', id);
 
 	// change the modal's message
 	$('#deleteModalUsername').html(username);
-
-	// open the modal
-	M.Modal.getInstance(modal).open();
 }
 
 function deleteChat() {
@@ -113,6 +114,28 @@ function deleteChat() {
 		'redirect': false,
 		'callback': {'name': 'deleteChatCallback', 'data': id}
 	});
+}
+
+function deleteChatCallback(chatId) {
+	apretaste.send({command: 'chat', useCache: false});
+
+	$('#' + chatId).remove();
+	M.toast({html: 'Chat eliminado'});
+}
+
+function deleteMessage(id) {
+	// delete the chat
+	apretaste.send({
+		'command': 'CHAT BORRAR',
+		'data': {'id': id, 'type': 'message'},
+		'redirect': false,
+		'callback': {'name': 'deleteMessageCallback', 'data': id}
+	});
+}
+
+function deleteMessageCallback(id) {
+	$('#' + id).remove();
+	M.toast({html: 'Mensaje eliminado'});
 }
 
 function searchUsers() {
@@ -144,11 +167,6 @@ function searchUsers() {
 	});
 }
 
-function deleteChatCallback(chatId) {
-	$('#' + chatId).remove();
-	M.toast({html: 'Chat eliminado'});
-}
-
 function sendMessage() {
 	// get the message to send
 	var message = $('#message').val().trim();
@@ -170,11 +188,12 @@ function sendMessage() {
 
 		// send the message with the file
 		apretaste.send({
-			'command': "CHAT ESCRIBIR",
-			'data': {'id': id, 'message': message, 'imageName': basename},
-			'redirect': false,
-			'files': [messagePicturePath],
-			'callback': {'name': 'sendMessageCallback', 'data': message}
+			command: "CHAT ESCRIBIR",
+			data: {id: id, message: message, imageName: basename},
+			redirect: false,
+			files: [messagePicturePath],
+			callback: {'name': 'sendMessageCallback'},
+			async: true
 		});
 
 		return;
@@ -187,16 +206,17 @@ function sendMessage() {
 
 	// send the message
 	apretaste.send({
-		'command': "CHAT ESCRIBIR",
-		'data': {'id': id, 'message': message, 'image': messagePicture},
-		'redirect': false,
-		'callback': {'name': 'sendMessageCallback', 'data': message}
+		command: "CHAT ESCRIBIR",
+		data: {id: id, message: message, image: messagePicture},
+		redirect: false,
+		callback: {name: 'sendMessageCallback'},
+		async: true
 	});
 
 	clearMsgBox();
 }
 
-function sendMessageCallback(message) {
+function sendMessageCallback(data, images) {
 	// clean the img if exists
 	messagePicture = null;
 	messagePicturePath = null;
@@ -205,11 +225,20 @@ function sendMessageCallback(message) {
 
 	$('.materialboxed').materialbox();
 
+
+	var lastMessage = $('#last');
+	lastMessage.attr('id', data.id)
+	lastMessage.find('.deleteButton').click(
+		function () {
+			deleteMessage(data.id);
+		}
+	)
+
 	// scroll to the end of the page
 	scrollToEndOfPage();
 }
 
-function clearMsgBox(){
+function clearMsgBox() {
 	var msgBox = $('#message');
 
 	msgBox.val('');
@@ -272,12 +301,14 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 		}
 
 		if (typeof apretaste.showImage != 'undefined' && isFile) {
-			pictureContent += '<br><img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
+			pictureContent += '<img src="' + src + '" class="responsive-img" onclick="apretaste.showImage(\'' + src + '\')"/>';
 		} else {
-			pictureContent += '<br><img src="' + src + '" class="responsive-img materialboxed"/>';
+			pictureContent += '<img src="' + src + '" class="responsive-img materialboxed"/>';
 		}
 
-
+		if (message != '') {
+			pictureContent += '<br>';
+		}
 	}
 
 	avatar = 'face="' + avatar + '"';
@@ -287,14 +318,18 @@ function appendMessage(align, message, avatar, color, gender, username, imgData)
 	}
 
 	var newMessage =
-		"<li class=\"" + align + "\" id=\"last\">\n" +
-		"     <div class=\"person-avatar message-avatar circle\"\n" +
-		avatar + " color=\"" + color + "\" size=\"30\"></div>\n" +
-		"     <div class=\"head\">\n" +
-		"         <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>\n" +
-		"         <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>\n" +
-		"     </div>\n" +
-		"     <span class=\"text\">" + message + pictureContent + "</span>\n" +
+		"<li class=\"" + align + "\" id=\"last\">" +
+		"    <div class=\"person-avatar message-avatar circle\"" +
+		avatar + " color=\"" + color + "\" size=\"30\"></div>" +
+		"    <div class=\"head\">" +
+		"        <a href=\"#!\" class=\"" + gender + "\">@" + username + "</a>" +
+		"        <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>" +
+		"    </div>" +
+		"    <span class=\"text\">" + pictureContent + message + "</span>" +
+		"    <br>" +
+		"    <i class=\"material-icons small red-text deleteButton\" onclick=\"deleteMessage('last')\">" +
+		"        delete" +
+		"    </i>" +
 		"</li>"
 
 	$('.chat').append(newMessage);
@@ -319,130 +354,15 @@ function scrollToEndOfPage() {
 	}
 }
 
-function short(username) {
-	if (username.length > 9) {
-		return username.substring(0, 6) + '...';
-	}
-	return username;
-}
-
 $(function () {
 	// initialize components
 	$('.tabs').tabs();
 	$('.modal').modal();
 });
 
-var currentUser = null;
-
-function openSearchModal() {
-	M.Modal.getInstance($('#searchModal')).open();
-}
-
-function rejectModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#rejectModal')).open();
-}
-
-function cancelRequestModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#cancelRequestModal')).open();
-}
-
-function blockModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#blockModal')).open();
-}
-
-function addFriendModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#addFriendModal')).open();
-}
-
-function acceptModalOpen(id, username) {
-	currentUser = id;
-	setCurrentUsername(username);
-	M.Modal.getInstance($('#acceptFriendModal')).open();
-}
-
-function searchUser() {
-	var username = $('#search').val();
-	if (username.length < 4) {
-		showToast('Minimo 4 caracteres');
-		return;
-	} else if (username.length > 16) {
-		showToast('Maximo 16 caracteres');
-		return;
-	}
-
-	apretaste.send({command: 'amigos buscar', data: {username: username}});
-}
-
-function addFriend(message) {
-	apretaste.send({
-		command: 'amigos agregar',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'addFriendCallback',
-			data: {id: currentUser, message: message}
-		}
-	});
-}
-
-function addFriendCallback(data) {
-	showToast(data.message);
-	$('#' + data.id).remove();
-}
-
-function deleteFriend() {
-	apretaste.send({
-		command: 'amigos eliminar',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'showToast',
-			data: 'Amigo eliminado'
-		}
-	});
-}
-
-function rejectFriend(message) {
-	apretaste.send({
-		command: 'amigos rechazar',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'showToast',
-			data: message
-		}
-	});
-}
-
-function blockUser() {
-	apretaste.send({
-		command: 'amigos bloquear',
-		data: {id: currentUser},
-		redirect: false,
-		callback: {
-			name: 'showToast',
-			data: 'Usuario bloqueado'
-		}
-	});
-}
-
-
 function showToast(text) {
 	M.toast({html: text});
 }
-
-function setCurrentUsername(username) {
-	$('.username').html('@' + username);
-}
-
 
 // filter by service category
 function filtrar(category) {
@@ -451,7 +371,7 @@ function filtrar(category) {
 
 	// highlight the category
 	$('.filter').addClass('hidden');
-	$('#'+category).find('.filter').removeClass('hidden');
+	$('#' + category).find('.filter').removeClass('hidden');
 
 	// scroll to the filters
 	$('html, body').animate({scrollTop: $('#filters').offset().top}, 1000);
@@ -470,12 +390,12 @@ function buscar() {
 	// get text to search by
 	var text = cleanUpSpecialChars($('#buscar').val().toLowerCase());
 
-	$('.user-card-col').show().each(function(i, e) {
+	$('.collection-item.avatar').show().each(function (i, e) {
 		// get the caption
 		var caption = cleanUpSpecialChars($(e).attr('data-value').toLowerCase());
 
 		// hide if caption does not match
-		if(caption.indexOf(text) < 0) {
+		if (caption.indexOf(text) < 0) {
 			$(e).hide();
 		}
 	})
@@ -484,19 +404,20 @@ function buscar() {
 // clean special chars
 function cleanUpSpecialChars(str) {
 	return str
-		.replace(/Á/g,"A").replace(/a/g,"a")
-		.replace(/É/g,"E").replace(/é/g,"e")
-		.replace(/Í/g,"I").replace(/í/g,"i")
-		.replace(/Ó/g,"O").replace(/ó/g,"o")
-		.replace(/Ú/g,"U").replace(/ú/g,"u")
-		.replace(/Ñ/g,"N").replace(/ñ/g,"n")
-		.replace(/[^a-z0-9]/gi,''); // final clean up
+		.replace(/Á/g, "A").replace(/a/g, "a")
+		.replace(/É/g, "E").replace(/é/g, "e")
+		.replace(/Í/g, "I").replace(/í/g, "i")
+		.replace(/Ó/g, "O").replace(/ó/g, "o")
+		.replace(/Ú/g, "U").replace(/ú/g, "u")
+		.replace(/Ñ/g, "N").replace(/ñ/g, "n")
+		.replace(/[^a-z0-9]/gi, ''); // final clean up
 }
 
 
-function openProfile(id) {
-	apretaste.send({command: 'perfil', data: {id: id}});
+function openProfile(username) {
+	apretaste.send({command: 'perfil', data: {username: username}});
 }
+
 /*
 function openProfile(username) {
 	apretaste.send({
