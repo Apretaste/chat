@@ -1,11 +1,10 @@
 <?php
 
+use Apretaste\Bucket;
 use Apretaste\Challenges;
 use Apretaste\Chats;
-use Apretaste\Level;
 use Apretaste\Notifications;
 use Apretaste\Person;
-use Apretaste\PushNotifications;
 use Apretaste\Request;
 use Apretaste\Response;
 use Framework\Core;
@@ -21,7 +20,7 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 * @throws Alert
+	 * @throws Alert|\Apretaste\Alert
 	 * @throws Exception
 	 * @author salvipascual
 	 */
@@ -90,11 +89,15 @@ class Service
 		$chats = Chats::conversation($request->person->id, $user->id);
 
 		$images = [];
-		$chatImgDir = SHARED_PUBLIC_PATH . '/content/chat';
 		foreach ($chats as $chat) {
 			if ($chat->image) {
 				$chat->image .= '.jpg';
-				$images[] = "$chatImgDir/{$chat->image}";
+				try {
+					$images[] = Bucket::download('chat', $chat->image);
+				} catch(Exception $e) {
+
+				}
+
 			}
 		}
 
@@ -201,17 +204,16 @@ class Service
 
 		// get the image name and path
 		if ($image || $imageName) {
-			$chatImgDir = SHARED_PUBLIC_PATH . '/content/chat';
 			$fileName = Utils::randomHash();
-			$filePath = "$chatImgDir/$fileName.jpg";
 
-			if ($image) {
-				// save the optimized image
-				Images::saveBase64Image($image, $filePath);
-			} else {
-				$tempImagePath = $request->input->files[$imageName];
-				rename($tempImagePath, $filePath);
+			if (!$image) {
+				$image = base64_encode(file_get_contents($request->input->files[$imageName]));
 			}
+
+			$filePath = Images::saveBase64Image($image, TEMP_PATH . $fileName);
+			$fileName = basename($filePath);
+			if (stripos($fileName, '.') === false) $fileName .= '.jpg';
+			Bucket::save("chat", $filePath, $fileName);
 		}
 
 		if ($request->person->isBlocked($userTo->id)) {
