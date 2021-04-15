@@ -91,13 +91,10 @@ class Service
 		$images = [];
 		foreach ($chats as $chat) {
 			if ($chat->image) {
-				$chat->image .= '.jpg';
+				if (stripos($chat->image, '.') === false) $chat->image .= '.jpg';
 				try {
 					$images[] = Bucket::download('chat', $chat->image);
-				} catch(Exception $e) {
-
-				}
-
+				} catch(Exception $e) { }
 			}
 		}
 
