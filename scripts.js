@@ -123,13 +123,13 @@ function deleteChatCallback(chatId) {
 	M.toast({html: 'Chat eliminado'});
 }
 
-function deleteMessage(id) {
+function deleteMessage(messageId) {
 	// delete the chat
 	apretaste.send({
 		'command': 'CHAT BORRAR',
-		'data': {'id': id, 'type': 'message'},
+		'data': {'id': messageId, 'type': 'message', 'userToId': id},
 		'redirect': false,
-		'callback': {'name': 'deleteMessageCallback', 'data': id}
+		'callback': {'name': 'deleteMessageCallback', 'data': messageId}
 	});
 }
 

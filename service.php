@@ -143,6 +143,8 @@ class Service
 		}
 
 		if ($deleteType === 'message') {
+			$userToId = $request->input->data->userToId;
+
 			if ($idToHide == 'last') {
 				$idToHide = Database::queryFirst("SELECT MAX(id) AS id FROM _note WHERE from_user={$request->person->id}")->id;
 			}
@@ -153,7 +155,7 @@ class Service
 				Chats::hideMessage($request->person->id, $idToHide);
 
 				// hide for both
-				Chats::hideMessage($idToHide, $request->person->id);
+				Chats::hideMessage($userToId, $idToHide);
 			}
 		}
 	}
