@@ -1,59 +1,87 @@
-<div class="col s12">
-    <div class="tags">
-        <div class="chip tiny">
-            <i class="fa fa-user-alt"></i>
-            <span id="friendsCounter">
-					<%= friends.length %> <%= friends.length > 1 ? 'amigos' : 'amigo' %>
+<div class="row" style="margin-top: 1rem">
+    <div class="col s12">
+        <div class="tags">
+            <div class="chip tiny">
+                <i class="fa fa-user-alt"></i>
+                <span id="chatsCounter">
+					<%= chats.length %> <%= chats.length !== 1 ? 'conversaciones' : 'conversación' %>
 				</span>
-        </div>
+            </div>
 
-        <span class="chip tiny" onclick="openSearch()">
+            <span class="chip tiny" onclick="openSearch()">
                 <i class="fas fa-search"></i>
                 <span class="hide filter">
                     <input id="buscar" onkeyup="buscar()" type="" style="border: none;" onfocusout="closeSearch()">
                 </span>
             </span>
-    </div>
-</div>
-
-
-<% friends.forEach(function(friend){ %>
-<div class="col s4 m3 user-card-col" data-value="<%= friend.username %>">
-    <div class="card user-card center-align">
-        <div class="content" onclick="openProfile('<%= friend.id %>')">
-            <% if (!(friend.is_influencer * 1)) { %>
-
-            <div class="person-avatar circle" face="<%= friend.avatar %>" color="<%= friend.avatarColor %>"
-                 size="40" online="<%= friend.online %>">
-                <% } else { %>
-                <div class="person-avatar circle"
-                     creator_image="{{APP_SERVICE_PATH}}/images/<%= friend.username %>.png"
-                     state="gold"
-                     color="<%= friend.avatarColor %>"
-                     size="40" online="<%= friend.online %>"
-                     onclick="openProfile('<%= friend.username %>')"
-                >
-                    <% } %>
-
-                    <% if(friend.unreadCount > 0){ %>
-                        <div class="icon-alert"></div>
-                    <% } %>
-                </div>
-                <span class="<%= friend.gender %>">@<%= friend.username %></span>
-
-            </div>
-            <div class="action grey lighten-2 green-text">
-                <a>
-                    <i class="fa fa-lg fa-comments"
-                       onclick="apretaste.send({command: 'chat', data: {userId: '<%= friend.id %>'}})">
-                    </i>
-                </a>
-            </div>
         </div>
     </div>
-    <% }) %>
 
-    <% if(friends.length == 0){ %>
-        <p class="middle-center center grey-text">Usted aún no tiene amigos para chatear.</p>
+    <div class="col s12">
+        <ul class="collection profile" style="border: none">
+            <% chats.forEach(function (chat) { %>
+                <li class="collection-item avatar" id="<%= chat.id %>" data-value="<%= chat.username %>">
+                    <% if (!chat.isInfluencer) { %>
+                        <div class="person-avatar circle"
+                             face="<%= chat.avatar %>"
+                             color="<%= chat.avatarColor %>"
+                             size="46" online="<%= chat.online ? 1 : 0 %>"
+                             onclick="openProfile('<%= chat.username %>')"
+                        ></div>
+                    <% } else { %>
+                        <div class="person-avatar circle"
+                             creator_image="{{APP_SERVICE_PATH}}/images/<%= chat.username %>.png"
+                             state="gold"
+                             color="<%= chat.avatarColor %>"
+                             size="46" online="<%= chat.online ? 1 : 0 %>"
+                             onclick="openProfile('<%= chat.username %>')"
+                        ></div>
+                    <% } %>
+
+                    <span class="<%= chat.gender %>" onclick="openProfile('<%= chat.username %>')">
+                        @<%= chat.username %>
+                        <div class="chip tiny clear" style="margin-left: 5px">
+                            <i class="material-icons icon">perm_contact_calendar</i>
+                            <%= chat.lastSent %>
+                        </div>
+                    </span>
+                    <div>
+                        <p class="lastMessage">
+                            <% var lastNoteIsMine = !chat.lastNoteRead && chat.lastNoteUser != myUser %>
+                            <% if(lastNoteIsMine){ %>
+                                <b><%= chat.lastNote %></b>
+                            <% } else { %>
+                                <%= chat.lastNote %>
+                            <% } %>
+                        </p>
+                    </div>
+                    <div class="action">
+                        <a class="secondary-content green-text first"
+                           onclick="apretaste.send({command:'CHAT', data:{id:'<%= chat.id %>'}})">
+                            <i class="fa fa-comments green-text"></i>
+                        </a>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+
+    <% if(chats.length === 0){ %>
+        <p class="middle-center center grey-text">
+            No tiene ninguna conversación abierta. Abra su <a onclick="apretaste.send({command: 'amigos'})">lista de amigos</a> y escoja un amigo para conversar.
+        </p>
     <% } %>
+</div>
+
+<div id="deleteModal" class="modal" data-value="">
+    <div class="modal-content">
+        <p>
+            ¿Está seguro que quiere borrar su conversación con @<span id="deleteModalUsername"></span>?
+            Ninguno podrá ver los chats nunca más.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-light btn-flat">Cancelar</a>
+        <a onclick="deleteChat()" class="modal-close waves-effect waves-green btn-flat green-text">Eliminar</a>
+    </div>
 </div>
