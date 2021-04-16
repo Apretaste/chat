@@ -56,9 +56,13 @@
                         </p>
                     </div>
                     <div class="action">
-                        <a class="secondary-content green-text first"
+                        <a class="secondary-content red-text second small"
+                           onclick="deleteModalOpen('<%= chat.id %>', '<%= chat.username %>')">
+                            <i class="fa fa-trash-alt"></i>
+                        </a>
+                        <a class="secondary-content green-text first small"
                            onclick="apretaste.send({command:'CHAT', data:{id:'<%= chat.id %>'}})">
-                            <i class="fa fa-comments green-text"></i>
+                            <i class="fa fa-comments"></i>
                         </a>
                     </div>
                 </li>
@@ -68,7 +72,8 @@
 
     <% if(chats.length === 0){ %>
         <p class="middle-center center grey-text">
-            No tiene ninguna conversación abierta. Abra su <a onclick="apretaste.send({command: 'amigos'})">lista de amigos</a> y escoja un amigo para conversar.
+            No tiene ninguna conversación abierta. Abra su <a onclick="apretaste.send({command: 'amigos'})">lista de
+                amigos</a> y escoja un amigo para conversar.
         </p>
     <% } %>
 </div>
