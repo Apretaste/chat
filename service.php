@@ -94,7 +94,8 @@ class Service
 				if (stripos($chat->image, '.') === false) $chat->image .= '.jpg';
 				try {
 					$images[] = Bucket::download('chat', $chat->image);
-				} catch(Exception $e) { }
+				} catch (Exception $e) {
+				}
 			}
 		}
 
@@ -189,9 +190,10 @@ class Service
 
 		$image = $request->input->data->image ?? false;
 		$imageName = $request->input->data->imageName ?? false;
+		$voiceName = $response->input->data->voiceName ?? false;
 		$message = $request->input->data->message ?? '';
 
-		if (!$image && !$imageName && empty($message)) {
+		if (!$image && !$imageName && !$voiceName && empty($message)) {
 			$response->setContent([
 				'error' => true,
 				'message' => 'Mensaje sin contenido'
@@ -200,6 +202,7 @@ class Service
 		}
 
 		$fileName = '';
+		$voiceFileName = '';
 
 		// get the image name and path
 		if ($image || $imageName) {
@@ -215,6 +218,13 @@ class Service
 			Bucket::save("chat", $filePath, $fileName);
 		}
 
+		if ($voiceName) {
+			$filePath = $request->input->files[$voiceName];
+			$voiceFileName = Utils::randomHash() . preg_split('.', $voiceName)[1];
+
+			Bucket::save("chat", $filePath, "voices/$voiceFileName");
+		}
+
 		if ($request->person->isBlocked($userTo->id)) {
 			$text = "Su mensaje para @{$userTo->username} no pudo ser entregado, es posible que usted haya sido bloqueado por esa persona.";
 			Notifications::alert($request->person->id, $text, 'error', "{'command':'PERFIL', 'data':{'id':'{$userTo->id}'}");
@@ -228,7 +238,7 @@ class Service
 
 		// store the note in the database
 		$message = Database::escape($request->input->data->message, 499);
-		$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName')");
+		$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image, voice) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName', '$voiceFileName')");
 
 		// send notification for the app
 		$text = "@{$request->person->username} le ha enviado una nota";
