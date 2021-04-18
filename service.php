@@ -89,6 +89,7 @@ class Service
 		$chats = Chats::conversation($request->person->id, $user->id);
 
 		$images = [];
+		$files = [];
 		foreach ($chats as $chat) {
 			if ($chat->image) {
 				if (stripos($chat->image, '.') === false) $chat->image .= '.jpg';
@@ -96,6 +97,10 @@ class Service
 					$images[] = Bucket::download('chat', $chat->image);
 				} catch (Exception $e) {
 				}
+			}
+
+			if ($chat->voice) {
+				$files[] = Bucket::download('chat', "voices/{$chat->voice}");
 			}
 		}
 
@@ -120,7 +125,7 @@ class Service
 		];
 
 		// send data to the view
-		$response->setTemplate('chat.ejs', $content, $images);
+		$response->setTemplate('chat.ejs', $content, $images, $files);
 	}
 
 	/**
@@ -220,7 +225,7 @@ class Service
 
 		if ($voiceName) {
 			$filePath = $request->input->files[$voiceName];
-			$voiceFileName = Utils::randomHash() . preg_split('.', $voiceName)[1];
+			$voiceFileName = Utils::randomHash() . '.' . explode('.', $voiceName)[1];
 
 			Bucket::save("chat", $filePath, "voices/$voiceFileName");
 		}

@@ -50,20 +50,20 @@ function onVoiceRecorded(voicePath) {
 		async: true
 	});
 
-	appendVoiceMessage(voiceSource)
+	appendVoiceMessage(voicePath)
 }
 
-function appendVoiceMessage(voiceSource) {
+function appendVoiceMessage(voicePath) {
 	var newMessage =
 		"<li class=\"right\" id=\"last\">" +
 		"    <div class=\"person-avatar message-avatar circle\"" +
-		"        avatar=\"" + myAvatar + "\" color=\"" + myAvatarColor + "\" size=\"30\"></div>" +
+		"        face=\"" + myAvatar + "\" color=\"" + myColor + "\" size=\"30\"></div>" +
 		"    <div class=\"head\">" +
 		"        <a href=\"#!\" class=\"" + myGender + "\">@" + myUsername + "</a>" +
 		"        <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>" +
 		"    </div>" +
 		"    <span class=\"text\">" +
-		"        <audio id=\"audio\" src=\"" + voiceSource + "\"" +
+		"        <audio id=\"audio\" src=\"" + voicePath + "\"" +
 		"            preload=\"auto\" controls>" +
 		"        </audio>" +
 		"    </span>" +

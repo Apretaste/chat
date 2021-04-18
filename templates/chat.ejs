@@ -69,6 +69,11 @@
                                          src="<%= src %>">
                                 <% } %>
                             <% } %>
+                            <% if(message.voice){ %>
+                                <% var audioSrc = '{{APP_IMAGE_PATH}}/' + message.voice %>
+                                <audio id="audio" src="<%= audioSrc %>" preload="auto" controls></audio>
+                            <% } %>
+
                             <% if(message.image && message.text != ''){ %>
                                 <br>
                             <% } %>
@@ -76,7 +81,8 @@
                         </span>
                         <% if(message.username == myUsername){ %>
                             <br>
-                            <i class="material-icons small red-text deleteButton" onclick="deleteMessage(<%= message.id %>)">
+                            <i class="material-icons small red-text deleteButton"
+                               onclick="deleteMessage(<%= message.id %>)">
                                 delete
                             </i>
                         <% } %>
