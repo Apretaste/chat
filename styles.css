@@ -745,3 +745,22 @@ ul.chat li {
 .chat .deleteButton {
     font-size: 1.2rem;
 }
+
+audio {
+    width: 100%;
+    margin: 0.5rem auto;
+    height: 32px;
+}
+
+/* https://stackoverflow.com/questions/4126708/is-it-possible-to-style-html5-audio-tag */
+audio::-webkit-media-controls-current-time-display {
+    font-size: 10px;
+}
+
+audio::-webkit-media-controls-time-remaining-display {
+    font-size: 10px;
+}
+
+audio::-webkit-media-controls-timeline{
+    padding: 0.5rem;
+}
