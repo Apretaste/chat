@@ -485,12 +485,25 @@ ul.chat li {
 }
 
 .collection.profile .secondary-content i {
-    font-size: 30px;
+    font-size: 2rem;
     line-height: 1.1;
 }
 
 .collection.profile .second {
-    right: 60px !important;
+    right: 48px !important;
+}
+
+.collection.profile .first.small {
+    right: 8px !important;
+}
+
+.collection.profile .second.small {
+    right: 36px !important;
+}
+
+.collection.profile .secondary-content.small i {
+    font-size: 1.4rem;
+    line-height: 1.6;
 }
 
 /* ONE LINE COLLECTION */
