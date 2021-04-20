@@ -1,17 +1,17 @@
 <?php
 
-use Apretaste\Bucket;
-use Apretaste\Challenges;
+use Apretaste\Core;
+use Apretaste\Alert;
+use Apretaste\Utils;
 use Apretaste\Chats;
-use Apretaste\Notifications;
+use Apretaste\Bucket;
+use Apretaste\Images;
 use Apretaste\Person;
 use Apretaste\Request;
 use Apretaste\Response;
-use Framework\Core;
-use Framework\Alert;
-use Framework\Database;
-use Framework\Images;
-use Framework\Utils;
+use Apretaste\Database;
+use Apretaste\Challenges;
+use Apretaste\Notifications;
 
 class Service
 {
