@@ -92,7 +92,7 @@ class Service
 		$files = [];
 		foreach ($chats as $chat) {
 			if ($chat->image) {
-        $file = Bucket::getPathByEnvironment('chat', $chat->image);
+				$file = Bucket::getPathByEnvironment('chat', $chat->image);
 				$images[] = (stripos($chat->image, '.') === false) ? "$file.jpg" : $file;
 			}
 
@@ -239,7 +239,7 @@ class Service
 		}
 
 		// store the note in the database
-		$message = Database::escape($request->input->data->message, 499);
+		$message = Database::escape($request->input->data->message ?? '', 499);
 		$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image, voice) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName', '$voiceFileName')");
 
 		// send notification for the app
