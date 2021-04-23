@@ -1,17 +1,17 @@
 <?php
 
-use Apretaste\Bucket;
-use Apretaste\Challenges;
+use Apretaste\Core;
+use Apretaste\Alert;
+use Apretaste\Utils;
 use Apretaste\Chats;
-use Apretaste\Notifications;
+use Apretaste\Bucket;
+use Apretaste\Images;
 use Apretaste\Person;
 use Apretaste\Request;
 use Apretaste\Response;
-use Framework\Core;
-use Framework\Alert;
-use Framework\Database;
-use Framework\Images;
-use Framework\Utils;
+use Apretaste\Database;
+use Apretaste\Challenges;
+use Apretaste\Notifications;
 
 class Service
 {
@@ -92,15 +92,12 @@ class Service
 		$files = [];
 		foreach ($chats as $chat) {
 			if ($chat->image) {
-				if (stripos($chat->image, '.') === false) $chat->image .= '.jpg';
-				try {
-					$images[] = Bucket::download('chat', $chat->image);
-				} catch (Exception $e) {
-				}
+        $file = Bucket::getPathByEnvironment('chat', $chat->image);
+				$images[] = (stripos($chat->image, '.') === false) ? "$file.jpg" : $file;
 			}
 
 			if ($chat->voice) {
-				$files[] = Bucket::download('chat', "voices/{$chat->voice}");
+				$files[] = Bucket::getPathByEnvironment('chat', "voices/{$chat->voice}");
 			}
 		}
 
