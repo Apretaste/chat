@@ -753,6 +753,10 @@ audio {
 }
 
 /* https://stackoverflow.com/questions/4126708/is-it-possible-to-style-html5-audio-tag */
+audio::-webkit-media-controls-enclosure {
+    background-color: transparent;
+}
+
 audio::-webkit-media-controls-current-time-display {
     font-size: 10px;
 }
@@ -763,4 +767,12 @@ audio::-webkit-media-controls-time-remaining-display {
 
 audio::-webkit-media-controls-timeline{
     padding: 0.5rem;
+}
+
+audio::-webkit-media-controls-volume-control-container{
+    display: none;
+}
+
+audio::-webkit-media-controls-panel{
+    padding: 0;
 }
