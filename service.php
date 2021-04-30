@@ -97,7 +97,7 @@ class Service
 			}
 
 			if ($chat->voice) {
-				$files[] = Bucket::getPathByEnvironment('chat', "voices/{$chat->voice}");
+				$files[] = Bucket::getPathByEnvironment('voices', $chat->voice);
 			}
 		}
 
@@ -224,7 +224,7 @@ class Service
 			$filePath = $request->input->files[$voiceName];
 			$voiceFileName = Utils::randomHash() . '.' . explode('.', $voiceName)[1];
 
-			Bucket::save("chat", $filePath, "voices/$voiceFileName");
+			Bucket::save("voices", $filePath, "$voiceFileName");
 		}
 
 		if ($request->person->isBlocked($userTo->id)) {
