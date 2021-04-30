@@ -755,6 +755,7 @@ audio {
 /* https://stackoverflow.com/questions/4126708/is-it-possible-to-style-html5-audio-tag */
 audio::-webkit-media-controls-enclosure {
     background-color: transparent;
+    margin-left: -16px;
 }
 
 audio::-webkit-media-controls-current-time-display {
