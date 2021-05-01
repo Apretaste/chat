@@ -9,6 +9,11 @@ $(document).ready(function () {
 	resizeChat();
 	scrollToEndOfPage();
 	$(window).resize(resizeChat);
+
+	$(".stop-propagation").onclick(function(e){
+		if (e.target !== this)
+			return;
+	});
 });
 
 function resizeChat() {
