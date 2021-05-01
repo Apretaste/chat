@@ -20,25 +20,25 @@
     <div class="col s12">
         <ul class="collection profile" style="border: none">
             <% chats.forEach(function (chat) { %>
-                <li class="collection-item avatar" id="<%= chat.id %>" data-value="<%= chat.username %>" onclick="apretaste.send({command:'CHAT', data:{id:'<%= chat.id %>'}})">
+                <li class="collection-item avatar open-conversation" id="<%= chat.id %>" data-value="<%= chat.username %>" >
                     <% if (!chat.isInfluencer) { %>
-                        <div class="person-avatar circle stop-propagation"
+                        <div class="person-avatar circle open-profile"
                              face="<%= chat.avatar %>"
                              color="<%= chat.avatarColor %>"
                              size="46" online="<%= chat.online ? 1 : 0 %>"
-                             onclick="openProfile('<%= chat.username %>')"
+                             data-username = "<%= chat.username %>"
                         ></div>
                     <% } else { %>
-                        <div class="person-avatar circle stop-propagation"
+                        <div class="person-avatar circle open-profile"
                              creator_image="{{APP_SERVICE_PATH}}/images/<%= chat.username %>.png"
                              state="gold"
                              color="<%= chat.avatarColor %>"
                              size="46" online="<%= chat.online ? 1 : 0 %>"
-                             onclick="openProfile('<%= chat.username %>')"
+                             data-username = "<%= chat.username %>"
                         ></div>
                     <% } %>
 
-                    <span class="<%= chat.gender %> stop-propagation" onclick="openProfile('<%= chat.username %>')">
+                    <span class="<%= chat.gender %> open-profile" data-username = "<%= chat.username %>">
                         @<%= chat.username %>
                         <div class="chip tiny clear" style="margin-left: 5px; color: #eeeeee;">
                             <i class="material-icons icon">perm_contact_calendar</i>
@@ -56,9 +56,9 @@
                         </p>
                     </div>
                     <div class="action">
-                        <a class="secondary-content red-text second small stop-propagation"
-                           onclick="deleteModalOpen('<%= chat.id %>', '<%= chat.username %>')">
-                            <i class="fa fa-trash-alt"></i>
+                        <a class="secondary-content red-text second small delete-conversation"
+                           data-username = "<%= chat.username %>">
+                           <i class="fa fa-trash-alt"></i>
                         </a>
                     </div>
                 </li>

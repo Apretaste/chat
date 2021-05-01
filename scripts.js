@@ -10,9 +10,26 @@ $(document).ready(function () {
 	scrollToEndOfPage();
 	$(window).resize(resizeChat);
 
-	$(".stop-propagation").onclick(function(e){
-		if (e.target !== this)
-			return;
+	// open conversation
+	$(".open-conversation").click(function(){
+		apretaste.send({
+			command:'CHAT',
+			data: {
+				id: $(this).attr('data-value')
+			}
+		});
+	});
+
+	// open profile
+	$(".open-profile").click(function(e){
+		e.stopPropagation();
+		openProfile($(this).attr('data-username'));
+	});
+
+	// delete conversation
+	$(".delete-conversation").click(function(e){
+		e.stopPropagation();
+		deleteModalOpen($(this).attr('data-username'));
 	});
 });
 
