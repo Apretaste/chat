@@ -2,19 +2,19 @@
     <div class="col s12">
         <ul class="collection profile">
             <li class="collection-item avatar">
-                <div class="person-avatar circle left"
-                     color="<%= avatarColor %>"
-                     size="45" online="<%= online %>"
-                     face="<%= avatar %>"
-                     onclick="openProfile('<%= username %>')"
-                <% if(isInfluencer){ %>
+                <div class="person-avatar circle left open-profile"
+                     color = "<%= avatarColor %>"
+                     size = "45"
+                     online = "<%= online %>"
+                     face = "<%= avatar %>"
+                     data-username = "<%= username %>"
+                    <% if(isInfluencer){ %>
                      creator_image="{{APP_SERVICE_PATH}}/images/<%= username %>.png"
                      state="gold"
-                        <% } %>
-                >
-                </div>
+                    <% } %>
+                ></div>
 
-                <span class="title <%= gender %>" onclick="openProfile('<%= username %>')">@<%= username %></span>
+                <span class="title <%= gender %> open-profile" data-username = "<%= username %>">@<%= username %></span>
                 <p class="valign-wrapper">
                     <span class="clear">
                         <% if(isInfluencer){ %>
@@ -30,8 +30,8 @@
                 <a onclick="apretaste.back()" class="secondary-content green-text second">
                     <i class="material-icons">arrow_back</i>
                 </a>
-                <a onclick="deleteModalOpen('<%= id %>', '<%= username %>')" class="secondary-content red-text first">
-                    <i class="material-icons">delete</i>
+                <a data-username="<%= username %>" class="secondary-content red-text first delete-conversation">
+                    <i class="fa fa-trash-alt"></i>
                 </a>
             </li>
         </ul>
@@ -42,18 +42,18 @@
                     <% if (message.username == myUsername) message.class = "right"; else message.class = "left"; %>
 
                     <li class="<%= message.class %>" id="<%= message.id %>">
-                        <div class="person-avatar message-avatar circle"
-                             face="<%= message.avatar %>"
-                             color="<%= message.avatarColor %>"
-                             size="30"
-                             onclick="openProfile('<%= message.username %>')"
-                        <% if(message.isInfluencer){ %>
-                             creator_image="{{APP_SERVICE_PATH}}/images/<%= message.username %>.png"
-                             state="gold"
-                                <% } %>
+                        <div class = "person-avatar message-avatar circle open-profile"
+                             face = "<%= message.avatar %>"
+                             color = "<%= message.avatarColor %>"
+                             size = "30"
+                             data-username = "<%= message.username %>"
+                            <% if(message.isInfluencer){ %>
+                             creator_image = "{{APP_SERVICE_PATH}}/images/<%= message.username %>.png"
+                             state = "gold"
+                            <% } %>
                         ></div>
                         <div class="head">
-                            <a class="<%= message.gender %>" onclick="openProfile('<%= message.username %>')">
+                            <a class="<%= message.gender %> open-profile" data-username = "<%= message.username %>">
                                 @<%= message.username %>
                             </a>
                             <span class="date"><%= moment(message.sent).format('DD/MM/Y hh:mm a') %></span>
