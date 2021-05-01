@@ -29,7 +29,7 @@ $(document).ready(function () {
 	// delete conversation
 	$(".delete-conversation").click(function(e){
 		e.stopPropagation();
-		deleteModalOpen($(this).attr('data-username'));
+		deleteModalOpen($(this).attr('data-id'), $(this).attr('data-username'));
 	});
 });
 
