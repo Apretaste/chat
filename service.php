@@ -44,7 +44,7 @@ class Service
 		];
 
 		// send data to the view
-		$response->setCache('hour');
+		// $response->setCache('hour');
 		$response->setTemplate('main.ejs', $content);
 	}
 
