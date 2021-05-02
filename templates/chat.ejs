@@ -32,7 +32,7 @@
                 </a>
                 <a data-username="<%= username %>"
                    data-id = "<%= id %>"
-                   class="secondary-content red-text first delete-conversation">
+                   class="secondary-content red-text first delete-conversation small">
                     <i class="fa fa-trash-alt"></i>
                 </a>
             </li>
@@ -78,9 +78,9 @@
                         </span>
                         <% if(message.username == myUsername){ %>
                             <br>
-                            <i class="material-icons small red-text deleteButton" onclick="deleteMessage(<%= message.id %>)">
-                                delete
-                            </i>
+                            <a href="#!" class="small red-text deleteButton" onclick="deleteMessage(<%= message.id %>)">
+                                <i class="fa fa-trash-alt"></i>
+                            </a>
                         <% } %>
                     </li>
                 <% }); %>
