@@ -71,6 +71,11 @@
                                          src="<%= src %>">
                                 <% } %>
                             <% } %>
+                            <% if(message.voice){ %>
+                                <% var audioSrc = '{{APP_IMAGE_PATH}}/' + message.voice %>
+                                <audio id="audio" src="<%= audioSrc %>" preload="auto" controls></audio>
+                            <% } %>
+
                             <% if(message.image && message.text != ''){ %>
                                 <br>
                             <% } %>

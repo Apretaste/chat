@@ -59,8 +59,53 @@ function recordVoiceNote() {
 	}
 }
 
-function onVoiceRecorded(path) {
-	console.log(path);
+function onVoiceRecorded(voicePath) {
+	var basename = voicePath.split(/[\\/]/).pop()
+
+	// send the message with the file
+	apretaste.send({
+		command: "CHAT ESCRIBIR",
+		data: {id: id, voiceName: basename},
+		redirect: false,
+		files: [voicePath],
+		callback: {'name': 'sendMessageCallback'},
+		async: true
+	});
+
+	appendVoiceMessage(voicePath)
+}
+
+function appendVoiceMessage(voicePath) {
+	var newMessage =
+		"<li class=\"right\" id=\"last\">" +
+		"    <div class=\"person-avatar message-avatar circle\"" +
+		"        face=\"" + myAvatar + "\" color=\"" + myColor + "\" size=\"30\"></div>" +
+		"    <div class=\"head\">" +
+		"        <a href=\"#!\" class=\"" + myGender + "\">@" + myUsername + "</a>" +
+		"        <span class=\"date\">" + moment().format('DD/MM/Y hh:mm a') + "</span>" +
+		"    </div>" +
+		"    <span class=\"text\">" +
+		"        <audio id=\"audio\" src=\"" + voicePath + "\"" +
+		"            preload=\"auto\" controls>" +
+		"        </audio>" +
+		"    </span>" +
+		"    <br>" +
+		"    <i class=\"material-icons small red-text deleteButton\" onclick=\"deleteMessage('last')\">" +
+		"        delete" +
+		"    </i>" +
+		"</li>"
+
+
+	$('.chat').append(newMessage);
+
+	$('.materialboxed').materialbox();
+
+	$('.person-avatar').each(function (i, item) {
+		setElementAsAvatar(item)
+	});
+
+	// scroll to the end of the page
+	scrollToEndOfPage()
 }
 
 var messagePicture = null;
@@ -203,10 +248,14 @@ function sendMessage() {
 	if (messagePicturePath != null) {
 		var basename = messagePicturePath.split(/[\\/]/).pop()
 
-		appendMessage(
-			'right', message, myAvatar, myColor,
-			myGender, myUsername, imgSource
-		);
+		const options = {
+			align: 'right', message: message,
+			avatar: myAvatar, color: myColor,
+			gender: myGender, username: myUsername,
+			imgData: imgSource
+		}
+
+		appendMessage(options);
 
 		// send the message with the file
 		apretaste.send({
@@ -221,10 +270,14 @@ function sendMessage() {
 		return;
 	}
 
-	appendMessage(
-		'right', message, myAvatar, myColor,
-		myGender, myUsername, imgSource
-	);
+	const options = {
+		align: 'right', message: message,
+		avatar: myAvatar, color: myColor,
+		gender: myGender, username: myUsername,
+		imgData: imgSource
+	}
+
+	appendMessage(options);
 
 	// send the message
 	apretaste.send({
@@ -286,23 +339,35 @@ function chatNewMessageHandler(data) {
 			return true;
 		}
 
-		appendMessage(
-			'left', data.message, avatar, avatarColor,
-			gender, username, null
-		)
+		const options = {
+			align: 'left', message: data.message,
+			avatar: avatar, color: avatarColor,
+			gender: gender, username: username,
+			imgData: null
+		}
+
+		appendMessage(options);
+
 		return true;
 	} else return false;
 }
 
 function handleImageMessage(imgPath) {
 	if (imgPath == null) return;
-	appendMessage(
-		'left', currentHandlerData.message, avatar, avatarColor,
-		gender, username, imgPath
-	)
+
+	const options = {
+		align: 'left', message: currentHandlerData.message,
+		avatar: avatar, color: avatarColor,
+		gender: gender, username: username,
+		imgData: imgPath
+	}
+
+	appendMessage(options)
 }
 
-function appendMessage(align, message, avatar, color, gender, username, imgData) {
+function appendMessage(options) {
+	var {align, message, avatar, color, gender, username, imgData} = options;
+
 	if (messages.length == 0) {
 		// Jquery Bug, fixed in 1.9, insertBefore or After deletes the element and inserts nothing
 		// $('#messageField').insertBefore("<div class=\"chat\"></div>");
