@@ -90,7 +90,7 @@ function appendVoiceMessage(voicePath) {
 		"        </audio>" +
 		"    </span>" +
 		"    <br>" +
-		"    <i class=\"material-icons small red-text deleteButton\" onclick=\"deleteMessage('last')\">" +
+		"    <i class=\"material-icons small red-text deleteButton delete-message\" onclick=\"deleteMessage('last')\">" +
 		"        delete" +
 		"    </i>" +
 		"</li>"
