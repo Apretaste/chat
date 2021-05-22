@@ -777,3 +777,12 @@ audio::-webkit-media-controls-volume-control-container{
 audio::-webkit-media-controls-panel{
     padding: 0;
 }
+
+.delete-conversation {
+    right: 5px !important;;
+    position: absolute !important;
+    border-radius: 50% !important;;
+    border: 1px solid red !important;;
+    background: white !important;;
+    margin-top: -10px !important;;
+}
