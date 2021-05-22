@@ -776,7 +776,7 @@ audio::-webkit-media-controls-panel{
     right: 22px !important;
     position: absolute !important;
     margin-top: -16px !important;
-    font-size: 24px;
+    font-size: 20px;
 }
 
 .action .delete-conversation i {
