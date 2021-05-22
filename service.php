@@ -242,7 +242,7 @@ class Service
 		$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image, voice) VALUES ({$request->person->id},{$userTo->id},'$message', '$fileName', '$voiceFileName')");
 
 		// send notification for the app
-		$text = "@{$request->person->username} le ha enviado una nota";
+		$text = "@{$request->person->username} te ha enviado una nota";
 		Notifications::alert(
 			$userTo->id, $text, 'message',
 			"{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}",
