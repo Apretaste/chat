@@ -782,3 +782,6 @@ audio::-webkit-media-controls-panel{
     font-size: 20px !important;
 }
 
+li.left .delete-message {
+    display: none !important;
+}
