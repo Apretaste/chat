@@ -250,7 +250,7 @@ ul.chat li {
     clear: both;
     width: 80%;
     padding: 10px 20px;
-    border-radius: 20px;
+    border-radius: 10px;
     margin-bottom: 3px;
     word-break: break-word;
 }
@@ -272,7 +272,7 @@ ul.chat li {
 
 .chat .right {
     color: #fff;
-    background: #66bb6a;
+    background: #c6f2c8;
     margin-right: 15px;
     float: right;
 }
