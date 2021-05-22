@@ -244,7 +244,7 @@ class Service
 		// send notification for the app
 		$text = "@{$request->person->username} te ha enviado una nota";
 		Notifications::alert(
-			$userTo->id, $text, 'message',
+			$userTo->id, $text, 'question_answer',
 			"{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}",
 			'chatNewMessageHandler',
 			['fromUser' => $request->person->id, 'message' => $message, 'image' => $fileName],
