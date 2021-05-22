@@ -270,12 +270,6 @@ ul.chat li {
     float: left;
 }
 
-.chat .right {
-    color: #fff;
-    background: #c6f2c8;
-    margin-right: 15px;
-    float: right;
-}
 
 .chat .right .message-avatar {
     position: relative;
@@ -635,7 +629,7 @@ ul.chat li {
 
 .chat .right {
     color: #fff;
-    background: #66bb6a;
+    background: #c6f2c8;
     margin-right: 15px;
     float: right;
 }
