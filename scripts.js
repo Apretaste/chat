@@ -414,9 +414,9 @@ function appendMessage(options) {
 		"    </div>" +
 		"    <span class=\"text\">" + pictureContent + message + "</span>" +
 		"    <br>" +
-		"    <i class=\"material-icons small red-text deleteButton\" onclick=\"deleteMessage('last')\">" +
-		"        delete" +
-		"    </i>" +
+		"    <a class=\"small red-text deleteButton delete-message\" onclick=\"deleteMessage('last')\">" +
+		"       <i class=\"fa fa-trash-alt\"></i>" +
+		"    </a>" +
 		"</li>"
 
 	$('.chat').append(newMessage);
