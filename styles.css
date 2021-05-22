@@ -779,7 +779,7 @@ audio::-webkit-media-controls-panel{
 }
 
 .delete-message {
-    right: 12px !important;
+    right: 18px !important;
     position: absolute !important;
     margin-top: -12px !important;
     font-size: 24px;
