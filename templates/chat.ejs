@@ -55,25 +55,26 @@
                             </a>
                             <span class="date"><%= moment(message.sent).format('DD/MM/Y hh:mm a') %></span>
                         </div>
-                        <span class="text">
-                            <% if(message.image){ %>
-                                <% var src = '{{APP_IMAGE_PATH}}/' + message.image %>
-                                <% if(typeof apretaste.showImage != 'undefined'){ %>
-                                    <img class="responsive-img" style="width: 100%; object-fit: cover;"
-                                         src="<%= src %>" onclick="apretaste.showImage('<%= src %>')">
-                                <% } else { %>
-                                    <img class="responsive-img materialboxed" style="width: 100%; object-fit: cover;"
-                                         src="<%= src %>">
-                                <% } %>
+                        
+                        <% if(message.image){ %>
+                            <% var src = '{{APP_IMAGE_PATH}}/' + message.image %>
+                            <% if(typeof apretaste.showImage != 'undefined'){ %>
+                                <img class="responsive-img" style="width: 100%; object-fit: cover;"
+                                     src="<%= src %>" onclick="apretaste.showImage('<%= src %>')">
+                            <% } else { %>
+                                <img class="responsive-img materialboxed" style="width: 100%; object-fit: cover;"
+                                     src="<%= src %>">
                             <% } %>
-                            <% if(message.voice){ %>
-                                <% var audioSrc = '{{APP_IMAGE_PATH}}/' + message.voice %>
-                                <audio id="audio" src="<%= audioSrc %>" preload="auto" controls></audio>
-                            <% } %>
+                        <% } %>
+                        <% if(message.voice){ %>
+                            <% var audioSrc = '{{APP_IMAGE_PATH}}/' + message.voice %>
+                            <audio id="audio" src="<%= audioSrc %>" preload="auto" controls></audio>
+                        <% } %>
 
-                            <% if(message.image && message.text != ''){ %>
-                                <br>
-                            <% } %>
+                        <% if(message.image && message.text != ''){ %>
+                            <br>
+                        <% } %>
+                        <span class="text">
                             <%- message.text %>
                         </span>
                         <% if(message.username == myUsername){ %>
