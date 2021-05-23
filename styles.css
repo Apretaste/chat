@@ -786,5 +786,6 @@ li.left .delete-message {
     display: none !important;
 }
 
-li.left .{
+li.left .material-placeholder {
     margin-left: -24px;
+}
