@@ -789,3 +789,7 @@ li.left .delete-message {
 li.left .material-placeholder {
     margin-left: -24px;
 }
+
+li.right .material-placeholder {
+    margin-left: 24px;
+}
