@@ -785,3 +785,6 @@ audio::-webkit-media-controls-panel{
 li.left .delete-message {
     display: none !important;
 }
+
+li.left .{
+    margin-left: -24px;
