@@ -786,10 +786,18 @@ li.left .delete-message {
     display: none !important;
 }
 
-li.left .material-placeholder {
+li.left img {
+    object-fit: cover;
+    position: absolute;
+    width: 80%;
     left: 15px;
+    border-radius: 0px;
 }
 
-li.right .material-placeholder {
+li.right img {
+    object-fit: cover;
+    position: absolute;
+    width: 80%;
     right: 15px;
+    border-radius: 0px;
 }
