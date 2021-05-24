@@ -796,13 +796,11 @@ li.right .material-placeholder {
 
 li.left img {
     object-fit: cover;
-    left: 15px;
     border-radius: 0px !important;
 }
 
 li.right img {
     object-fit: cover;
-    right: 15px;
     border-radius: 0px !important;;
 }
 
