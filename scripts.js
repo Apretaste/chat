@@ -405,7 +405,7 @@ function appendMessage(options) {
 	}
 
 	var newMessage =
-		"<li class=\"" + align + "\" id=\"last\">" +
+		"<li class=\"" + align + " " + (pictureContent !== ''? 'transparent': '')+"\" id=\"last\">" +
 		"    <div class=\"person-avatar message-avatar circle\"" +
 		avatar + " color=\"" + color + "\" size=\"30\"></div>" +
 		"    <div class=\"head\">" +
