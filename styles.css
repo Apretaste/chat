@@ -796,7 +796,6 @@ li.right .material-placeholder {
 
 li.left img {
     object-fit: cover;
-    position: absolute;
     width: 80%;
     left: 15px;
     border-radius: 0px !important;
@@ -804,7 +803,6 @@ li.left img {
 
 li.right img {
     object-fit: cover;
-    position: absolute;
     width: 80%;
     right: 15px;
     border-radius: 0px !important;;
