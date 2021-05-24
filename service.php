@@ -92,6 +92,7 @@ class Service
 		$files = [];
 		foreach ($chats as $chat) {
 			if ($chat->image) {
+				$container = Database::query("SELECT container FROM _note WHERE id = {$chat->id}")
 				$images[] = Bucket::getPathByEnvironment('chat', $chat->image);
 			}
 
