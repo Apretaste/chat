@@ -38,7 +38,7 @@
                 <% messages.forEach(function(message){ %>
                     <% if (message.username == myUsername) message.class = "right"; else message.class = "left"; %>
 
-                    <li class="<%= message.class %>" id="<%= message.id %>" <% if(message.image){ %> style="position: absolute;width: 80%;left: 15px;border-radius: 0px;"<% } %>>
+                    <li class="<%= message.class %>" id="<%= message.id %>">
                         <div class = "person-avatar message-avatar circle open-profile"
                              face = "<%= message.avatar %>"
                              color = "<%= message.avatarColor %>"
