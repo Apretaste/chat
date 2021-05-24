@@ -259,4 +259,33 @@ class Service
 			'id' => $newMessageId
 		]);
 	}
+
+	public function _perfilimage(Request $request, Response $response) {
+		$image = Database::queryFirst("SELECT * FROM person_images WHERE id = {$request->input->data->image}");
+		if ($image) {
+			$userTo = Person::find($image->id_person);
+
+			// store the note in the database
+			$message = Database::escape($request->input->data->message ?? '', 499);
+			$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image,  container) 
+					VALUES ({$request->person->id},{$userTo->id},'$message', '{$image->file}', 'profile')");
+
+			// send notification for the app
+			$text = "@{$request->person->username} te ha enviado una nota";
+			Notifications::alert(
+				$userTo->id, $text, 'question_answer',
+				"{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}",
+				'chatNewMessageHandler',
+				['fromUser' => $request->person->id, 'message' => $message, 'image' => $fileName],
+			);
+
+			// complete challenge
+			Challenges::complete("chat", $request->person->id);
+
+			$response->setContent([
+				'error' => false,
+				'id' => $newMessageId
+			]);
+		}
+	}
 }
