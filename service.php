@@ -260,6 +260,12 @@ class Service
 		]);
 	}
 
+	/**
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
+	 * @throws \Framework\Alert
+	 */
 	public function _perfilimage(Request $request, Response $response) {
 		$image = Database::queryFirst("SELECT * FROM person_images WHERE id = {$request->input->data->image}");
 		if ($image) {
@@ -267,8 +273,9 @@ class Service
 
 			// store the note in the database
 			$message = Database::escape($request->input->data->message ?? '', 499);
-			$newMessageId = Database::query("INSERT INTO _note (from_user, to_user, `text`, image,  container) 
-					VALUES ({$request->person->id},{$userTo->id},'$message', '{$image->file}', 'profile')");
+			$newMessageId = Database::query("
+					INSERT INTO _note (from_user, to_user, `text`, image,  container) 
+					VALUES ({$request->person->id}, {$userTo->id}, '$message', '{$image->file}', 'perfil')");
 
 			// send notification for the app
 			$text = "@{$request->person->username} te ha enviado una nota";
@@ -276,7 +283,7 @@ class Service
 				$userTo->id, $text, 'question_answer',
 				"{'command':'CHAT', 'data':{'id':'{$request->person->id}'}}",
 				'chatNewMessageHandler',
-				['fromUser' => $request->person->id, 'message' => $message, 'image' => $fileName],
+				['fromUser' => $request->person->id, 'message' => $message, 'image' => $image->file],
 			);
 
 			// complete challenge
