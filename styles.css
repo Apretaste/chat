@@ -789,11 +789,13 @@ li.left .delete-message {
 li.left img {
     object-fit: cover;
     border-radius: 0px !important;
+    float:left;
 }
 
 li.right img {
     object-fit: cover;
     border-radius: 0px !important;;
+    float:right;
 }
 
 .person-avatar {
