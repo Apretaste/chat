@@ -786,14 +786,6 @@ li.left .delete-message {
     display: none !important;
 }
 
-li.left .material-placeholder {
-    min-height: 25vh;
-}
-
-li.right .material-placeholder {
-    min-height: 25vh;
-}
-
 li.left img {
     object-fit: cover;
     border-radius: 0px !important;
