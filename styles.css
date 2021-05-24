@@ -787,9 +787,9 @@ li.left .delete-message {
 }
 
 li.left .material-placeholder {
-    margin-left: -24px;
+    left: 15px;
 }
 
 li.right .material-placeholder {
-    margin-left: 20px;
+    right: 15px;
 }
