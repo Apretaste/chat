@@ -799,7 +799,7 @@ li.left img {
     position: absolute;
     width: 80%;
     left: 15px;
-    border-radius: 0px;
+    border-radius: 0px !important;
 }
 
 li.right img {
@@ -807,5 +807,5 @@ li.right img {
     position: absolute;
     width: 80%;
     right: 15px;
-    border-radius: 0px;
+    border-radius: 0px !important;;
 }
