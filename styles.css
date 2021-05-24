@@ -809,3 +809,7 @@ li.right img {
     right: 15px;
     border-radius: 0px !important;;
 }
+
+.person-avatar {
+    z-index: 9999;
+}
